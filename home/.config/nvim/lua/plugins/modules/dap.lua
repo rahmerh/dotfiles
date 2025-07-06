@@ -11,19 +11,8 @@ return {
             { "dt",      "<cmd>DapToggleRepl<cr>",      desc = "Toggle REPL" },
         },
         config = function()
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "sh",
-                callback = function()
-                    require("debug.bash")
-                end,
-            })
-
-            vim.api.nvim_create_autocmd("FileType", {
-                pattern = "rust",
-                callback = function()
-                    require("debug.rust")
-                end,
-            })
+            require("debug.bash")
+            require("debug.rust")
         end,
     },
     {
