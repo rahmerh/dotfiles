@@ -20,7 +20,6 @@ return {
             })
         end,
     },
-
     {
         "andythigpen/nvim-coverage",
         dependencies = { "nvim-lua/plenary.nvim" },
@@ -28,7 +27,7 @@ return {
             {
                 "<leader>cv",
                 function()
-                    require("coverage._lazy_toggle")()
+                    require("coverage")._lazy_toggle()
                 end,
                 desc = "Toggle code coverage"
             },
@@ -42,7 +41,7 @@ return {
             {
                 "<leader>cc",
                 function()
-                    require("coverage._lazy_generate")()
+                    require("coverage")._lazy_generate()
                 end,
                 desc = "Generate LCOV coverage"
             },
@@ -54,9 +53,9 @@ return {
                 auto_reload = true,
             })
 
-            -- Lazy-friendly wrappers to avoid side effects on load
-            cov._lazy_toggle = function()
+            cov._lazy_toggle = (function()
                 local loaded = false
+
                 local function find_lcov_file()
                     local candidates = {
                         "target/llvm-cov/lcov.info",
@@ -86,9 +85,9 @@ return {
                         end
                     end
                 end
-            end
+            end)()
 
-            cov._lazy_generate = function()
+            cov._lazy_generate = (function()
                 return function()
                     local ft = vim.bo.filetype
                     local cmd, output
@@ -117,8 +116,7 @@ return {
                         end)
                     end)
                 end
-            end
+            end)()
         end,
     },
-
 }
