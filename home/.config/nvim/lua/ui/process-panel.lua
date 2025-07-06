@@ -132,7 +132,9 @@ M.run_active = function(cmd)
         end,
         { buffer = buf, nowait = true })
 
-    vim.cmd("startinsert")
+    vim.defer_fn(function()
+        vim.cmd("startinsert")
+    end, 50)
 end
 
 return M
