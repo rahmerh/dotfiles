@@ -144,6 +144,14 @@ function M.toggle(cmd)
     active_terminals[command] = terminal
 end
 
+function M.hide_active_terminal()
+    local _, terminal = get_active_terminal()
+
+    if terminal then
+        vim.api.nvim_win_hide(terminal.float_win)
+    end
+end
+
 function M.print_active_terminals()
     local json_str = vim.fn.json_encode(active_terminals)
     print(json_str)
