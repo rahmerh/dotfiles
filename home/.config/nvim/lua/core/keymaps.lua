@@ -61,16 +61,20 @@ vim.keymap.set("n", "R", "<cmd>lua vim.lsp.buf.rename()<cr>", options)
 -- Terminal
 local floatterm = require("ui.floatterm")
 
-vim.keymap.set({ "n", "t" }, "<leader>tt", function()
+vim.keymap.set("n", "<C-t>", function()
     floatterm.toggle()
 end, options)
 
-vim.keymap.set({ "n", "t" }, "<leader>te", function()
+vim.keymap.set("n", "<C-e>", function()
     floatterm.toggle("yazi")
 end, options)
 
-vim.keymap.set({ "n", "t" }, "<leader>tg", function()
+vim.keymap.set("n", "<C-g>", function()
     floatterm.toggle("lazygit")
+end, options)
+
+vim.keymap.set("t", "<C-h>", function()
+    floatterm.hide_active_terminal()
 end, options)
 
 -- Workflow
