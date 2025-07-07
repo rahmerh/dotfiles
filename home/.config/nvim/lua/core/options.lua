@@ -46,6 +46,8 @@ for k, v in pairs(options) do
     vim.opt[k] = v
 end
 
+vim.opt.shortmess:append("I")
+
 vim.g.loaded = 1
 vim.g.loaded_netrwPlugin = 1
 
