@@ -37,7 +37,7 @@ print_info "Configuring theme"
 
 command sudo sed -i -E "s;^passwordCursorColor=.*;passwordCursorColor=#E85A98;" "$conf"
 command sudo sed -i -E "s;^passwordFontSize=.*;passwordFontSize=80;" "$conf"
-command sudo sed -i -E "s;^cursorBlinkAnimation=.*;cursorBlinkAnimation=false;" "$conf"
+command sudo sed -i -E "s;^cursorBlinkAnimation=.*;cursorBlinkAnimation=true;" "$conf"
 command sudo sed -i -E "s;^background=.*;background=wallpaper.png;" "$conf"
 
 print_success Done
