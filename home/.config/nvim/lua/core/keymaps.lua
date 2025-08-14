@@ -40,6 +40,9 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", options)
 vim.keymap.set("n", "<C-d>", "<C-d>zz", options)
 vim.keymap.set("n", "<C-u>", "<C-u>zz", options)
 
+vim.keymap.set("n", "D", "dd", options)
+vim.keymap.set("n", "Y", "yy", options)
+
 -- Clipboard
 vim.keymap.set("x", "<C-p>", [["_dP]])
 
