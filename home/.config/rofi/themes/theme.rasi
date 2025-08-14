@@ -9,7 +9,7 @@
 window {
     transparency: "real";
     background-color: @background;
-    border-radius: 4px;
+    border-radius: 0px;
     width: 20%;
     text-color: @foreground;
 }
@@ -26,7 +26,7 @@ entry {
 element selected {
   text-color: #1A1A40;  // Dark text for contrast on selection
   background-color: #FF61A6;
-  border-radius: 3px;
+  border-radius: 0px;
 }
 
 prompt {

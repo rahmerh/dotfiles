@@ -1,7 +1,8 @@
 * {
-  font-family: "Atkinson Hyperlegible Mono";
-  font-size: 16px;
-  color: #dcdfe1;
+    font-family: "Atkinson Hyperlegible Mono";
+    font-size: 16px;
+    color: #dcdfe1;
+    border-radius: 0px;
 }
 
 #waybar {
@@ -13,7 +14,6 @@
 #pulseaudio-slider {
     background-color: rgba(68, 68, 68, 0.53);
     margin: 6px;
-    border-radius: 4px;
 }
 
 #pulseaudio-slider slider {

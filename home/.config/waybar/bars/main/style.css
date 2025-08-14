@@ -2,6 +2,7 @@
   font-family: "Atkinson Hyperlegible Mono";
   font-size: 16px;
   color: #dcdfe1;
+  border-radius: 0px;
 }
 
 #waybar {
@@ -13,14 +14,12 @@
 /* Left modules, in order */
 #cpu{
   background-color: rgba(68, 68, 68, 0.53);
-  border-radius: 4px 0px 0px 0px;
   margin: 6px 0px 0px 6px;
   padding: 7px 7px 7px 20px;
 }
 
 #memory{
   background-color: rgba(68, 68, 68, 0.53);
-  border-radius: 0px 4px 4px 0px;
   margin: 6px 0px 0px 0px;
   padding: 7px 20px 7px 7px;
 }
@@ -29,14 +28,12 @@
   background-color: rgba(68, 68, 68, 0.53);
   margin: 6px 0px 0px 6px;
   padding: 7px 7px 7px 20px;
-  border-radius: 4px 0px 0px 4px;
 }
 
 #custom-pulseaudio-description{
   background-color: rgba(68, 68, 68, 0.53);
   margin-top: 6px;
   padding: 7px 20px 7px 7px;
-  border-radius: 0px 4px 4px 0px;
 }
 
 /* Center modules, in order */
@@ -44,7 +41,6 @@
   background-color: rgba(68, 68, 68, 0.53);
   padding: 7px;
   margin: 6px;
-  border-radius: 4px;
 }
 
 /* Right modules, in order */
@@ -52,13 +48,11 @@
   background-color: rgba(68, 68, 68, 0.53);
   padding: 7px;
   margin: 6px 0px 0px 6px;
-  border-radius: 4px 0px 0px 4px;
 }
 
 #clock{
   background-color: rgba(68, 68, 68, 0.53);
   margin: 6px 6px 0px 0px;
   padding: 7px;
-  border-radius: 0px 4px 4px 0px;
 }
 
