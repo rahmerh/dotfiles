@@ -63,6 +63,6 @@ set_pref "toolkit.legacyUserProfileCustomizations.stylesheets" true
 install_extension sponsorblock
 install_extension passff
 install_extension adaptive-tab-bar-colour
-install_extension vimium-c
+install_extension return-youtube-dislikes
 
 print_success Done
