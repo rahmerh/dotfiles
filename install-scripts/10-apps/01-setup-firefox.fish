@@ -1,11 +1,11 @@
 #!/usr/bin/env fish
 source install-scripts/library/print-utils.fish
 
-print_info "Configuring LibreWolf"
+print_info "Configuring firefox"
 
-set profile_dir (find ~/.librewolf -maxdepth 1 -type d -name "*.default-default" | head -n 1)
+set profile_dir (find ~/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -n 1)
 if not test -d "$profile_dir"
-    print_error "LibreWolf profile not found. Launch LibreWolf once and retry."
+    print_error "firefox profile not found. Launch firefox once and retry."
     return 1
 end
 
@@ -45,7 +45,7 @@ function install_extension --argument extension_name
 
     cp "$tmpfile" "$extensions_dir/$ext_id.xpi"
 
-    print_success "Installed $extension_name. Enable it in LibreWolf manually."
+    print_success "Installed $extension_name. Enable it in firefox manually."
 end
 
 # Preferences

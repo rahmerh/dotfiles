@@ -24,4 +24,6 @@ for plugin in $plugins
     ya pkg add $plugin
 end
 
+ya pkg install
+
 print_success "Yazi done"

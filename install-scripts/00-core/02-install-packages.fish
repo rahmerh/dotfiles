@@ -12,8 +12,6 @@ if not type -q yay
     makepkg --syncdeps --rmdeps --install --noconfirm
 end
 
-yay -S --repo=extra python-markupsafe --noconfirm
-
 # Core CLI tools
 set core_packages \
     neovim \
@@ -30,19 +28,21 @@ set core_packages \
     passff-host \
     tealdeer \
     neofetch \
-    7zip
+    7zip \
+    yazi \
+    wine
 
 # GUI/system tools
 set gui_packages \
-    librewolf \
+    firefox \
     steam \
     firewalld \
     lazygit \
     pulsemixer \
-    audiorelay \
     discord \
     borg \
-    gamemode
+    gamemode \
+    rofi
 
 # Hyprland stack
 set hyprland_packages \
@@ -58,18 +58,15 @@ set hyprland_packages \
 
 # Fonts
 set font_packages \
-    ttf-jetbrains-mono-nerd \
-    ttf-inter
+    ttf-jetbrains-mono-nerd 
 
 # Dev tools
 set dev_packages \
     dotnet-sdk \
-    fish-lsp \
     npm \
     qt5-tools \
     openrazer-meta \
     razer-cli \
-    zsa-keymapp-bin
 
 yay --needed -S \
     $core_packages \

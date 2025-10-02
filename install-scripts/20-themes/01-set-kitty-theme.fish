@@ -13,6 +13,8 @@ else
     command git -C "$theme_repo" pull &>/dev/null
 end
 
+mkdir -p ~/dotfiles/home/.config/kitty/themes/theme.conf
+
 cp "$theme_repo/themes/Chalk.conf" ~/dotfiles/home/.config/kitty/themes/theme.conf
 
 print_success Done

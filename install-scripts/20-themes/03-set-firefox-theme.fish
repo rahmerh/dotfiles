@@ -1,9 +1,9 @@
 #!/usr/bin/env fish
 source install-scripts/library/print-utils.fish
 
-set theme_repo ~/repos/librewolf-theme
+set theme_repo ~/repos/firefox-theme
 
-print_info "Setting librewolf theme"
+print_info "Setting firefox theme"
 
 if not test -d "$theme_repo"
     print_info "Cloning theme repo"
@@ -13,9 +13,9 @@ else
     command git -C "$theme_repo" pull &>/dev/null
 end
 
-set profile_dir (find ~/.librewolf -maxdepth 1 -type d -name '*.default-default' | head -n 1)
+set profile_dir (find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' | head -n 1)
 if not test -d "$profile_dir"
-    print_error "LibreWolf profile not found. Launch LibreWolf at least once."
+    print_error "Profile not found. Launch firefox at least once."
     return 1
 end
 
