@@ -11,4 +11,6 @@ set -gx QT_QPA_PLATFORMTHEME qt5ct
 set -gx QT_STYLE_OVERRIDE qt5ct
 set -gx XDG_CURRENT_DESKTOP KDE
 
+fish_add_path ~/.local/bin
+
 print_success Done
