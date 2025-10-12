@@ -13,7 +13,7 @@ else
     command git -C "$theme_repo" pull &>/dev/null
 end
 
-mkdir -p ~/dotfiles/home/.config/kitty/themes/theme.conf
+mkdir -p ~/dotfiles/home/.config/kitty/themes
 
 cp "$theme_repo/themes/Chalk.conf" ~/dotfiles/home/.config/kitty/themes/theme.conf
 
