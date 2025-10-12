@@ -42,7 +42,10 @@ set gui_packages \
     discord \
     borg \
     gamemode \
-    rofi
+    rofi \
+    docker \
+    docker-compose \
+    nvidia-container-toolkit
 
 # Hyprland stack
 set hyprland_packages \
@@ -58,7 +61,7 @@ set hyprland_packages \
 
 # Fonts
 set font_packages \
-    ttf-jetbrains-mono-nerd 
+    ttf-jetbrains-mono-nerd
 
 # Dev tools
 set dev_packages \
@@ -66,8 +69,7 @@ set dev_packages \
     npm \
     qt5-tools \
     openrazer-meta \
-    razer-cli \
-
+    razer-cli
 yay --needed -S \
     $core_packages \
     $gui_packages \
