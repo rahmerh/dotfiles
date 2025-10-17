@@ -45,7 +45,8 @@ set gui_packages \
     rofi \
     docker \
     docker-compose \
-    nvidia-container-toolkit
+    nvidia-container-toolkit \
+    audiorelay
 
 # Hyprland stack
 set hyprland_packages \
