@@ -6,6 +6,7 @@
   "modules-left": [
     "cpu",
     "memory",
+    "custom/gpu-usage",
     "pulseaudio",
     "custom/pulseaudio-description"
   ],
@@ -41,6 +42,12 @@
   },
   "cpu": {
     "format": "\ue266   {usage}%"
+  },
+  "custom/gpu-usage": {
+    "format": "\udb82\udcae  {}",
+    "exec": "gpu-usage-waybar",
+    "return-type": "json",
+    "format-icons": "󰾲"
   },
   "clock": {
     "interval": 1,

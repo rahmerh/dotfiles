@@ -21,6 +21,12 @@
 #memory{
   background-color: rgba(68, 68, 68, 0.53);
   margin: 6px 0px 0px 0px;
+  padding: 7px 7px 7px 7px;
+}
+
+#custom-gpu-usage{
+  background-color: rgba(68, 68, 68, 0.53);
+  margin: 6px 0px 0px 0px;
   padding: 7px 20px 7px 7px;
 }
 

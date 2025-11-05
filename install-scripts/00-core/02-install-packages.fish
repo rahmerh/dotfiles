@@ -95,5 +95,6 @@ end
 
 cargo install cargo-nextest
 cargo install cargo-llvm-cov
+cargo install gpu-usage-waybar
 
 print_success Done
