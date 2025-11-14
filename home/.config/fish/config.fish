@@ -2,6 +2,9 @@ abbr --add ls 'lsd -l'
 abbr --add cat bat
 abbr --add lg lazygit
 
+alias wg-up="sudo wg-quick up wg0"
+alias wg-down="sudo wg-quick down wg0"
+
 function reload
     exec fish
 end
