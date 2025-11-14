@@ -1,5 +1,0 @@
-[Desktop Entry]
-Name=Pass
-Exec=sh -c "$HOME/.config/rofi/scripts/launch-rofi-pass.sh"
-Type=Application
-Categories=Utility;
