@@ -1,7 +1,6 @@
 [Desktop Entry]
-Name=NXM Handler
-Exec=nxm-handler %u
+Name=Moma NXM Handler
+Exec=moma uri nxm %u
 Type=Application
 NoDisplay=true
 MimeType=x-scheme-handler/nxm;
-
