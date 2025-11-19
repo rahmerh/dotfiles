@@ -32,7 +32,7 @@ local function cache_current_git_branch(bufnr)
     bufnr = bufnr or vim.api.nvim_get_current_buf()
     local fname = vim.api.nvim_buf_get_name(bufnr)
     if fname == "" then
-        git_cache[bufnr] = ""
+        git_cache[bufnr] = { branch = "", status = "clean" }
         return
     end
 
@@ -42,7 +42,7 @@ local function cache_current_git_branch(bufnr)
     )[1]
 
     if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
-        git_cache[bufnr] = ""
+        git_cache[bufnr] = { branch = "", status = "clean" }
         return
     end
 
@@ -51,16 +51,45 @@ local function cache_current_git_branch(bufnr)
     )[1]
 
     if vim.v.shell_error ~= 0 or not branch or branch == "" or branch == "HEAD" then
-        git_cache[bufnr] = ""
+        git_cache[bufnr] = { branch = "", status = "clean" }
         return
     end
 
-    git_cache[bufnr] = " " .. branch
+    -- Determine status: clean vs dirty
+    local status_lines = vim.fn.systemlist(
+        "git -C " .. vim.fn.shellescape(git_root) .. " status --porcelain=v2 --branch 2>/dev/null"
+    )
+
+    local dirty = false
+    if vim.v.shell_error == 0 and status_lines and #status_lines > 0 then
+        for _, line in ipairs(status_lines) do
+            -- Any non-comment line in porcelain output = something changed
+            if not line:match("^#") then
+                dirty = true
+                break
+            end
+        end
+    end
+
+    git_cache[bufnr] = {
+        branch = " " .. branch,
+        status = dirty and "dirty" or "clean",
+    }
 end
 
 local function git_branch()
     local bufnr = vim.api.nvim_get_current_buf()
-    return git_cache[bufnr] or ""
+    local entry = git_cache[bufnr]
+    if not entry or entry.branch == "" then
+        return "", "StatusLineGit"
+    end
+
+    local hl = "StatusLineGitClean"
+    if entry.status == "dirty" then
+        hl = "StatusLineGitDirty"
+    end
+
+    return entry.branch, hl
 end
 
 local function diagnostics()
@@ -92,13 +121,12 @@ function _G.MyStatusline()
         s = s .. "%#StatusLineDiag#" .. " " .. diag .. " "
     end
 
-    local git = git_branch()
-    if git ~= "" then
-        s = s .. "%#StatusLineGit#" .. " " .. git .. " "
+    local git_text, git_hl = git_branch()
+    if git_text ~= "" then
+        s = s .. "%#" .. git_hl .. "#" .. " " .. git_text .. " "
     end
 
     s = s .. "%#StatusLine#" .. " " .. filetype() .. " "
-
     s = s .. "%#StatusLine# %l:%c "
 
     return s
@@ -111,20 +139,22 @@ function M.setup()
             bg = "NONE",
             bold = false,
         })
-        vim.api.nvim_set_hl(0, "StatusLineNC", {
-            fg = "#666666",
+
+        -- fallback
+        vim.api.nvim_set_hl(0, "StatusLineGit", {
+            fg = "#bbbbbb",
             bg = "NONE",
             bold = false,
         })
 
-        vim.api.nvim_set_hl(0, "StatusLineMode", {
-            fg = "#000000",
+        vim.api.nvim_set_hl(0, "StatusLineGitClean", {
+            fg = "#bbbbbb",
             bg = "NONE",
-            bold = true,
+            bold = false,
         })
 
-        vim.api.nvim_set_hl(0, "StatusLineGit", {
-            fg = "#B48EAD",
+        vim.api.nvim_set_hl(0, "StatusLineGitDirty", {
+            fg = "#ebcb8b",
             bg = "NONE",
             bold = false,
         })
