@@ -10,6 +10,7 @@ return {
             require("lsp.servers.fish")
             require("lsp.servers.lua")
             require("lsp.servers.rust")
+            require("lsp.servers.toml")
         end
     },
     {
