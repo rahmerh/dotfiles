@@ -15,7 +15,8 @@
   ],
   "modules-right": [
     "tray",
-    "clock"
+    "clock",
+    "custom/notifications"
   ],
   "pulseaudio": {
     "format": "{icon} {volume}%",
@@ -65,5 +66,12 @@
     "on-click-middle": "close",
     "tooltip": true,
     "max-length": 30
+  },
+  "custom/notifications": {
+    "format": "\uf0f3",
+    "interval": 999999,
+    "tooltip": false,
+    "on-click": "~/.local/bin/toggle-notification-panel"
   }
 }
+

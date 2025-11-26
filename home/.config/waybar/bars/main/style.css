@@ -58,7 +58,12 @@
 
 #clock{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 6px 0px 0px;
+  margin: 6px 0px 0px 0px;
   padding: 7px;
 }
 
+#custom-notifications{
+  background-color: rgba(68, 68, 68, 0.53);
+  margin: 6px 6px 0px 0px;
+  padding: 7px;
+}
