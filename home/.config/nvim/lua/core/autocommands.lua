@@ -69,5 +69,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
     end,
 })
 
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+    callback = function()
+        vim.cmd("checktime")
+    end,
+})
+
 vim.opt.laststatus = 3
 vim.opt.mouse = "n"
