@@ -34,14 +34,6 @@ else
     printf "Shell already fish.\n"
 fi
 
-# if [ -d "$HOME/dotfiles" ]; then
-#     echo "Dotfiles directory already exists at ~/dotfiles, run 'apply.fish' instead."
-#     exit 0;
-# else
-#     git clone https://github.com/Rahmerh/dotfiles.git ~/dotfiles
-# fi
-
-
 if [ -d "$HOME/dotfiles" ]; then
     gum style --foreground 202 --border normal --padding "1 2" --margin "1 0" "⚠️  ~/dotfiles already exists — skipping clone"
 else
