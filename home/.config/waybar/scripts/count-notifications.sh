@@ -1,6 +1,6 @@
 #!/bin/bash
 
-file="$HOME/.local/share/notify-history/notifications.log"
+file="/tmp/notification-history/notifications.log"
 
 if [ -f "$file" ]; then
   wc -l "$file" | awk '{print $1}'
