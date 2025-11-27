@@ -68,8 +68,9 @@
     "max-length": 30
   },
   "custom/notifications": {
-    "format": "\uf0f3",
-    "interval": 999999,
+    "format": "\uf0f3 {} ",
+    "exec": "~/.config/waybar/scripts/count-notifications.sh",
+    "interval": 5,
     "tooltip": false,
     "on-click": "~/.local/bin/toggle-notification-panel"
   }
