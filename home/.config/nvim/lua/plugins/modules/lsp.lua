@@ -9,7 +9,6 @@ return {
             require("lsp.servers.bash")
             require("lsp.servers.fish")
             require("lsp.servers.lua")
-            require("lsp.servers.rust")
             require("lsp.servers.toml")
         end
     },
@@ -65,6 +64,30 @@ return {
                 end,
                 preview_opts = { border = "none" },
                 title = true,
+            }
+        end,
+    },
+    {
+        'mrcjkb/rustaceanvim',
+        version = '^6',
+        lazy = false,
+        init = function()
+            local lsp            = require("lsp.config")
+
+            local extension_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/"
+            local codelldb_path  = extension_path .. "adapter/codelldb"
+            local liblldb_path   = extension_path .. "lldb/lib/liblldb.so"
+
+            local cfg            = require("rustaceanvim.config")
+
+            vim.g.rustaceanvim   = {
+                server = {
+                    on_attach = lsp.on_attach,
+                    capabilities = lsp.capabilities,
+                },
+                dap = {
+                    adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
+                },
             }
         end,
     }

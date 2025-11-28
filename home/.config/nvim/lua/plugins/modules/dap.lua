@@ -50,7 +50,7 @@ return {
                             { id = "stacks",      size = 0.25 },
                             { id = "watches",     size = 0.25 },
                         },
-                        size = 40,
+                        size = 80,
                         position = "right",
                     },
                     {
