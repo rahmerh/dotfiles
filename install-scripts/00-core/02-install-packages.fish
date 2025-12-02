@@ -30,7 +30,8 @@ set core_packages \
     neofetch \
     7zip \
     yazi \
-    wine
+    wine \
+    imagemagick
 
 # GUI/system tools
 set gui_packages \
@@ -46,7 +47,8 @@ set gui_packages \
     docker \
     docker-compose \
     nvidia-container-toolkit \
-    audiorelay
+    audiorelay \
+    nwg-displays
 
 # Hyprland stack
 set hyprland_packages \
