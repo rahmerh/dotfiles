@@ -12,6 +12,10 @@ if not type -q yay
     makepkg --syncdeps --rmdeps --install --noconfirm
 end
 
+print_info "Is this a work or personal machin?"
+set choices Personal Work
+set choice (gum choose $choices)
+
 # Core CLI tools
 set core_packages \
     neovim \
@@ -23,9 +27,7 @@ set core_packages \
     jq \
     stow \
     pv \
-    pass \
     gnupg \
-    passff-host \
     tealdeer \
     neofetch \
     7zip \
@@ -36,18 +38,14 @@ set core_packages \
 # GUI/system tools
 set gui_packages \
     firefox \
-    steam \
     firewalld \
     lazygit \
     pulsemixer \
-    discord \
     borg \
-    gamemode \
     rofi \
     docker \
     docker-compose \
     nvidia-container-toolkit \
-    audiorelay \
     nwg-displays
 
 # Hyprland stack
@@ -70,9 +68,25 @@ set font_packages \
 set dev_packages \
     dotnet-sdk \
     npm \
-    qt5-tools \
+    qt5-tools
+
+set personal_packages \
     openrazer-meta \
+    audiorelay \
+    gamemode \
+    discord \
+    steam \
     razer-cli
+
+set work_packages \
+    slack-desktop
+
+if test "$choice" = Work
+    yay --needed -S $work_packages --noconfirm
+else if test "$choice" = Personal
+    yay --needed -S $personal_packages --noconfirm
+end
+
 yay --needed -S \
     $core_packages \
     $gui_packages \
