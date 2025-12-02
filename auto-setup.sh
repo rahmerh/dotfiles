@@ -13,22 +13,14 @@ printf "Installing fish.\n"
 
 if ! command -v fish &> /dev/null; then
     echo "Installing fish and gum"
-    sudo pacman -Sy --noconfirm fish gum
+    sudo pacman -Sy --noconfirm fish
 else
     echo "Fish already installed"
 fi
 
+sudo pacman -Sy --noconfirm gum
 
-if grep -qEi "(Microsoft|WSL)" /proc/version; then
-    if [ -w /etc/wsl.conf ]; then
-        sudo sed -i '/^\[boot\]/,/^$/d' /etc/wsl.conf
-    fi
-
-    sudo tee -a /etc/wsl.conf > /dev/null <<EOF
-[boot]
-command = fish
-EOF
-elif [ "$SHELL" != "/usr/bin/fish" ]; then
+if [ "$SHELL" != "/usr/bin/fish" ]; then
     chsh -s /usr/bin/fish
 else 
     printf "Shell already fish.\n"
