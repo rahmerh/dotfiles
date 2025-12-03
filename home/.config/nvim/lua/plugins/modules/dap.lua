@@ -13,6 +13,7 @@ return {
         config = function()
             require("debug.bash")
             require("debug.rust")
+            require("debug.go")
 
             local dap, dapui = require("dap"), require("dapui")
             dap.listeners.before.attach.dapui_config = function()
@@ -98,4 +99,10 @@ return {
             })
         end,
     },
+    {
+        "leoluz/nvim-dap-go",
+        config = function()
+            require("dap-go").setup()
+        end
+    }
 }

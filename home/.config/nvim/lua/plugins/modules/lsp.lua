@@ -10,6 +10,7 @@ return {
             require("lsp.servers.fish")
             require("lsp.servers.lua")
             require("lsp.servers.toml")
+            require("lsp.servers.go")
         end
     },
     {

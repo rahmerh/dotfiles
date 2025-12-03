@@ -1,5 +1,4 @@
-local dap = safe_require("dap")
-if not dap then return end
+local dap = require("dap")
 
 local extension_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/"
 local adapter_path = extension_path .. "adapter/codelldb"
