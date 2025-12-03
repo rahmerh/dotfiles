@@ -43,7 +43,8 @@ set gui_packages \
     docker \
     docker-compose \
     nvidia-container-toolkit \
-    nwg-displays
+    nwg-displays \
+    blueman
 
 # Hyprland stack
 set hyprland_packages \
