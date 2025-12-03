@@ -6,11 +6,11 @@ return {
             "williamboman/mason-lspconfig.nvim",
         },
         config = function()
-            require("lsp.servers.bash")
-            require("lsp.servers.fish")
-            require("lsp.servers.lua")
-            require("lsp.servers.toml")
-            require("lsp.servers.go")
+            vim.lsp.enable('bashls')
+            vim.lsp.enable('fish_lsp')
+            vim.lsp.enable('lua_ls')
+            vim.lsp.enable("tombi")
+            vim.lsp.enable('gopls')
         end
     },
     {
@@ -34,19 +34,12 @@ return {
         config = function()
             local mason_tool_installer = require("mason-tool-installer")
             local registry = require("lsp.registry")
-            local mason_registry = require("mason-registry")
-
-            local function filter_installed(tbl)
-                return vim.tbl_filter(function(pkg)
-                    return mason_registry.has_package(pkg)
-                end, vim.tbl_values(tbl))
-            end
 
             mason_tool_installer.setup({
                 ensure_installed = vim.tbl_extend(
                     "force",
-                    filter_installed(registry.servers),
-                    filter_installed(registry.tools)
+                    registry.servers,
+                    registry.tools
                 ),
                 auto_update = true,
                 run_on_start = true,

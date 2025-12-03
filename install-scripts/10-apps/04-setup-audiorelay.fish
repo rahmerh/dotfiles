@@ -1,5 +1,11 @@
 #!/usr/bin/env fish
 source install-scripts/library/print-utils.fish
+source install-scripts/library/machine-type-utils.fish
+
+if mt_is_work
+    print_info "Not configuring audio relay on a work machine."
+    return
+end
 
 print_info "Configuring audio relay"
 
