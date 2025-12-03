@@ -2,6 +2,7 @@
 
 source install-scripts/library/print-utils.fish
 source install-scripts/library/prompt-utils.fish
+source install-scripts/library/machine-type-utils.fish
 
 print_info "Hello $USER,"
 print_info "This script will copy (and overwrite) to various folders on your system."
@@ -10,6 +11,11 @@ print_info "This script is designed to be executed over and over again, so no pr
 for invalid in (find install-scripts -maxdepth 1 -name '*.fish' | grep -vE '/[0-9]{2}-[^/]+\.fish$')
     print_error "Invalid script name: $invalid. Must match NN-name.fish."
     exit 1
+end
+
+if not mt_is_valid
+    print_info "Is this a work or personal machine?"
+    echo (gum choose Personal Work) >machine-type
 end
 
 set full_scripts (find install-scripts -type f -name '*.fish' | grep -v "library/" | sort -V)

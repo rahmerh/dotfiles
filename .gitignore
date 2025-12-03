@@ -22,3 +22,5 @@ home/.config/yazi/flavors
 home/.config/yazi/plugins
 
 install-scripts/00-*.fish
+
+machine-type

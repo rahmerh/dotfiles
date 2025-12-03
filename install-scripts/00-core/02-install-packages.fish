@@ -1,5 +1,6 @@
 #!/usr/bin/env fish
 source install-scripts/library/print-utils.fish
+source install-scripts/library/machine-type-utils.fish
 
 print_info "Updating all packages and installing defaults"
 
@@ -11,10 +12,6 @@ if not type -q yay
     cd yay
     makepkg --syncdeps --rmdeps --install --noconfirm
 end
-
-print_info "Is this a work or personal machin?"
-set choices Personal Work
-set choice (gum choose $choices)
 
 # Core CLI tools
 set core_packages \
@@ -79,11 +76,17 @@ set personal_packages \
     razer-cli
 
 set work_packages \
-    slack-desktop
+    slack-desktop \
+    go \
+    delve \
+    flutter \
+    lazysql \
+    google-chrome \
+    visual-studio-code-bin
 
-if test "$choice" = Work
+if mt_is_work
     yay --needed -S $work_packages --noconfirm
-else if test "$choice" = Personal
+else if mt_is_personal
     yay --needed -S $personal_packages --noconfirm
 end
 
