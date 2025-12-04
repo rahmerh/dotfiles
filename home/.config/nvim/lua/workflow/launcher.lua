@@ -14,6 +14,9 @@ local project_root_markers = {
     rust = {
         markers = { "Cargo.toml" },
     },
+    dart = {
+        markers = { "pubspec.yaml" },
+    }
 }
 
 local function find_project_root()

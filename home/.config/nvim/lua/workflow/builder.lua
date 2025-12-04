@@ -7,6 +7,27 @@ local project_types = {
         markers = { "Cargo.toml" },
         build = "cargo build"
     },
+    dart = {
+        markers = { "pubspec.yaml" },
+        build = function(_)
+            local ok, args = pcall(vim.fn.input, {
+                prompt = "flutter build args (empty for none): ",
+                default = "",
+            })
+
+            if not ok then
+                return nil
+            end
+
+            local cmd = "flutter build"
+
+            if args and args:match("%S") then
+                cmd = cmd .. " " .. args
+            end
+
+            return cmd
+        end
+    }
 }
 
 local active_build_win = nil
