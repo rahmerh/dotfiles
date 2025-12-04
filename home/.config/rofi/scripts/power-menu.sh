@@ -14,7 +14,7 @@ else
     elif [ "$1" = "$reboot" ]; then
         systemctl reboot
     elif [ "$1" = "$logout" ]; then
-        hyprctl dispatch exit
+        loginctl kill-session $XDG_SESSION_ID
     fi
 fi
 
