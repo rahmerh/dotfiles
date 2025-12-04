@@ -21,6 +21,10 @@ home/.config/rofi/config-dump
 home/.config/yazi/flavors
 home/.config/yazi/plugins
 
+home/.config/hypr/monitors.conf
+home/.config/hypr/workspaces.conf
+
 install-scripts/00-*.fish
 
 machine-type
+
