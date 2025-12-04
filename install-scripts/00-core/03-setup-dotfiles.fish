@@ -5,4 +5,8 @@ print_info "Stow dotfiles"
 
 stow home
 
+cd system/
+
+sudo stow --target=/ sddm
+
 print_success Done
