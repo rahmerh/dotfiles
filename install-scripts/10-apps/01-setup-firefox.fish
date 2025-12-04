@@ -61,7 +61,6 @@ set_pref "toolkit.legacyUserProfileCustomizations.stylesheets" true
 
 # Extensions
 install_extension sponsorblock
-install_extension adaptive-tab-bar-colour
 install_extension return-youtube-dislikes
 install_extension control-panel-for-youtube
 install_extension proton-pass
