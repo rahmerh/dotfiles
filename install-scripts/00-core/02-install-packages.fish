@@ -44,8 +44,7 @@ set gui_packages \
     docker-compose \
     nvidia-container-toolkit \
     nwg-displays \
-    blueman \
-    brightnessctl
+    blueman
 
 # Hyprland stack
 set hyprland_packages \
