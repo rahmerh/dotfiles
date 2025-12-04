@@ -12,13 +12,8 @@ set -gx QT_QPA_PLATFORMTHEME qt5ct
 set -gx QT_STYLE_OVERRIDE qt5ct
 set -gx XDG_CURRENT_DESKTOP KDE
 
-fish_add_path ~/.local/bin
-
 if mt_is_work
     set -Ux CHROME_EXECUTABLE /usr/bin/google-chrome-stable
-
-    fish_add_path ~/.pub-cache/bin
-    fish_add_path ~/go/bin
 end
 
 print_success Done

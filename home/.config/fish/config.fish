@@ -24,6 +24,7 @@ set -gx PATH "$HOME/.cargo/bin" $PATH
 
 fish_add_path --path ~/.pub-cache/bin
 fish_add_path --path ~/go/bin
+fish_add_path --path ~/.local/bin
 
 if test "$TERM" = xterm-kitty
     set -x TERM xterm-256color
