@@ -25,7 +25,7 @@ print_info "Copying theme to '$target_dir'"
 
 command sudo mkdir -p "$target_dir"
 command sudo cp -a "$src_dir"/. "$target_dir"/
-command sudo cp ~/Pictures/wallpaper.png "$target_dir/wallpaper.png"
+command sudo cp ~/Pictures/wallpaper-2560x1600.png "$target_dir/wallpaper.png"
 
 set -l conf "$target_dir/theme.conf"
 if not test -f "$conf"
