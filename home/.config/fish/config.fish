@@ -30,6 +30,8 @@ if test "$TERM" = xterm-kitty
     set -x TERM xterm-256color
 end
 
-if test -f ~/.config/fish/local.fish
-    source ~/.config/fish/local.fish
+if status is-interactive
+    if type -q keychain
+        keychain --eval --quiet | source
+    end
 end
