@@ -44,6 +44,7 @@ set gui_packages \
     docker-compose \
     nvidia-container-toolkit \
     nwg-displays \
+    keychain \
     blueman
 
 # Hyprland stack

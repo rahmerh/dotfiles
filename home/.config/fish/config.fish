@@ -29,3 +29,7 @@ fish_add_path --path ~/.local/bin
 if test "$TERM" = xterm-kitty
     set -x TERM xterm-256color
 end
+
+if test -f ~/.config/fish/local.fish
+    source ~/.config/fish/local.fish
+end
