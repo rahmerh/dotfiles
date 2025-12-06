@@ -6,6 +6,7 @@ home/.config/fish/conf.d/hydro.fish
 home/.config/fish/completions/fisher.fish
 home/.config/fish/functions/fisher.fish
 home/.config/fish/fish_plugins
+home/.config/fish/local.fish
 
 home/.config/nvim/plugin/packer_compiled.lua
 
