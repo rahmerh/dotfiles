@@ -29,3 +29,4 @@ install-scripts/00-*.fish
 
 machine-type
 
+home/.config/fish/local.fish
