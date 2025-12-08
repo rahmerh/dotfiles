@@ -1,6 +1,9 @@
 abbr --add ls 'lsd -l'
 abbr --add cat bat
 abbr --add lg lazygit
+if type -q gitlab-ci-local
+    abbr --add gcl gitlab-ci-local
+end
 
 alias wg-up="sudo wg-quick up wg0"
 alias wg-down="sudo wg-quick down wg0"

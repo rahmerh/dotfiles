@@ -88,7 +88,8 @@ set work_packages \
     flutter \
     lazysql \
     google-chrome \
-    visual-studio-code-bin
+    visual-studio-code-bin \
+    gitlab-ci-local
 
 if mt_is_work
     yay --needed -S $work_packages --noconfirm
