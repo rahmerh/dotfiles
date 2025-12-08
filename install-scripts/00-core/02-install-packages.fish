@@ -45,7 +45,6 @@ set gui_packages \
     nvidia-container-toolkit \
     nwg-displays \
     keychain \
-    blueman \
     brightnessctl \
     network-manager-applet
 
@@ -89,10 +88,15 @@ set work_packages \
     lazysql \
     google-chrome \
     visual-studio-code-bin \
-    gitlab-ci-local
+    gitlab-ci-local \
+    logiops
 
 if mt_is_work
     yay --needed -S $work_packages --noconfirm
+
+    if not systemctl is-enabled --quiet logid.service
+        sudo systemctl enable --now logid.service
+    end
 else if mt_is_personal
     yay --needed -S $personal_packages --noconfirm
 end

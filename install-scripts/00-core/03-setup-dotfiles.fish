@@ -8,5 +8,6 @@ stow home
 cd system/
 
 sudo stow --target=/ sddm
+sudo stow --target=/ logid
 
 print_success Done
