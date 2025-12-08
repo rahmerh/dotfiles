@@ -91,7 +91,9 @@ return {
         lazy = false,
         dependencies = {
             'nvim-lua/plenary.nvim',
-            'stevearc/dressing.nvim', -- optional for vim.ui.select
+        },
+        keys = {
+            { "<C-f>l", "<cmd>FlutterLogToggle<cr>", desc = "Toggle flutter log buf" },
         },
         config = function()
             require("flutter-tools").setup({
