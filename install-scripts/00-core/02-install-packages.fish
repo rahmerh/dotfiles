@@ -46,7 +46,8 @@ set gui_packages \
     nwg-displays \
     keychain \
     blueman \
-    brightnessctl
+    brightnessctl \
+    network-manager-applet
 
 # Hyprland stack
 set hyprland_packages \
