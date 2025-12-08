@@ -45,7 +45,8 @@ set gui_packages \
     nvidia-container-toolkit \
     nwg-displays \
     keychain \
-    blueman
+    blueman \
+    brightnessctl
 
 # Hyprland stack
 set hyprland_packages \

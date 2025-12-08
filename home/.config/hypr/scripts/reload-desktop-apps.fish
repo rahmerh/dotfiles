@@ -10,3 +10,5 @@ hyprctl dispatch exec "waybar -s ~/.config/waybar/bars/main/style.css -c ~/.conf
 
 pkill mako
 hyprctl dispatch exec mako
+
+fish -c ~/.config/hypr/scripts/set-wallpaper.fish
