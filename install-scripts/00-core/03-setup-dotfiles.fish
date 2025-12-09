@@ -9,5 +9,6 @@ cd system/
 
 sudo stow --target=/ sddm
 sudo stow --target=/ logid
+sudo stow --target=/ logind
 
 print_success Done
