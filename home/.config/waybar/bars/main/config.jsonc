@@ -15,6 +15,8 @@
   ],
   "modules-right": [
     "tray",
+    "bluetooth",
+    "battery",
     "clock",
     "custom/notifications"
   ],
@@ -49,6 +51,25 @@
     "exec": "gpu-usage-waybar",
     "return-type": "json",
     "format-icons": "󰾲"
+  },
+  "bluetooth": {
+	"format": " {status}",
+	"format-disabled": "",
+	"format-connected": " {num_connections}",
+	"tooltip-format": "{controller_alias}\t{controller_address}",
+	"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+	"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}"
+  },
+  "battery": {
+    "bat": "BAT0",
+    "interval": 60,
+    "states": {
+        "warning": 30,
+        "critical": 15
+    },
+    "format": "{capacity}% {icon}",
+    "format-icons": ["", "", "", "", ""],
+    "max-length": 25
   },
   "clock": {
     "interval": 1,

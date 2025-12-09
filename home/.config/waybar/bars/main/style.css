@@ -56,6 +56,18 @@
   margin: 6px 0px 0px 6px;
 }
 
+#bluetooth {
+  background-color: rgba(68, 68, 68, 0.53);
+  padding: 7px;
+  margin: 6px 0px 0px 0px;
+}
+
+#battery{
+  background-color: rgba(68, 68, 68, 0.53);
+  padding: 7px;
+  margin: 6px 0px 0px 0px;
+}
+
 #clock{
   background-color: rgba(68, 68, 68, 0.53);
   margin: 6px 0px 0px 0px;
