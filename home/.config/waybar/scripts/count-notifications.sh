@@ -1,9 +1,9 @@
 #!/bin/bash
 
-file="/tmp/notification-history/notifications.log"
+db="/tmp/notification-history/notifications.sqlite3"
 
-if [ -f "$file" ]; then
-  wc -l "$file" | awk '{print $1}'
+if [ -f "$db" ]; then
+  sqlite3 "$db" "SELECT COUNT(*) FROM notifications;"
 else
   echo 0
 fi
