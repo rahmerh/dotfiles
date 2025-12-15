@@ -89,7 +89,8 @@ set work_packages \
     google-chrome \
     visual-studio-code-bin \
     gitlab-ci-local \
-    logiops
+    logiops \
+    blueman
 
 if mt_is_work
     yay --needed -S $work_packages --noconfirm
