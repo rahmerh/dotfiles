@@ -61,6 +61,11 @@ vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<cr>", options)
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", options)
 vim.keymap.set("n", "R", "<cmd>lua vim.lsp.buf.rename()<cr>", options)
 
+vim.keymap.set("n", "<leader>ht", function()
+    local enabled = vim.lsp.inlay_hint.is_enabled()
+    vim.lsp.inlay_hint.enable(not enabled)
+end, options)
+
 -- Terminal
 local floatterm = require("ui.floatterm")
 
