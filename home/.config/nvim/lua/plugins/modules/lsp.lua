@@ -29,22 +29,21 @@ return {
         }
     },
     {
-        "WhoIsSethDaniel/mason-tool-installer.nvim",
-        event = { "BufReadPre", "BufNewFile" },
-        config = function()
-            local mason_tool_installer = require("mason-tool-installer")
-            local registry = require("lsp.registry")
-
-            mason_tool_installer.setup({
-                ensure_installed = vim.tbl_extend(
-                    "force",
-                    registry.servers,
-                    registry.tools
-                ),
-                auto_update = true,
-                run_on_start = true,
-            })
-        end
+        "mason-org/mason-lspconfig.nvim",
+        opts = {
+            ensure_installed = {
+                "lua_ls",
+                "rust_analyzer",
+                "bashls",
+                "fish_lsp",
+                "gopls",
+                "tombi"
+            },
+        },
+        dependencies = {
+            { "mason-org/mason.nvim", opts = {} },
+            "neovim/nvim-lspconfig",
+        },
     },
     {
         "lewis6991/hover.nvim",
@@ -53,9 +52,9 @@ return {
         },
         config = function()
             require("hover").setup {
-                init = function()
-                    require("hover.providers.lsp")
-                end,
+                providers = {
+                    'hover.providers.lsp',
+                },
                 preview_opts = { border = "none" },
                 title = true,
             }
@@ -85,7 +84,6 @@ return {
             }
         end,
     },
-
     {
         'nvim-flutter/flutter-tools.nvim',
         lazy = false,
@@ -100,5 +98,15 @@ return {
                 fvm = true
             })
         end,
-    }
+    },
+    {
+        "chrisgrieser/nvim-lsp-endhints",
+        event = "LspAttach",
+        opts = {}, -- required, even if empty
+        config = function()
+            require("lsp-endhints").setup({
+                autoEnableHints = false
+            })
+        end
+    },
 }
