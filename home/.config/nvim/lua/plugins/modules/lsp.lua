@@ -11,6 +11,8 @@ return {
             vim.lsp.enable('lua_ls')
             vim.lsp.enable("tombi")
             vim.lsp.enable('gopls')
+            vim.lsp.enable('html')
+            vim.lsp.enable('dockerls')
         end
     },
     {
@@ -30,15 +32,19 @@ return {
     },
     {
         "mason-org/mason-lspconfig.nvim",
+        event = { "BufReadPre", "BufNewFile" },
         opts = {
             ensure_installed = {
-                "lua_ls",
-                "rust_analyzer",
-                "bashls",
-                "fish_lsp",
+                "lua-language-server",
+                "bash-language-server",
+                "fish-lsp",
                 "gopls",
-                "tombi"
+                "rust-analyzer",
+                "tombi",
+                "html",
+                "dockerls"
             },
+            automatic_enable = true
         },
         dependencies = {
             { "mason-org/mason.nvim", opts = {} },

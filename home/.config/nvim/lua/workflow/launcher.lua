@@ -16,6 +16,9 @@ local project_root_markers = {
     },
     dart = {
         markers = { "pubspec.yaml" },
+    },
+    html = {
+        markers = { "index.html" },
     }
 }
 
