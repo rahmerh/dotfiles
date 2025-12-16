@@ -14,68 +14,57 @@
 /* Left modules, in order */
 #cpu{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 0px 0px 6px;
-  padding: 7px 7px 7px 20px;
+  padding: 4px;
 }
 
 #memory{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 0px 0px 0px;
-  padding: 7px 7px 7px 7px;
+  padding: 4px;
 }
 
 #custom-gpu-usage{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 0px 0px 0px;
-  padding: 7px 20px 7px 7px;
+  padding: 4px;
 }
 
 #pulseaudio{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 0px 0px 6px;
-  padding: 7px 7px 7px 20px;
+  padding: 4px;
 }
 
 #custom-pulseaudio-description{
   background-color: rgba(68, 68, 68, 0.53);
-  margin-top: 6px;
-  padding: 7px 20px 7px 7px;
+  padding: 4px;
 }
 
 /* Center modules, in order */
 #taskbar{
   background-color: rgba(68, 68, 68, 0.53);
-  padding: 7px;
-  margin: 6px;
+  padding: 4px;
 }
 
 /* Right modules, in order */
 #tray{
   background-color: rgba(68, 68, 68, 0.53);
-  padding: 7px;
-  margin: 6px 0px 0px 6px;
+  padding: 4px;
 }
 
 #bluetooth {
   background-color: rgba(68, 68, 68, 0.53);
-  padding: 7px;
-  margin: 6px 0px 0px 0px;
+  padding: 4px;
 }
 
 #battery{
   background-color: rgba(68, 68, 68, 0.53);
-  padding: 7px;
-  margin: 6px 0px 0px 0px;
+  padding: 4px;
 }
 
 #clock{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 0px 0px 0px;
-  padding: 7px;
+  padding: 4px;
 }
 
 #custom-notifications{
   background-color: rgba(68, 68, 68, 0.53);
-  margin: 6px 6px 0px 0px;
-  padding: 7px;
+  padding: 4px;
 }

@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 55,
+  "height": 2,
   "spacing": 0,
   "modules-left": [
     "cpu",
