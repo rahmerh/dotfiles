@@ -30,7 +30,8 @@ set core_packages \
     7zip \
     yazi \
     wine \
-    imagemagick
+    imagemagick \
+    bc
 
 # GUI/system tools
 set gui_packages \
