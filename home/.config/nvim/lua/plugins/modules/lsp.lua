@@ -43,7 +43,7 @@ return {
                 "rust-analyzer",
                 "tombi",
                 "html",
-                "dockerls"
+                "dockerls",
                 "tombi",
                 "jsonls"
             },
