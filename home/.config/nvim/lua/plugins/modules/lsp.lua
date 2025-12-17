@@ -6,9 +6,9 @@ return {
             "williamboman/mason-lspconfig.nvim",
         },
         config = function()
+            vim.lsp.enable('lua_ls')
             vim.lsp.enable('bashls')
             vim.lsp.enable('fish_lsp')
-            vim.lsp.enable('lua_ls')
             vim.lsp.enable("tombi")
             vim.lsp.enable('gopls')
             vim.lsp.enable('html')
@@ -36,15 +36,14 @@ return {
         event = { "BufReadPre", "BufNewFile" },
         opts = {
             ensure_installed = {
-                "lua-language-server",
-                "bash-language-server",
-                "fish-lsp",
-                "gopls",
-                "rust-analyzer",
+                "rust_analyzer",
+                "lua_ls",
+                "bashls",
+                "fish_lsp",
                 "tombi",
+                "gopls",
                 "html",
                 "dockerls",
-                "tombi",
                 "jsonls"
             },
             automatic_enable = true
