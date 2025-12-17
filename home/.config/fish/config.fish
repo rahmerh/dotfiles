@@ -14,11 +14,6 @@ end
 
 set fish_greeting
 
-source ~/.config/fish/functions/dotctl.fish
-source ~/.config/fish/functions/prompt.fish
-source ~/.config/fish/functions/manpages.fish
-source ~/.config/fish/functions/utility.fish
-
 mcfly init fish | source
 zoxide init fish | source
 
