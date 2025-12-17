@@ -13,6 +13,7 @@ return {
             vim.lsp.enable('gopls')
             vim.lsp.enable('html')
             vim.lsp.enable('dockerls')
+            vim.lsp.enable('jsonls')
         end
     },
     {
@@ -43,6 +44,8 @@ return {
                 "tombi",
                 "html",
                 "dockerls"
+                "tombi",
+                "jsonls"
             },
             automatic_enable = true
         },
