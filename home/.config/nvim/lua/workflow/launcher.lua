@@ -75,7 +75,11 @@ end
 
 local function read_commands()
     local file = get_commands_file()
-    if not file or vim.fn.filereadable(file) == 0 then return {} end
+
+    if not file or vim.fn.filereadable(file) == 0 then
+        vim.notify("Failed to read launch_commands.json", vim.log.levels.ERROR)
+        return
+    end
 
     local content = vim.fn.readfile(file)
     return json(table.concat(content, "\n")) or {}
@@ -83,6 +87,12 @@ end
 
 local function write_commands(cmds)
     local file = get_commands_file()
+
+    if not file then
+        vim.notify("Failed to read launch_commands.json", vim.log.levels.ERROR)
+        return
+    end
+
     if file then
         vim.fn.writefile({ encode(cmds) }, file)
     end
