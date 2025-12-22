@@ -46,7 +46,7 @@ return {
                 "dockerls",
                 "jsonls"
             },
-            automatic_enable = true
+            automatic_enable = false
         },
         dependencies = {
             { "mason-org/mason.nvim", opts = {} },
