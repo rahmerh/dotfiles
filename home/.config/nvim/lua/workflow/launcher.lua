@@ -10,29 +10,13 @@ local json = vim.fn.json_decode
 local encode = vim.fn.json_encode
 local decode = vim.fn.json_decode
 
-local project_root_markers = {
-    rust = {
-        markers = { "Cargo.toml" },
-    },
-    dart = {
-        markers = { "pubspec.yaml" },
-    },
-    html = {
-        markers = { "index.html" },
-    }
-}
-
 local function find_project_root()
     local path = vim.fn.expand("%:p:h")
 
     while path and path ~= "/" do
-        for _, meta in pairs(project_root_markers) do
-            for _, marker in ipairs(meta.markers) do
-                local glob = vim.fn.glob(path .. "/" .. marker)
-                if glob ~= "" then
-                    return path
-                end
-            end
+        local glob = vim.fn.glob(path .. "/.git")
+        if glob ~= "" then
+            return path
         end
         path = vim.fn.fnamemodify(path, ":h")
     end
@@ -76,9 +60,13 @@ end
 local function read_commands()
     local file = get_commands_file()
 
-    if not file or vim.fn.filereadable(file) == 0 then
-        vim.notify("Failed to read launch_commands.json", vim.log.levels.ERROR)
+    if vim.fn.filereadable(file) == 0 then
+        vim.notify("Could not read launch_commands.json", vim.log.levels.ERROR)
         return
+    end
+
+    if not file then
+        return {}
     end
 
     local content = vim.fn.readfile(file)
@@ -89,7 +77,7 @@ local function write_commands(cmds)
     local file = get_commands_file()
 
     if not file then
-        vim.notify("Failed to read launch_commands.json", vim.log.levels.ERROR)
+        vim.notify("Could not write to launch_commands.json", vim.log.levels.ERROR)
         return
     end
 
