@@ -79,7 +79,8 @@ set personal_packages \
     gamemode \
     discord \
     steam \
-    razer-cli
+    razer-cli \
+    openrgb
 
 set work_packages \
     slack-desktop \

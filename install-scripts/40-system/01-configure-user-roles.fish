@@ -7,8 +7,8 @@ if not groups $USER | grep -qw plugdev
     sudo gpasswd -a $USER plugdev
 end
 
-if not groups $USER | grep -qw vboxusers
-    sudo gpasswd -a $USER vboxusers
+if not groups $USER | grep -qw openrazer
+    sudo gpasswd -a $USER openrazer
 end
 
 print_success Done
