@@ -1,0 +1,46 @@
+@define-color background rgba(68, 68, 68, 0.53);
+@define-color foreground #f8f8f2;
+@define-color gray	#44475a;
+
+* {
+  font-family: "monospace";
+  font-size: 16px;
+  font-weight: bold;
+  color: @foreground;
+  border-radius: 0;
+  border: none;
+}
+
+#waybar {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+#cpu,
+#memory,
+#custom-gpu-usage,
+#pulseaudio, 
+#custom-pulseaudio-description,
+#taskbar, 
+#tray, 
+#bluetooth,
+#battery, 
+#clock, 
+#custom-notifications,
+#network {
+    background-color: @background;
+    padding: 0px 5px;
+    margin: 2px 0px 2px 0px;
+}
+
+tooltip {
+    background: @background;
+    opacity: 0.95;
+    border-radius: 0px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: @purple;
+}
+
+tooltip label{
+    color: @grey;
+}

@@ -46,8 +46,7 @@ set gui_packages \
     nvidia-container-toolkit \
     nwg-displays \
     keychain \
-    brightnessctl \
-    network-manager-applet
+    brightnessctl
 
 # Hyprland stack
 set hyprland_packages \

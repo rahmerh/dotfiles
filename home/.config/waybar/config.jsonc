@@ -1,52 +1,47 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 2,
+    "height": 30,
     "spacing": 0,
+    "margin-right": 5,
+    "margin-left": 5,
     "modules-left": [
-        "cpu",
-        "memory",
-        "custom/gpu-usage",
-        "pulseaudio",
-        "custom/pulseaudio-description"
-    ],
-    "modules-center": [
+        "clock",
         "wlr/taskbar"
     ],
     "modules-right": [
         "tray",
+        "network",
         "battery",
-        "clock",
+        "cpu",
+        "memory",
+        "custom/gpu-usage",
+        "pulseaudio",
         "custom/notifications"
     ],
     "pulseaudio": {
         "format": "{icon} {volume}%",
-        "format-muted": " \udb81\udd81",
+        "format-muted": " ",
         "format-icons": {
             "default": [
-                "\uf026",
-                "\uf027",
-                "\uf028"
+                "",
+                "",
+                "󰕾"
             ]
         },
-        "on-click": "~/.config/waybar/scripts/toggle-slider-popup.sh",
-        "on-click-middle": "pavucontrol -t 3",
-        "on-click-right": "pactl -- set-sink-mute 0 toggle"
-    },
-    "custom/pulseaudio-description": {
-        "format": "{}",
-        "exec": "~/.config/waybar/scripts/print-active-audio-out.sh",
-        "interval": 0,
-        "on-click": "~/.config/waybar/scripts/toggle-audio-out.sh"
+        "on-click": "pactl -- set-sink-mute 0 toggle",
+        "on-click-middle": "pavucontrol -t 3"
     },
     "memory": {
-        "format": "\uefc5   {used:0.1f}G/{total:0.1f}G"
+        "format": "\uefc5 {}%",
+        "tooltip": true,
+        "tooltip-format": "{used:0.1f}G/{total:0.1f}G"
     },
     "cpu": {
-        "format": "\ue266   {usage}%"
+        "format": "\ue266 {usage}%"
     },
     "custom/gpu-usage": {
-        "format": "\udb82\udcae  {}",
+        "format": "\udb82\udcae {}",
         "exec": "gpu-usage-waybar",
         "return-type": "json",
         "format-icons": "󰾲"
@@ -58,7 +53,7 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{capacity}% {icon}",
+        "format": "{icon} ",
         "format-icons": [
             "",
             "",
@@ -66,13 +61,13 @@
             "",
             ""
         ],
+        "tooltip": true,
+        "tooltip-format": "{capacity}%",
         "max-length": 25
     },
     "clock": {
-        "interval": 1,
         "timezone": "Europe/Amsterdam",
-        "format": " \uf073  {:%d-%m-%Y   \uf017  %H:%M} ",
-        "on-click": "~/.config/waybar/scripts/display-calendar.sh"
+        "format": "\uf073 {:%d-%m-%Y \uf017 %H:%M}"
     },
     "tray": {
         "icon-size": 20,
@@ -86,10 +81,21 @@
         "max-length": 30
     },
     "custom/notifications": {
-        "format": "\uf0f3 {} ",
+        "format": "\uf0f3 {}",
         "exec": "~/.config/waybar/scripts/count-notifications.sh",
         "interval": 5,
         "tooltip": false,
         "on-click": "~/.local/bin/toggle-notification-panel"
+    },
+    "network": {
+        "format": "{ifname}",
+        "format-wifi": " ",
+        "format-ethernet": "󰈀 ",
+        "format-disconnected": " ",
+        "tooltip-format": "󰈀 {ifname} via {gwaddr}",
+        "tooltip-format-wifi": "  {essid} ({signalStrength}%)",
+        "tooltip-format-ethernet": " {ifname} {ipaddr}/{cidr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "max-length": 50
     }
 }
