@@ -1,23 +1,8 @@
-[mgr]
-cwd={ fg = "#ffffff" }
-hovered={ fg = "#e1579c"}
-
+[indicator]
+parent = { fg = "#ffffff", bg = "#e1579c" }
+current = { fg = "#ffffff", bg = "#e1579c" }
+preview = { fg = "#e1579c" }
+padding = { open = " ", close = " " }
 
 [filetype]
-rules = [
-	{ name = "*/", fg ="#999999"   }
-]
-
-# "#2c2c2c"
-# "#d0d0d0"
-# "#e1579c"
-# "#ffffff"
-# "#e1579c"
-# "#2c2c2c"
-# "#e1579c"
-# "#444444"
-# "#e1579c"
-# "#999999"
-# "#ff4b82"
-# "#e1579c"
-# "#e1579c"
+rules = [{ name = "*/", fg = "#999999" }]
