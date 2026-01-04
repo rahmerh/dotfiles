@@ -31,7 +31,8 @@ set core_packages \
     yazi \
     wine \
     imagemagick \
-    bc
+    bc \
+    pastel
 
 # GUI/system tools
 set gui_packages \
