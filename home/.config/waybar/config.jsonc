@@ -30,7 +30,7 @@
             ]
         },
         "on-click": "pactl -- set-sink-mute 0 toggle",
-        "on-click-middle": "pavucontrol -t 3"
+        "on-click-right": "pavucontrol -t 3"
     },
     "memory": {
         "format": "\uefc5 {}%",
