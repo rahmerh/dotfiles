@@ -4,70 +4,96 @@ local process_panel = require("ui.process-panel")
 
 local project_types = {
     rust = {
-        markers = { "Cargo.toml" },
-        build = "cargo build"
+        ft = "rust",
     },
-    dart = {
-        markers = { "pubspec.yaml" },
-        build = function(_)
-            local ok, args = pcall(vim.fn.input, {
-                prompt = "flutter build args (empty for none): ",
-                default = "",
-            })
-
-            if not ok then
-                return nil
-            end
-
-            local cmd = "flutter build"
-
-            if args and args:match("%S") then
-                cmd = cmd .. " " .. args
-            end
-
-            return cmd
-        end
-    }
+    dotnet = {
+        ft = { "cs", "fsharp" },
+    },
 }
 
-local active_build_win = nil
+local function buf_dir()
+    local name = vim.api.nvim_buf_get_name(0)
+    if name == "" then return nil end
+    return vim.fn.fnamemodify(name, ":p:h")
+end
 
-local function get_build_cmd_for_current_project()
-    local cwd = vim.fn.getcwd()
+local function find_upwards(start_dir, patterns)
+    local dir = start_dir
 
-    for _, meta in pairs(project_types) do
-        local has_marker = false
-
-        for _, marker in ipairs(meta.markers) do
-            if #vim.fn.glob(cwd .. "/" .. marker, false, true) > 0 then
-                has_marker = true
-                break
+    while dir do
+        for _, pat in ipairs(patterns) do
+            local matches = vim.fn.glob(dir .. "/" .. pat, false, true)
+            if #matches > 0 then
+                table.sort(matches)
+                return matches[1]
             end
         end
 
-        if not has_marker then
+        local parent = vim.fn.fnamemodify(dir, ":h")
+        if parent == dir then break end
+        dir = parent
+    end
+end
+
+local function determine_build_command(types)
+    local ft = vim.bo.filetype
+    local start_dir = buf_dir()
+    if not start_dir then
+        return nil
+    end
+
+    for kind, meta in pairs(types) do
+        local fts = type(meta.ft) == "table" and meta.ft or { meta.ft }
+        if not vim.tbl_contains(fts, ft) then
             goto continue
         end
 
-        if type(meta.build) == "function" then
-            return meta.build(cwd)
-        else
-            return meta.build
+        if kind == "rust" then
+            local cargo, dir = find_upwards(start_dir, { "Cargo.toml" })
+            if cargo then
+                return {
+                    command = "cargo build",
+                    cwd = dir,
+                }
+            end
+        end
+
+        if kind == "dotnet" then
+            local csproj = find_upwards(start_dir, { "*.csproj", "*.fsproj" })
+            if csproj then
+                return {
+                    command = string.format("dotnet build %s", csproj),
+                    cwd = "."
+                }
+            end
+
+            local sln = find_upwards(start_dir, { "*.sln" })
+            if sln then
+                return {
+                    command = string.format("dotnet build %s", sln),
+                    cwd = "."
+                }
+            end
         end
 
         ::continue::
     end
 end
 
-M.build = function()
-    local build_cmd = get_build_cmd_for_current_project()
+local active_build_win = nil
 
-    if not build_cmd then
-        vim.notify("No build command found", vim.log.levels.WARN)
-        return
+M.build = function()
+    local build_command = determine_build_command(project_types)
+
+    if not build_command then
+        vim.notify(
+            "No build location found for filetype: " .. vim.bo.filetype,
+            vim.log.levels.WARN
+        )
+        return nil
     end
 
-    process_panel.run_passive(build_cmd)
+    process_panel.run_passive(string.format("cd %s && %s", build_command.cwd, build_command.command))
 end
 
 M.close_build_log = function()

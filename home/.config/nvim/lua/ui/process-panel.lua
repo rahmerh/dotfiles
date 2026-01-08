@@ -3,12 +3,11 @@ local M = {}
 local function open_floating_window(enter)
     local buf = vim.api.nvim_create_buf(false, true)
 
-    if enter then
-        vim.bo[buf].buftype = "nofile"
-        vim.bo[buf].bufhidden = "wipe"
-        vim.bo[buf].swapfile = false
-        vim.bo[buf].modifiable = true
-    end
+    vim.bo[buf].buftype = "nofile"
+    vim.bo[buf].bufhidden = "wipe"
+    vim.bo[buf].swapfile = false
+    vim.bo[buf].modifiable = true
+    vim.bo[buf].filetype = "log"
 
     local win_width = math.floor(vim.o.columns * 0.2)
     local win_height = math.floor(vim.o.lines * 0.8)
@@ -22,12 +21,52 @@ local function open_floating_window(enter)
         col = vim.o.columns,
         style = "minimal",
         border = "none",
-        focusable = enter,
+        focusable = true,
         zindex = 50,
     })
 
+    vim.wo[win].wrap = true
+    vim.wo[win].linebreak = true
+    vim.wo[win].breakindent = true
+    vim.wo[win].breakindentopt = "shift:2"
+    vim.wo[win].showbreak = "↪ "
+
+    vim.wo[win].scrolloff = 0
+    vim.wo[win].sidescrolloff = 0
+
+    vim.wo[win].number = false
+    vim.wo[win].relativenumber = false
+    vim.wo[win].signcolumn = "no"
+    vim.wo[win].cursorline = false
+    vim.wo[win].foldcolumn = "0"
+    vim.wo[win].spell = false
+    vim.wo[win].list = false
+    vim.wo[win].conceallevel = 0
+
+    local map_opts = { buffer = buf, silent = true, nowait = true }
+
+    vim.keymap.set("n", "j", "<C-e>", map_opts)
+    vim.keymap.set("n", "k", "<C-y>", map_opts)
+    vim.keymap.set("n", "<Down>", "<C-e>", map_opts)
+    vim.keymap.set("n", "<Up>", "<C-y>", map_opts)
+    vim.keymap.set("n", "<PageDown>", "<C-f>", map_opts)
+    vim.keymap.set("n", "<PageUp>", "<C-b>", map_opts)
+
+    vim.keymap.set("n", "gg", "gg", map_opts)
+    vim.keymap.set("n", "G", "G", map_opts)
+
+    vim.keymap.set("n", "q", function()
+        if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, true)
+        end
+        if vim.api.nvim_buf_is_valid(buf) then
+            vim.api.nvim_buf_delete(buf, { force = true })
+        end
+    end, map_opts)
+
     return buf, win
 end
+
 
 M.run_passive = function(cmd, opts)
     opts = opts or {}
@@ -54,7 +93,7 @@ M.run_passive = function(cmd, opts)
     end
 
     vim.fn.jobstart(cmd, {
-        pty = true,
+        pty = false,
         stdout_buffered = false,
         stderr_buffered = false,
         on_stdout = function(_, data) append(data) end,
