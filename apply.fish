@@ -32,13 +32,13 @@ set -a choices $scripts
 set choice (gum choose --height 100 $choices)
 
 function run_script
-    set full_path install-scripts/$argv[1]
+    set -l full_path "install-scripts/$argv[1]"
     print_info "\nExecuting: $argv[1]\n"
 
-    set err (fish $full_path 2>&1)
+    fish "$full_path"
     or begin
-        print_error "Script $argv[1] failed:"
-        print_error "$err"
+        set -l code $status
+        print_error "Script $argv[1] failed (exit $code)."
         exit 1
     end
 end
