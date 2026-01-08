@@ -14,6 +14,7 @@ return {
             vim.lsp.enable('html')
             vim.lsp.enable('dockerls')
             vim.lsp.enable('jsonls')
+            vim.lsp.enable('omnisharp')
         end
     },
     {
@@ -35,22 +36,36 @@ return {
         "mason-org/mason-lspconfig.nvim",
         event = { "BufReadPre", "BufNewFile" },
         opts = {
-            ensure_installed = {
-                "rust_analyzer",
-                "lua_ls",
-                "bashls",
-                "fish_lsp",
-                "tombi",
-                "gopls",
-                "html",
-                "dockerls",
-                "jsonls"
-            },
             automatic_enable = false
         },
         dependencies = {
-            { "mason-org/mason.nvim", opts = {} },
+            "mason-org/mason.nvim",
             "neovim/nvim-lspconfig",
+        },
+    },
+    {
+        'owallb/mason-auto-install.nvim',
+        event = { "BufReadPre", "BufNewFile" },
+        opts = {
+            packages = {
+                -- LSP
+                "rust-analyzer",
+                "lua-language-server",
+                "bash-language-server",
+                "fish-lsp",
+                "tombi",
+                "gopls",
+                "html-lsp",
+                "dockerfile-language-server",
+                "json-lsp",
+                "omnisharp",
+                -- DAP
+                "netcoredbg"
+            }
+        },
+        dependencies = {
+            'williamboman/mason.nvim',
+            'neovim/nvim-lspconfig',
         },
     },
     {
@@ -73,8 +88,6 @@ return {
         version = '^6',
         ft = "rust",
         init = function()
-            local lsp            = require("lsp.config")
-
             local extension_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/"
             local codelldb_path  = extension_path .. "adapter/codelldb"
             local liblldb_path   = extension_path .. "lldb/lib/liblldb.so"
@@ -82,10 +95,6 @@ return {
             local cfg            = require("rustaceanvim.config")
 
             vim.g.rustaceanvim   = {
-                server = {
-                    on_attach = lsp.on_attach,
-                    capabilities = lsp.capabilities,
-                },
                 dap = {
                     adapter = cfg.get_codelldb_adapter(codelldb_path, liblldb_path),
                 },
