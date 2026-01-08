@@ -69,7 +69,6 @@ set font_packages \
 
 # Dev tools
 set dev_packages \
-    dotnet-sdk \
     npm \
     qt5-tools
 
@@ -92,7 +91,10 @@ set work_packages \
     visual-studio-code-bin \
     gitlab-ci-local \
     logiops \
-    blueman
+    blueman \
+    dotnet-sdk \
+    dotnet-sdk-9.0 \
+    dotnet-sdk-8.0
 
 if mt_is_work
     yay --needed -S $work_packages --noconfirm
