@@ -24,6 +24,7 @@ fish_add_path --path ~/.pub-cache/bin
 fish_add_path --path ~/go/bin
 fish_add_path --path ~/.local/bin
 fish_add_path --path ~/.fvm_flutter/bin
+fish_add_path --path ~/.dotnet/tools
 
 if test "$TERM" = xterm-kitty
     set -x TERM xterm-256color
