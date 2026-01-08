@@ -10,30 +10,47 @@ local json = vim.fn.json_decode
 local encode = vim.fn.json_encode
 local decode = vim.fn.json_decode
 
+local uv = vim.loop
+
 local function find_project_root()
     local path = vim.fn.expand("%:p:h")
 
-    while path and path ~= "/" do
-        local glob = vim.fn.glob(path .. "/.git")
-        if glob ~= "" then
-            return path
-        end
-        path = vim.fn.fnamemodify(path, ":h")
+    if path == "" then
+        error("Cannot determine project root: no buffer path")
     end
 
-    return nil
+    while true do
+        local stat = uv.fs_stat(path .. "/.git")
+        if stat then
+            return path
+        end
+
+        local parent = vim.fn.fnamemodify(path, ":h")
+        if parent == path then
+            break
+        end
+
+        path = parent
+    end
+
+    error("Cannot determine project root: not inside a git repository")
 end
+
 
 local function read_launch_config(project_root)
     local config_path = project_root .. "/.nvim/launch_commands.json"
-    if vim.fn.filereadable(config_path) == 0 then
-        return {}
+
+    local stat, stat_err = uv.fs_stat(config_path)
+    if not stat then
+        if stat_err and stat_err:match("ENOENT") then
+            return {}
+        end
+        error(("Failed to stat %s: %s"):format(config_path, tostring(stat_err)))
     end
 
     local ok, content = pcall(vim.fn.readfile, config_path)
     if not ok then
-        vim.notify("Failed to read launch_commands.json", vim.log.levels.ERROR)
-        return {}
+        error(("File exists but cannot be read: %s"):format(config_path))
     end
 
     local ok2, parsed = pcall(decode, table.concat(content, "\n"))
@@ -44,6 +61,7 @@ local function read_launch_config(project_root)
 
     return parsed
 end
+
 
 local function get_commands_file()
     local root = find_project_root()
@@ -62,7 +80,7 @@ local function read_commands()
 
     if vim.fn.filereadable(file) == 0 then
         vim.notify("Could not read launch_commands.json", vim.log.levels.ERROR)
-        return
+        return {}
     end
 
     if not file then
@@ -98,7 +116,7 @@ M.launch = function()
 
     pickers.new({}, {
         layout_config = {
-            width = 0.3,
+            width = 0.8,
             height = 0.5,
             prompt_position = "top",
         },

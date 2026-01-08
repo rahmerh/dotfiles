@@ -3,12 +3,8 @@ local M = {}
 local process_panel = require("ui.process-panel")
 
 local project_types = {
-    rust = {
-        ft = "rust",
-    },
-    dotnet = {
-        ft = { "cs", "fsharp" },
-    },
+    rust = { ft = "rust" },
+    dotnet = { ft = { "cs", "fsharp" } },
 }
 
 local function buf_dir()
@@ -17,15 +13,19 @@ local function buf_dir()
     return vim.fn.fnamemodify(name, ":p:h")
 end
 
-local function find_upwards(start_dir, patterns)
-    local dir = start_dir
+local function start_dir()
+    return buf_dir() or vim.fn.getcwd()
+end
 
-    while dir do
+local function find_upwards(start_dir_, patterns)
+    local dir = start_dir_
+
+    while dir and dir ~= "" do
         for _, pat in ipairs(patterns) do
             local matches = vim.fn.glob(dir .. "/" .. pat, false, true)
             if #matches > 0 then
                 table.sort(matches)
-                return matches[1]
+                return matches[1], dir
             end
         end
 
@@ -33,12 +33,14 @@ local function find_upwards(start_dir, patterns)
         if parent == dir then break end
         dir = parent
     end
+
+    return nil, nil
 end
 
 local function determine_build_command(types)
     local ft = vim.bo.filetype
-    local start_dir = buf_dir()
-    if not start_dir then
+    local sdir = start_dir()
+    if not sdir or sdir == "" then
         return nil
     end
 
@@ -49,40 +51,46 @@ local function determine_build_command(types)
         end
 
         if kind == "rust" then
-            local cargo, dir = find_upwards(start_dir, { "Cargo.toml" })
-            if cargo then
+            local cargo_toml, root = find_upwards(sdir, { "Cargo.toml" })
+            if cargo_toml then
                 return {
                     command = "cargo build",
-                    cwd = dir,
+                    cwd = root,
                 }
             end
         end
 
         if kind == "dotnet" then
-            local csproj = find_upwards(start_dir, { "*.csproj", "*.fsproj" })
-            if csproj then
+            local proj, root = find_upwards(sdir, { "*.csproj", "*.fsproj" })
+            if proj then
                 return {
-                    command = string.format("dotnet build %s", csproj),
-                    cwd = "."
+                    command = ("dotnet build %s"):format(vim.fn.fnameescape(proj)),
+                    cwd = root,
                 }
             end
 
-            local sln = find_upwards(start_dir, { "*.sln" })
+            local sln, root2 = find_upwards(sdir, { "*.sln" })
             if sln then
                 return {
-                    command = string.format("dotnet build %s", sln),
-                    cwd = "."
+                    command = ("dotnet build %s"):format(vim.fn.fnameescape(sln)),
+                    cwd = root2,
                 }
             end
         end
 
         ::continue::
     end
+
+    return nil
 end
 
-local active_build_win = nil
-
 M.build = function()
+    local ft = vim.bo.filetype
+    if not ft or ft == "" then
+        vim.notify("Cannot build from buffer without filetype.", vim.log.levels.ERROR)
+        return
+    end
+
     local build_command = determine_build_command(project_types)
 
     if not build_command then
@@ -90,17 +98,11 @@ M.build = function()
             "No build location found for filetype: " .. vim.bo.filetype,
             vim.log.levels.WARN
         )
-        return nil
+        return
     end
 
-    process_panel.run_passive(string.format("cd %s && %s", build_command.cwd, build_command.command))
-end
-
-M.close_build_log = function()
-    if active_build_win and vim.api.nvim_win_is_valid(active_build_win) then
-        vim.api.nvim_win_close(active_build_win, true)
-        active_build_win = nil
-    end
+    local cmd = ("cd %s && %s"):format(vim.fn.shellescape(build_command.cwd), build_command.command)
+    process_panel.run_passive(cmd)
 end
 
 return M
