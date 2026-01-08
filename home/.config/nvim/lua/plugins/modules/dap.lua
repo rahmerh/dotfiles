@@ -2,7 +2,13 @@ return {
     {
         "mfussenegger/nvim-dap",
         keys = {
-            { "<F5>",    "<cmd>DapContinue<cr>",        desc = "Start Debugger" },
+            {
+                "<F5>",
+                function()
+                    require("debug.loader").continue()
+                end,
+                desc = "Start Debugger",
+            },
             { "<F10>",   "<cmd>DapStepOver<cr>",        desc = "Step Over" },
             { "<F11>",   "<cmd>DapStepInto<cr>",        desc = "Step Into" },
             { "<S-F11>", "<cmd>DapStepOut<cr>",         desc = "Step Out" },
@@ -11,23 +17,12 @@ return {
             { "dt",      "<cmd>DapToggleRepl<cr>",      desc = "Toggle REPL" },
         },
         config = function()
-            require("debug.bash")
-            require("debug.rust")
-            require("debug.go")
-
             local dap, dapui = require("dap"), require("dapui")
-            dap.listeners.before.attach.dapui_config = function()
-                dapui.open()
-            end
-            dap.listeners.before.launch.dapui_config = function()
-                dapui.open()
-            end
-            dap.listeners.before.event_terminated.dapui_config = function()
-                dapui.close()
-            end
-            dap.listeners.before.event_exited.dapui_config = function()
-                dapui.close()
-            end
+
+            dap.listeners.before.attach.dapui_config = dapui.open
+            dap.listeners.before.launch.dapui_config = dapui.open
+            dap.listeners.before.event_terminated.dapui_config = dapui.close
+            dap.listeners.before.event_exited.dapui_config = dapui.close
         end,
     },
     {
