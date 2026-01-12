@@ -15,6 +15,7 @@ return {
             vim.lsp.enable('dockerls')
             vim.lsp.enable('jsonls')
             vim.lsp.enable('omnisharp')
+            vim.lsp.enable('buf_ls')
         end
     },
     {
@@ -59,6 +60,7 @@ return {
                 "dockerfile-language-server",
                 "json-lsp",
                 "omnisharp",
+                "buf",
                 -- DAP
                 "netcoredbg"
             }
