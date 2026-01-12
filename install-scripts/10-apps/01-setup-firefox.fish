@@ -64,5 +64,6 @@ install_extension sponsorblock
 install_extension return-youtube-dislikes
 install_extension control-panel-for-youtube
 install_extension proton-pass
+install_extension ublock-origin
 
 print_success Done
