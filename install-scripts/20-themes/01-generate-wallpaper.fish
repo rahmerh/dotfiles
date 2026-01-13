@@ -27,6 +27,7 @@ print_info "Creating wallpapers"
 make_wallpaper 5120 1440 ~/Pictures/wallpaper-5120x1440.png
 make_wallpaper 2560 1600 ~/Pictures/wallpaper-2560x1600.png
 make_wallpaper 2560 1440 ~/Pictures/wallpaper-2560x1440.png
+make_wallpaper 3840 2160 ~/Pictures/wallpaper-3840x2160.png
 
 print_info Done
 
