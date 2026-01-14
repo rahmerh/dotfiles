@@ -101,3 +101,7 @@ end, options)
 vim.keymap.set("n", "<leader>ml", function()
     require("workflow.launcher").manage_commands()
 end, options)
+
+vim.keymap.set("n", "<leader>el", function()
+    require("ui.process-panel").enter_active_panel()
+end, { desc = "Enter active process panel" })

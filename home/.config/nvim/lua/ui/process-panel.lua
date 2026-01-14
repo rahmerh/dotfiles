@@ -72,6 +72,9 @@ M.run_passive = function(cmd, opts)
     opts = opts or {}
 
     local buf, win = open_floating_window(false)
+    vim.b[buf].process_panel = true
+    vim.bo[buf].buflisted = false
+
     local baleia = require("baleia").setup({})
     baleia.automatically(buf)
 
@@ -150,30 +153,87 @@ M.run_passive = function(cmd, opts)
 end
 
 M.run_active = function(cmd)
+    local origin_win = vim.api.nvim_get_current_win()
+
     local buf, win = open_floating_window(true)
+
+    vim.b[buf].process_panel = true
+    vim.bo[buf].buflisted = false
 
     vim.wo[win].winblend = 20
     vim.wo[win].winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder"
 
-    vim.fn.jobstart(cmd, {
+    local job_id = vim.fn.jobstart(cmd, {
         term = true,
         pty = true,
     })
 
-    vim.keymap.set("n", "q",
-        function(_, _)
-            if vim.api.nvim_win_is_valid(win) then
-                vim.api.nvim_win_close(win, true)
-            end
-            if vim.api.nvim_buf_is_valid(buf) then
-                vim.api.nvim_buf_delete(buf, { force = true })
-            end
-        end,
-        { buffer = buf, nowait = true })
+    local function stop_job()
+        if job_id and job_id > 0 then
+            vim.fn.jobstop(job_id)
+            job_id = nil
+        end
+    end
+
+    local function close_panel()
+        stop_job()
+
+        if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, true)
+        end
+        if vim.api.nvim_buf_is_valid(buf) then
+            vim.b[buf].process_panel = nil
+            vim.api.nvim_buf_delete(buf, { force = true })
+        end
+    end
+
+    local function leave_panel()
+        vim.cmd("stopinsert")
+
+        if vim.api.nvim_win_is_valid(origin_win) then
+            vim.api.nvim_set_current_win(origin_win)
+        end
+    end
+
+    vim.keymap.set("t", "<C-e>", leave_panel, { buffer = buf, nowait = true })
+    vim.keymap.set("t", "<Esc><Esc>", function()
+        vim.cmd("stopinsert")
+        close_panel()
+    end, { buffer = buf, nowait = true })
 
     vim.defer_fn(function()
         vim.cmd("startinsert")
     end, 50)
+end
+
+local function find_process_panel_win()
+    for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+            local b = vim.api.nvim_win_get_buf(win)
+            if vim.api.nvim_buf_is_valid(b) and vim.b[b].process_panel then
+                return win, b, tab
+            end
+        end
+    end
+end
+
+function M.enter_active_panel()
+    local win, buf, tab = find_process_panel_win()
+    if not win then
+        return
+    end
+
+    if vim.api.nvim_get_current_tabpage() ~= tab then
+        vim.api.nvim_set_current_tabpage(tab)
+    end
+
+    if vim.api.nvim_get_current_win() ~= win then
+        vim.api.nvim_set_current_win(win)
+    end
+
+    if vim.bo[buf].buftype == "terminal" then
+        vim.cmd("startinsert")
+    end
 end
 
 return M
