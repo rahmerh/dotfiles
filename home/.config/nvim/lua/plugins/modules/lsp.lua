@@ -16,6 +16,7 @@ return {
             vim.lsp.enable('jsonls')
             vim.lsp.enable('omnisharp')
             vim.lsp.enable('buf_ls')
+            vim.lsp.enable('yamlls')
         end
     },
     {
@@ -61,6 +62,7 @@ return {
                 "json-lsp",
                 "omnisharp",
                 "buf",
+                "yaml-language-server",
                 -- DAP
                 "netcoredbg"
             }
