@@ -1,18 +1,22 @@
 return {
     {
         "nvim-neotest/neotest",
-        dependencies = { "rouge8/neotest-rust" },
+        dependencies = {
+            "rouge8/neotest-rust",
+            "Issafalcon/neotest-dotnet"
+        },
         keys = {
             { "<leader>tn", function() require("neotest").run.run() end,                     desc = "Run nearest test" },
             { "<leader>tf", function() require("neotest").run.run(vim.fn.expand("%")) end,   desc = "Run file tests" },
             { "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, desc = "Run test with DAP" },
             { "<leader>to", function() require("neotest").output.open({ enter = true }) end, desc = "Open test output" },
-            { "<leader>ts", function() require("neotest").summary.toggle() end,              desc = "Toggle test summary" },
+            { "<leader>te", function() require("neotest").summary.toggle() end,              desc = "Toggle test summary" },
         },
         config = function()
             require("neotest").setup({
                 adapters = {
-                    require('rustaceanvim.neotest')
+                    require('rustaceanvim.neotest'),
+                    require("neotest-dotnet")
                 }
             })
         end,

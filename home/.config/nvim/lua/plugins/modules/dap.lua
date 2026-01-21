@@ -2,13 +2,7 @@ return {
     {
         "mfussenegger/nvim-dap",
         keys = {
-            {
-                "<F5>",
-                function()
-                    require("debug.loader").continue()
-                end,
-                desc = "Start Debugger",
-            },
+            { "<F5>",    "<cmd>DapContinue<cr>",        desc = "Start Debugger" },
             { "<F10>",   "<cmd>DapStepOver<cr>",        desc = "Step Over" },
             { "<F11>",   "<cmd>DapStepInto<cr>",        desc = "Step Into" },
             { "<S-F11>", "<cmd>DapStepOut<cr>",         desc = "Step Out" },
@@ -17,6 +11,11 @@ return {
             { "dt",      "<cmd>DapToggleRepl<cr>",      desc = "Toggle REPL" },
         },
         config = function()
+            require("debug.dotnet")
+            require("debug.bash")
+            require("debug.go")
+            require("debug.rust")
+
             local dap, dapui = require("dap"), require("dapui")
 
             dap.listeners.before.attach.dapui_config = dapui.open
