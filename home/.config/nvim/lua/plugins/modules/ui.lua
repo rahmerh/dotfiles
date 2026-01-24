@@ -84,11 +84,14 @@ return {
         priority = 1000,
         config = function()
             require("vscode").setup({
+                transparent = true,
                 italic_comments = true,
+                italic_inlayhints = true,
+                underline_links = true,
                 disable_nvimtree_bg = true,
-                transparent = true
             })
-            vim.cmd("colorscheme vscode")
+
+            vim.cmd.colorscheme "vscode"
         end,
     },
     {

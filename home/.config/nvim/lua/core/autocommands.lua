@@ -75,5 +75,13 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
     end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { '<filetype>' },
+    callback = function()
+        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        vim.treesitter.start()
+    end,
+})
+
 vim.opt.laststatus = 3
 vim.opt.mouse = "n"

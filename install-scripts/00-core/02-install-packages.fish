@@ -70,6 +70,7 @@ set font_packages \
 # Dev tools
 set dev_packages \
     npm \
+    go \
     qt5-tools
 
 set personal_packages \
@@ -83,7 +84,6 @@ set personal_packages \
 
 set work_packages \
     slack-desktop \
-    go \
     delve \
     flutter \
     lazysql \
