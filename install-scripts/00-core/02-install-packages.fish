@@ -131,5 +131,6 @@ end
 cargo install cargo-nextest
 cargo install cargo-llvm-cov
 cargo install gpu-usage-waybar
+cargo install tree-sitter-cli
 
 print_success Done
