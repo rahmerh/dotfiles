@@ -14,9 +14,20 @@ return {
             vim.lsp.enable('html')
             vim.lsp.enable('dockerls')
             vim.lsp.enable('jsonls')
-            vim.lsp.enable('omnisharp')
             vim.lsp.enable('buf_ls')
             vim.lsp.enable('yamlls')
+        end
+    },
+    {
+        "GustavEikaas/easy-dotnet.nvim",
+        dependencies = { "nvim-lua/plenary.nvim", 'nvim-telescope/telescope.nvim', },
+        config = function()
+            require("easy-dotnet").setup({
+
+                notifications = {
+                    handler = false
+                },
+            })
         end
     },
     {
@@ -60,7 +71,6 @@ return {
                 "html-lsp",
                 "dockerfile-language-server",
                 "json-lsp",
-                "omnisharp",
                 "buf",
                 "yaml-language-server",
                 -- DAP
