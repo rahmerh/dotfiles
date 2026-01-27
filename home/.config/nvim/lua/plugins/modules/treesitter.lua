@@ -27,6 +27,7 @@ return {
                 indent = {
                     enable = true
                 },
+                sync_install = true
             });
         end,
     },

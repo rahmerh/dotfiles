@@ -7,7 +7,10 @@ function fish_prompt
 
     if test -n "$branch"
         set -l dirty_output (command git status --porcelain 2>/dev/null)
-        set -l unpushed (command git rev-list --count @{u}..HEAD 2>/dev/null)
+        set -l unpushed 0
+        if command git rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1
+            set unpushed (command git rev-list --count @{u}..HEAD 2>/dev/null)
+        end
 
         if test -n "$dirty_output"
             set_color '#EBCB8B'
