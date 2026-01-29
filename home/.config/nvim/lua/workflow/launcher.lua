@@ -36,7 +36,6 @@ local function find_project_root()
     error("Cannot determine project root: not inside a git repository")
 end
 
-
 local function read_launch_config(project_root)
     local config_path = project_root .. "/.nvim/launch_commands.json"
 
