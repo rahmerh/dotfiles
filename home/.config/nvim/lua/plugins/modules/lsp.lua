@@ -16,6 +16,7 @@ return {
             vim.lsp.enable('jsonls')
             vim.lsp.enable('buf_ls')
             vim.lsp.enable('yamlls')
+            vim.lsp.enable('cspell_ls')
         end
     },
     {
@@ -73,6 +74,7 @@ return {
                 "json-lsp",
                 "buf",
                 "yaml-language-server",
+                "cspell-lsp",
                 -- DAP
                 "netcoredbg"
             }
