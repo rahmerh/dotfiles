@@ -133,14 +133,4 @@ cargo install --locked cargo-llvm-cov
 cargo install --locked gpu-usage-waybar
 cargo install --locked tree-sitter-cli
 
-print_info "Uninstalling packages"
-
-set to_uninstall plymouth plymouth-theme-cachyos
-
-for pkg in $to_uninstall
-    if yay -Qq $pkg >/dev/null 2>&1
-        yay -Rns --noconfirm $pkg
-    end
-end
-
 print_success Done
