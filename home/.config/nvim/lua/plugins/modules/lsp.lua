@@ -17,6 +17,7 @@ return {
             vim.lsp.enable('buf_ls')
             vim.lsp.enable('yamlls')
             vim.lsp.enable('cspell_ls')
+            vim.lsp.enable('postgres_lsp')
         end
     },
     {
@@ -75,6 +76,7 @@ return {
                 "buf",
                 "yaml-language-server",
                 "cspell-lsp",
+                "postgres-language-server",
                 -- DAP
                 "netcoredbg"
             }
