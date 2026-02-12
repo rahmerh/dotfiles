@@ -43,6 +43,11 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz", options)
 vim.keymap.set("n", "D", "dd", options)
 vim.keymap.set("n", "Y", "yy", options)
 
+vim.keymap.set("n", "<leader>bd", function()
+    vim.cmd("bp")
+    vim.cmd("bd #")
+end, options)
+
 -- Clipboard
 vim.keymap.set("x", "<C-p>", [["_dP]])
 
