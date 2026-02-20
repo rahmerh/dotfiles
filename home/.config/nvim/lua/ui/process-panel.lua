@@ -75,9 +75,6 @@ M.run_passive = function(cmd, opts)
     vim.b[buf].process_panel = true
     vim.bo[buf].buflisted = false
 
-    local baleia = require("baleia").setup({})
-    baleia.automatically(buf)
-
     local function append(lines)
         if lines and #lines > 0 then
             if #lines == 1 and lines[1] == "" then return end
@@ -106,7 +103,6 @@ M.run_passive = function(cmd, opts)
             local msg = { "\tProcess exited with code: " .. color .. code .. "\x1b[37m" }
 
             local line = vim.api.nvim_buf_line_count(buf)
-            baleia.buf_set_lines(buf, line, line, true, msg)
 
             local win_height = vim.api.nvim_win_get_height(win)
             local buf_line_count = vim.api.nvim_buf_line_count(buf)
