@@ -10,5 +10,6 @@ cd system/
 sudo stow --target=/ sddm
 sudo stow --target=/ logid
 sudo stow --target=/ logind
+sudo stow --target=/ on-monitor-change
 
 print_success Done
