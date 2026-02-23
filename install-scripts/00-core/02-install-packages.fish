@@ -94,7 +94,8 @@ set work_packages \
     blueman \
     dotnet-sdk \
     dotnet-sdk-9.0 \
-    dotnet-sdk-8.0
+    dotnet-sdk-8.0 \
+    rofi-rbw
 
 if mt_is_work
     yay --needed -S $work_packages --noconfirm
