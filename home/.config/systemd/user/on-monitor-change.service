@@ -1,0 +1,6 @@
+[Unit]
+Description=Monitor change handler
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/fish /home/bas/.local/bin/on-monitor-change.fish
