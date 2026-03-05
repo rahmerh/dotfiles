@@ -55,7 +55,11 @@ local fmt = vim.api.nvim_create_augroup("FormatAutogroup", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePre", {
     group = fmt,
-    callback = function()
+    callback = function(args)
+        if vim.b[args.buf].no_autoformat then
+            return
+        end
+
         vim.lsp.buf.format({ async = false })
     end,
 })
