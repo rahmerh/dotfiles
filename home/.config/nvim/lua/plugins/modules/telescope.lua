@@ -5,6 +5,13 @@ return {
         keys = {
             { "<leader>f", "<cmd>Telescope find_files<cr>", desc = "Find Files" },
             { "<leader>g", "<cmd>Telescope live_grep<cr>",  desc = "Live Grep" },
+            {
+                "<leader>n",
+                function()
+                    require("telescope.builtin").find_files({ no_ignore = true })
+                end,
+                desc = "Find Files (include gitignored)",
+            },
         },
         dependencies = {
             "nvim-lua/plenary.nvim",
