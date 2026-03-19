@@ -15,19 +15,11 @@ end
 
 sleep 0.3
 
-for line in (hyprctl monitors -j | jq -r '.[] | "\(.name) \(.width)x\(.height)"')
-    set name (echo $line | awk '{print $1}')
-    set res (echo $line | awk '{print $2}')
+set wp ~/Pictures/wallpaper.*
 
-    set wp "$base_dir/wallpaper-$res.png"
-
-    if test -f "$wp"
-        hyprctl hyprpaper preload "$wp" >/dev/null
-        hyprctl hyprpaper wallpaper "$name,$wp" >/dev/null
-    else
-        if not contains -- "$res" $missing_resolutions
-            set missing_resolutions $missing_resolutions $res
-            notify-send "Missing wallpaper" "No wallpaper found for $res ($wp)"
-        end
-    end
+if set -q wp[1]
+    hyprctl hyprpaper preload "$wp[1]" >/dev/null
+    hyprctl hyprpaper wallpaper ",$wp[1]" >/dev/null
+else
+    notify-send "Missing wallpaper" "No wallpaper found in ~/Pictures (wallpaper.*)"
 end
