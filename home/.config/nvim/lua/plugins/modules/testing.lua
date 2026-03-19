@@ -16,10 +16,21 @@ return {
             require("neotest").setup({
                 adapters = {
                     require('rustaceanvim.neotest'),
-                    require("neotest-dotnet")
+                    require("neotest-dotnet"),
+                    require('neotest-dart') {
+                        command = 'fvm flutter',
+                        use_lsp = true
+                    }
                 }
             })
         end,
+    },
+    {
+        "sidlatau/neotest-dart",
+        dependencies = {
+            "nvim-neotest/neotest",
+        },
+        lazy = false
     },
     {
         "andythigpen/nvim-coverage",
