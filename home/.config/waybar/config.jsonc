@@ -1,9 +1,10 @@
 {
     "layer": "top",
     "position": "top",
-    "height": 30,
+    "height": 35,
     "spacing": 0,
-    "margin-right": 5,
+    "margin-top": 0,
+    "margin-right": 0,
     "margin-left": 5,
     "modules-right": [
         "tray",

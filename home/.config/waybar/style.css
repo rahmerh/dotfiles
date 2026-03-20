@@ -15,33 +15,11 @@
   background-color: rgba(0, 0, 0, 0);
 }
 
-#cpu,
-#memory,
-#custom-gpu-usage,
-#pulseaudio, 
-#custom-pulseaudio-description,
-#taskbar, 
 #tray, 
-#bluetooth,
-#battery, 
-#clock, 
-#custom-notifications,
 #network,
-#workspaces {
+#battery, 
+#pulseaudio, 
+#clock {
     background-color: @background;
-    padding: 0px 5px;
-    margin: 2px 0px 2px 0px;
-}
-
-tooltip {
-    background: @background;
-    opacity: 0.95;
-    border-radius: 0px;
-    border-width: 2px;
-    border-style: solid;
-    border-color: @purple;
-}
-
-tooltip label{
-    color: @grey;
+    padding: 0px 4px;
 }
