@@ -1,13 +1,8 @@
-anchor=top-center
-
-# Default timeout 10s
-ignore-timeout=1
-default-timeout=10000
-
-# Styling
+anchor=top-right
 background-color=#545454CC
 border-radius=0
 border-size=0
+margin=10
 padding=10
 font=Inter 12
 width=450
