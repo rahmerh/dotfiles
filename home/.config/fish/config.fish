@@ -14,10 +14,8 @@ end
 
 set fish_greeting
 
-mcfly init fish | source
 zoxide init fish | source
 
-set -gx MCFLY_KEY_SCHEME vim
 set -gx PATH "$HOME/.cargo/bin" $PATH
 
 fish_add_path --path ~/.pub-cache/bin

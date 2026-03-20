@@ -116,10 +116,6 @@ yay --needed -S \
 
 print_info "Configuring and install misc tools"
 
-if ! type -q mcfly
-    sudo bash -c 'curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sh -s -- --git cantino/mcfly'
-end
-
 if ! type -q rustc
     curl https://sh.rustup.rs -sSf | sh -s -- -y
 end
