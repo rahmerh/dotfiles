@@ -27,6 +27,7 @@ switch $action
         grim -g "$geom" "$file"
 
         set -l clicked (notify-send \
+            -i "$HOME/.local/share/icons/screenshot.png" \
             --action=default=Open \
             "Screenshot saved" \
             "$file")
@@ -35,15 +36,19 @@ switch $action
             feh "$file" &
         end
     case copy
-        grim -g "$geom" - | wl-copy --type image/png --foreground
+        grim -g "$geom" - | wl-copy --type image/png
 
-        notify-send "Screenshot copied" "Copied to clipboard"
+        notify-send \
+            -i "$HOME/.local/share/icons/screenshot.png" \
+            "Screenshot copied" \
+            "Copied to clipboard"
     case both
         grim -g "$geom" "$file"
 
-        wl-copy --type image/png --foreground <"$file"
+        wl-copy --type image/png <"$file"
 
         set -l clicked (notify-send \
+            -i "$HOME/.local/share/icons/screenshot.png" \
             --action=default=Open \
             "Screenshot saved + copied" \
             "$file")
