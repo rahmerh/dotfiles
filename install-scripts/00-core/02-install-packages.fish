@@ -71,7 +71,8 @@ set font_packages \
 set dev_packages \
     npm \
     go \
-    qt5-tools
+    qt5-tools \
+    luarocks
 
 set personal_packages \
     openrazer-meta \
@@ -93,8 +94,6 @@ set work_packages \
     logiops \
     blueman \
     dotnet-sdk \
-    dotnet-sdk-9.0 \
-    dotnet-sdk-8.0 \
     rofi-rbw
 
 if mt_is_work
@@ -117,10 +116,6 @@ yay --needed -S \
 
 print_info "Configuring and install misc tools"
 
-if ! type -q zoxide
-    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-end
-
 if ! type -q mcfly
     sudo bash -c 'curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sh -s -- --git cantino/mcfly'
 end
@@ -133,5 +128,6 @@ cargo install --locked cargo-nextest
 cargo install --locked cargo-llvm-cov
 cargo install --locked gpu-usage-waybar
 cargo install --locked tree-sitter-cli
+cargo install --locked zoxide
 
 print_success Done
