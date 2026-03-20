@@ -40,7 +40,6 @@ set gui_packages \
     firewalld \
     lazygit \
     pulsemixer \
-    borg \
     rofi \
     feh \
     docker \
@@ -48,7 +47,8 @@ set gui_packages \
     nvidia-container-toolkit \
     nwg-displays \
     keychain \
-    pinta
+    pinta \
+    ripdrag
 
 # Hyprland stack
 set hyprland_packages \
