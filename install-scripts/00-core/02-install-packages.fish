@@ -48,7 +48,7 @@ set gui_packages \
     nvidia-container-toolkit \
     nwg-displays \
     keychain \
-    brightnessctl
+    pinta
 
 # Hyprland stack
 set hyprland_packages \
