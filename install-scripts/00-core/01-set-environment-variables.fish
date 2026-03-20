@@ -7,6 +7,7 @@ print_info "Setting environment variables"
 set -Ux XDG_CONFIG_HOME ~/.config
 set -Ux VISUAL nvim
 set -Ux EDITOR nvim
+set -Ux MANPAGER "bat -plman"
 
 set -gx QT_QPA_PLATFORMTHEME qt5ct
 set -gx QT_STYLE_OVERRIDE qt5ct
