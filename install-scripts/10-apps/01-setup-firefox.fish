@@ -6,13 +6,20 @@ print_info "Configuring firefox"
 set profile_dir (find ~/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -n 1)
 if not test -d "$profile_dir"
     print_error "firefox profile not found. Launch firefox once and retry."
-    return 1
+    exit 1
 end
 
 function set_pref --argument key value
-    set prefs "$profile_dir/prefs.js"
-    sed -i "/user_pref(\"$key\"/d" "$prefs"
-    echo "user_pref(\"$key\", $value);" >>"$prefs"
+    set -l prefs "$profile_dir/user.js"
+    set -l tmpfile (mktemp)
+
+    if test -f "$prefs"
+        grep -vF "user_pref(\"$key\"," "$prefs" >"$tmpfile"
+    end
+
+    echo "user_pref(\"$key\", $value);" >>"$tmpfile"
+
+    mv "$tmpfile" "$prefs"
 end
 
 function install_extension --argument extension_name
@@ -58,6 +65,7 @@ set_pref "privacy.clearOnShutdown.siteSettings" false
 set_pref "network.cookie.lifetimePolicy" 0
 set_pref "browser.sessionstore.resume_from_crash" false
 set_pref "toolkit.legacyUserProfileCustomizations.stylesheets" true
+set_pref "widget.use-xdg-desktop-portal.file-picker" 1
 
 # Extensions
 install_extension sponsorblock
