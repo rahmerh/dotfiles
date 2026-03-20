@@ -12,3 +12,5 @@ padding=10
 font=Inter 12
 width=450
 
+actions=1
+on-button-left=invoke-default-action
