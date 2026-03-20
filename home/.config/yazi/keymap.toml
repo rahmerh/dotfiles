@@ -5,5 +5,5 @@ desc = "Enter the child directory, or open the file"
 
 [[mgr.prepend_keymap]]
 on = "D"
-run = 'shell -- ripdrag -n -b "$(dirname "%s1")"/*'
+run = 'shell -- ripdrag -nbx "$(dirname "%s1")"/*'
 desc = "Open ripdrag in dir"

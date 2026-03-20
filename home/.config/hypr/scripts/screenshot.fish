@@ -37,11 +37,6 @@ switch $action
         end
     case copy
         grim -g "$geom" - | wl-copy --type image/png
-
-        notify-send \
-            -i "$HOME/.local/share/icons/screenshot.png" \
-            "Screenshot copied" \
-            "Copied to clipboard"
     case both
         grim -g "$geom" "$file"
 
@@ -50,7 +45,7 @@ switch $action
         set -l clicked (notify-send \
             -i "$HOME/.local/share/icons/screenshot.png" \
             --action=default=Open \
-            "Screenshot saved + copied" \
+            "Screenshot saved" \
             "$file")
 
         if test "$clicked" = default
