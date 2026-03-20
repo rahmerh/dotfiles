@@ -61,7 +61,9 @@ set hyprland_packages \
     grim \
     slurp \
     wl-clipboard \
-    xdg-desktop-portal-hyprland
+    xdg-desktop-portal \
+    xdg-desktop-portal-hyprland \
+    xdg-desktop-portal-termfilechooser-hunkyburrito-git
 
 # Fonts
 set font_packages \
