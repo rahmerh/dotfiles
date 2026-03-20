@@ -10,8 +10,7 @@
         "network",
         "battery",
         "pulseaudio",
-        "clock",
-        "custom/notifications"
+        "clock"
     ],
     "tray": {
         "icon-size": 20,
@@ -63,12 +62,5 @@
     "clock": {
         "timezone": "Europe/Amsterdam",
         "format": "\uf073 {:%d-%m-%Y \uf017 %H:%M}"
-    },
-    "custom/notifications": {
-        "format": "\uf0f3 {}",
-        "exec": "~/.config/waybar/scripts/count-notifications.sh",
-        "interval": 5,
-        "tooltip": false,
-        "on-click": "~/.local/bin/toggle-notification-panel"
     }
 }
