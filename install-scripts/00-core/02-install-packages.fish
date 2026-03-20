@@ -42,6 +42,7 @@ set gui_packages \
     pulsemixer \
     borg \
     rofi \
+    feh \
     docker \
     docker-compose \
     nvidia-container-toolkit \

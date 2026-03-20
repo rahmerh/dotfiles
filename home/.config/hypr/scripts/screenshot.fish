@@ -27,20 +27,30 @@ switch $action
         grim -g "$geom" "$file"
 
         set -l clicked (notify-send \
-    --action=default=Open \
-    "Screenshot saved" \
-    "$file")
+            --action=default=Open \
+            "Screenshot saved" \
+            "$file")
 
         if test "$clicked" = default
-            xdg-open "$file" >/dev/null 2>&1 &
+            feh "$file" &
         end
     case copy
         grim -g "$geom" - | wl-copy --type image/png --foreground
+
         notify-send "Screenshot copied" "Copied to clipboard"
     case both
         grim -g "$geom" "$file"
+
         wl-copy --type image/png --foreground <"$file"
-        notify-send "Screenshot saved + copied" $file
+
+        set -l clicked (notify-send \
+            --action=default=Open \
+            "Screenshot saved + copied" \
+            "$file")
+
+        if test "$clicked" = default
+            feh "$file" &
+        end
     case '*'
         usage
 end
