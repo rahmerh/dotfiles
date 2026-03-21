@@ -7,8 +7,8 @@ stow home
 
 cd system/
 
-sudo stow --target=/ logid
+sudo stow --target=/ greetd
 sudo stow --target=/ logind
-sudo stow --target=/ on-monitor-change
+sudo stow --target=/ logid
 
 print_success Done

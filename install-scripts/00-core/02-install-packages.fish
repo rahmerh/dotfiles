@@ -50,21 +50,21 @@ set gui_packages \
     pinta \
     ripdrag
 
-# Hyprland stack
-set hyprland_packages \
-    hyprland \
-    hyprpaper \
-    hyprpicker \
-    hyprlock \
-    hypridle \
-    waybar \
+# WM
+set wm_packages \
+    niri \
+    swaybg \
+    swaylock \
+    swayidle \
     mako \
     grim \
     slurp \
     wl-clipboard \
     xdg-desktop-portal \
-    xdg-desktop-portal-hyprland \
-    xdg-desktop-portal-termfilechooser-hunkyburrito-git
+    xdg-desktop-portal-termfilechooser-hunkyburrito-git \
+    xwayland-satellite \
+    hypridle \
+    hyprlock
 
 # Fonts
 set font_packages \
@@ -112,9 +112,9 @@ end
 yay --needed -S \
     $core_packages \
     $gui_packages \
-    $hyprland_packages \
     $font_packages \
     $dev_packages \
+    $wm_packages \
     --noconfirm
 
 print_info "Configuring and install misc tools"

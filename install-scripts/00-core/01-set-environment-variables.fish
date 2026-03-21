@@ -9,9 +9,7 @@ set -Ux VISUAL nvim
 set -Ux EDITOR nvim
 set -Ux MANPAGER "bat -plman"
 
-set -gx QT_QPA_PLATFORMTHEME qt5ct
-set -gx QT_STYLE_OVERRIDE qt5ct
-set -gx XDG_CURRENT_DESKTOP KDE
+set -Ux QT_QPA_PLATFORM wayland
 
 if mt_is_work
     set -Ux CHROME_EXECUTABLE /usr/bin/google-chrome-stable

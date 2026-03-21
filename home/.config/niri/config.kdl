@@ -1,0 +1,69 @@
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+}
+
+output "DP-3" {
+    scale 1.0
+    mode "5120x1440@119.999"
+}
+
+layout {
+    gaps 10
+
+    focus-ring {
+        off
+    }
+}
+
+workspace "hidden"
+
+spawn-at-startup "mako"
+spawn-at-startup "waybar"
+spawn-at-startup "steam" "-silent"
+spawn-at-startup "discord" "--start-minimized"
+spawn-at-startup "hypridle"
+
+spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings.fish"
+spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper.fish"
+
+binds {
+    Mod+Space {
+        spawn-sh "rofi -show combi -modi 'combi' -combi-modi 'drun,:~/.config/rofi/scripts/power-menu.sh' -display-drun ''"
+    }
+
+    Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot.fish copy"; }
+    Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot.fish save"; }
+    Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot.fish both"; }
+
+    Mod+R { spawn-sh "fish -c ~/.config/niri/scripts/reload-desktop-apps.fish"; }
+
+    Ctrl+Shift+L { spawn "hyprlock"; }
+
+    Mod+Q { close-window; }
+    Mod+V { toggle-window-floating; }
+    Mod+F { fullscreen-window; }
+
+    Mod+H { focus-column-left; }
+    Mod+J { focus-window-down; }
+    Mod+K { focus-window-up; }
+    Mod+L { focus-column-right; }
+
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-down; }
+    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+L     { move-column-right; }
+
+    Mod+Ctrl+H { set-column-width "-5%"; }
+    Mod+Ctrl+L { set-column-width "+5%"; }
+
+    Mod+Ctrl+J { set-window-height "+5%"; }
+    Mod+Ctrl+K { set-window-height "-5%"; }
+
+    Mod+T { center-column; }
+
+    Mod+Ctrl+T { scroll-workspace-left 100000; }
+}
