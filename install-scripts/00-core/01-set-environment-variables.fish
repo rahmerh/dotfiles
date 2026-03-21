@@ -10,6 +10,7 @@ set -Ux EDITOR nvim
 set -Ux MANPAGER "bat -plman"
 
 set -Ux QT_QPA_PLATFORM wayland
+set -Ux LIBDECOR_DISABLE 1
 
 if mt_is_work
     set -Ux CHROME_EXECUTABLE /usr/bin/google-chrome-stable

@@ -35,6 +35,8 @@ binds {
         spawn-sh "rofi -show combi -modi 'combi' -combi-modi 'drun,:~/.config/rofi/scripts/power-menu.sh' -display-drun ''"
     }
 
+    Mod+T { spawn "kitty"; }
+
     Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot.fish copy"; }
     Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot.fish save"; }
     Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot.fish both"; }
@@ -63,7 +65,13 @@ binds {
     Mod+Ctrl+J { set-window-height "+5%"; }
     Mod+Ctrl+K { set-window-height "-5%"; }
 
-    Mod+T { center-column; }
+    Mod+G { consume-window-into-column; }
+    Mod+Shift+G { expel-window-from-column; }
 
-    Mod+Ctrl+T { scroll-workspace-left 100000; }
+    Mod+C { center-column; }
+
+    Mod+W { focus-workspace-up; }
+    Mod+S { focus-workspace-down; }
+    Mod+Shift+W { move-window-to-workspace-up; }
+    Mod+Shift+S { move-window-to-workspace-down; }
 }
