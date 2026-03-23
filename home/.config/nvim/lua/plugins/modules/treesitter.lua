@@ -17,7 +17,8 @@ return {
                 "yaml",
                 "c_sharp",
                 "go",
-                "rust"
+                "rust",
+                "dart"
             })
         end,
     },
