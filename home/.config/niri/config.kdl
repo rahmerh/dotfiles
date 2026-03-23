@@ -11,6 +11,11 @@ output "DP-3" {
     mode "5120x1440@119.999"
 }
 
+output "DP-2" {
+    scale 1.5
+    mode "3840x2160@59.997"
+}
+
 layout {
     gaps 10
 
@@ -26,6 +31,7 @@ spawn-at-startup "waybar"
 spawn-at-startup "steam" "-silent"
 spawn-at-startup "discord" "--start-minimized"
 spawn-at-startup "hypridle"
+spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings.fish"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper.fish"
