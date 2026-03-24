@@ -6,6 +6,10 @@ input {
     }
 }
 
+hotkey-overlay {
+    skip-at-startup
+}
+
 output "DP-3" {
     scale 1.0
     mode "5120x1440@119.999"
