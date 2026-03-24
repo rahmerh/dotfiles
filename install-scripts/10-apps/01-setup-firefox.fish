@@ -67,6 +67,7 @@ set_pref "browser.sessionstore.resume_from_crash" false
 set_pref "toolkit.legacyUserProfileCustomizations.stylesheets" true
 set_pref "widget.use-xdg-desktop-portal.file-picker" 1
 set_pref "sidebar.revamp" false
+set_pref "widget.gtk.rounded-bottom-corners.enabled" false
 
 # Extensions
 install_extension sponsorblock
