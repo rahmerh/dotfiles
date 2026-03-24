@@ -123,6 +123,10 @@ if ! type -q rustc
     curl https://sh.rustup.rs -sSf | sh -s -- -y
 end
 
+if ! type -q pass-cli
+    curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+end
+
 cargo install --locked cargo-nextest
 cargo install --locked cargo-llvm-cov
 cargo install --locked gpu-usage-waybar
