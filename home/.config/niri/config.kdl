@@ -24,6 +24,8 @@ layout {
     }
 }
 
+prefer-no-csd
+
 workspace "hidden"
 
 spawn-at-startup "mako"
@@ -50,6 +52,8 @@ binds {
     Mod+R { spawn-sh "fish -c ~/.config/niri/scripts/reload-desktop-apps.fish"; }
 
     Ctrl+Shift+L { spawn "hyprlock"; }
+
+    Mod+B { spawn "rofi-rbw"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
@@ -80,4 +84,15 @@ binds {
     Mod+S { focus-workspace-down; }
     Mod+Shift+W { move-window-to-workspace-up; }
     Mod+Shift+S { move-window-to-workspace-down; }
+}
+
+window-rule {
+    match app-id="feh"
+    open-floating true
+}
+
+window-rule {
+    match title="rbw"
+    match app-id="Pinentry-gtk"
+    open-floating true
 }
