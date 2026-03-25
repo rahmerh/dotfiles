@@ -7,6 +7,8 @@ sudo groupadd docker
 sudo usermod -aG docker $USER
 sudo nvidia-ctk runtime configure --runtime=docker
 
-sudo systemctl enable --now docker.service
+if not systemctl is-enabled --quiet docker.service
+    sudo systemctl enable --now docker.service
+end
 
 print_success Done
