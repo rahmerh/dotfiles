@@ -66,6 +66,7 @@ set_pref "network.cookie.lifetimePolicy" 0
 set_pref "browser.sessionstore.resume_from_crash" false
 set_pref "toolkit.legacyUserProfileCustomizations.stylesheets" true
 set_pref "widget.use-xdg-desktop-portal.file-picker" 1
+set_pref "sidebar.revamp" false
 
 # Extensions
 install_extension sponsorblock
