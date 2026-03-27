@@ -5,7 +5,7 @@
 I've included an install script to easily get set up. If you want to live on the edge and directly install execute the following:
 
 ```shell
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Rahmerh/dotfiles/main/auto-setup.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Rahmerh/dotfiles/main/auto-setup)"
 ```
 
 ## TODO
