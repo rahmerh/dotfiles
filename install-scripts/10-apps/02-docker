@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+getent group docker >/dev/null || sudo groupadd docker
+
+if ! id -nG "$USER" | grep -qw docker; then
+    sudo usermod -aG docker $USER
+fi
+
+sudo nvidia-ctk runtime configure --runtime=docker &>/dev/null
+
+if ! systemctl is-enabled --quiet docker.service; then
+    sudo systemctl enable --now docker.service
+fi
+
+print_step Done

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+profile_dir=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -n 1)
+if [[ -z "$profile_dir" ]]; then
+    print_error "firefox profile not found. Launch firefox once and retry."
+    exit 1
+fi
+
+set_user_preference() {
+    local key=$1
+    local value=$2
+
+    prefs_file="$profile_dir/user.js"
+
+    tmp_file=$(mktemp)
+    if [[ -f "$prefs_file" ]]; then
+        grep -vF "user_pref(\"$key\"," "$prefs_file" >"$tmp_file"
+    fi
+
+    echo "user_pref(\"$key\", $value);" >>"$tmp_file"
+
+    mv "$tmp_file" "$prefs_file"
+}
+
+install_extension() {
+    local extension_name=$1
+
+    local extensions_dir="$profile_dir/extensions"
+    mkdir -p "$extensions_dir"
+
+    local installed_extensions_file="$profile_dir/extensions/.installed"
+
+    [[ -f "$installed_extensions_file" ]] || touch "$installed_extensions_file"
+
+    if grep -q "$extension_name" "$installed_extensions_file"; then
+        print_warning "$extension_name already installed, skipping"
+        return 0
+    fi
+
+    local tmp_file=$(mktemp)
+
+    curl -sLo "$tmp_file" "https://addons.mozilla.org/firefox/downloads/latest/$extension_name/latest.xpi"
+
+    local external_id=$(unzip -p "$tmp_file" manifest.json | jq -r '.browser_specific_settings.gecko.id')
+
+    if [[ -z "$external_id" ]]; then
+        print_error "Could not extract external id from $extension_name, skipping"
+        return 1
+    fi
+
+    mv "$tmp_file" "$extensions_dir/$external_id.xpi"
+
+    print_step "Installed $extension_name"
+
+    echo "$extension_name" >> "$installed_extensions_file"
+}
+
+# Preferences
+set_user_preference "privacy.clearOnShutdown.cookies" false
+set_user_preference "privacy.clearOnShutdown.history" true
+set_user_preference "privacy.clearOnShutdown.sessions" false
+set_user_preference "privacy.clearOnShutdown.cache" true
+set_user_preference "privacy.clearOnShutdown.offlineApps" true
+set_user_preference "privacy.clearOnShutdown.siteSettings" false
+set_user_preference "network.cookie.lifetimePolicy" 0
+set_user_preference "browser.sessionstore.resume_from_crash" false
+set_user_preference "toolkit.legacyUserProfileCustomizations.stylesheets" true
+set_user_preference "widget.use-xdg-desktop-portal.file-picker" 1
+set_user_preference "widget.gtk.rounded-bottom-corners.enabled" false
+set_user_preference "sidebar.revamp" false
+
+# Extensions
+install_extension sponsorblock
+install_extension return-youtube-dislikes
+install_extension control-panel-for-youtube
+install_extension proton-pass
+install_extension ublock-origin
+
+print_step Done
