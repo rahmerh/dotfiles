@@ -22,12 +22,12 @@ for file in install-scripts/**/*; do
 
     if [[ ! -x "$file" ]]; then
         print_error "Not executable: $file"
-        exit 1
+        invalid=1
     fi
 
     if ! head -n1 "$file" | grep -Eq '^#!.*bash'; then
         print_error "Not a bash script: $file"
-        exit 1
+        invalid=1
     fi
 
     scripts+=("$file")
