@@ -5,17 +5,19 @@ if ! command -v pacman &>/dev/null; then
     exit 1
 fi
 
-if ! command -v gum >/dev/null 2>&1; then
-  sudo pacman -Sy --noconfirm gum &> /dev/null
+if ! command -v gum &>/dev/null; then
+    sudo -v || exit 1
+    gum spin --spinner line --title "Installing gum" -- \
+      sudo pacman -Sy --noconfirm gum
 fi
 
 red="#ef4444"
 pink="#e1579c"
 
-gum style --foreground $pink --bold --underline "Running setup for dotfiles"
+gum style --foreground $pink --bold "Running setup for dotfiles"
 
 printf "\nThis script will setup some basic things before being able to run the apply script.\n"
-printf "\nThis script only needs to be run once.\n"
+printf "This script only needs to be run once.\n\n"
 
 if [ -d "$HOME/dotfiles" ]; then
     gum style --foreground $pink "~/dotfiles already exists — skipping clone"
@@ -34,5 +36,10 @@ email="$(gum input --prompt "Email: " --placeholder "you@example.com")" || exit 
 
 git config --global user.name "$name"
 git config --global user.email "$email"
+
+mt_file='machine-type'
+if [[ ! -f $mt_file ]]; then
+    gum choose --header="Is this a personal or work machine?" personal work > $mt_file
+fi
 
 gum style --foreground $pink "Done! Run ~/dotfiles/apply to apply dotfiles."

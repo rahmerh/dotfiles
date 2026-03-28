@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/machine-type"
+
+if ! command -v yay &>/dev/null; then
+    sudo pacman -S --needed git base-devel
+
+    temp_dir=$(mktemp -d)
+
+    git clone https://aur.archlinux.org/yay.git $temp_dir
+
+    cd $temp_dir
+
+    makepkg -si
+
+    yay -Y --gendb --noconfirm
+    yay -Syu --devel --noconfirm
+    yay -Y --devel --save --noconfirm
+fi
+
+core_packages=(
+    neovim
+    fish
+    kitty
+    bat
+    lsd
+    ripgrep
+    jq
+    stow
+    pv
+    gnupg
+    tealdeer
+    neofetch
+    7zip
+    yazi
+    wine
+    imagemagick
+    bc
+    pastel
+)
+
+gui_packages=(
+    firefox
+    firewalld
+    lazygit
+    pulsemixer
+    rofi
+    feh
+    docker
+    docker-compose
+    nvidia-container-toolkit
+    nwg-displays
+    keychain
+    pinta
+    ripdrag
+)
+
+wm_packages=(
+    niri
+    swaybg
+    swaylock
+    swayidle
+    mako
+    grim
+    slurp
+    wl-clipboard
+    xdg-desktop-portal
+    xdg-desktop-portal-termfilechooser-hunkyburrito-git
+    xwayland-satellite
+    hypridle
+    hyprlock
+)
+
+font_packages=(ttf-jetbrains-mono-nerd)
+
+dev_packages=(
+    npm
+    go
+    qt5-tools
+    luarocks
+)
+
+personal_packages=(
+    openrazer-meta
+    audiorelay
+    gamemode
+    discord
+    steam
+    razer-cli
+    openrgb
+)
+
+work_packages=(
+    slack-desktop
+    delve
+    flutter
+    lazysql
+    google-chrome
+    visual-studio-code-bin
+    gitlab-ci-local
+    logiops
+    blueman
+    dotnet-sdk
+    rofi-rbw
+)
+
+if mt_is_work; then
+    mt_packages=("${work_packages[@]}")
+
+    if ! systemctl is-enabled --quiet logid.service; then
+        sudo systemctl enable --now logid.service
+    fi
+elif mt_is_personal; then
+    mt_packages=("${personal_packages[@]}")
+else
+    print_error "Unknown machine type"
+    exit 1
+fi
+
+print_step "Installing packages"
+
+yay --needed -S \
+    "${core_packages[@]}" \
+    "${gui_packages[@]}" \
+    "${font_packages[@]}" \
+    "${dev_packages[@]}" \
+    "${wm_packages[@]}" \
+    "${mt_packages[@]}" \
+    --noconfirm
+
+print_step "Installing manual packages"
+
+if ! command -v rustc &>/dev/null; then
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+fi
+
+if ! command -v pass-cli &>/dev/null; then
+    curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+fi
+
+if ! command -v mcfly &>/dev/null; then
+    curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sh -s -- --git cantino/mcfly
+fi
+
+cargo install --locked cargo-nextest
+cargo install --locked cargo-llvm-cov
+cargo install --locked gpu-usage-waybar
+cargo install --locked tree-sitter-cli
+cargo install --locked zoxide
+
+print_step Done

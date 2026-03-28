@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/install-scripts/lib/print"
+
+shopt -s nullglob globstar
+
+print_header "Running install scripts"
+
+scripts=()
+invalid=0
+for file in install-scripts/**/*; do
+    [[ -f $file ]] || continue
+    [[ $file == *"/lib/"* ]] && continue
+    [[ $file == *"/assets/"* ]] && continue
+
+    # Temporary, until migrated
+    [[ $file == *.fish ]] && continue
+
+    name=${file##*/}
+
+    if [[ ! $name =~ ^[0-9]{2}-[^/]+$ ]]; then
+        print_error "Invalid script name: $file. Must match NN-name."
+        invalid=1
+    fi
+
+    if [[ ! -x "$file" ]]; then
+        print_error "Not executable: $file"
+        exit 1
+    fi
+
+    if ! head -n1 "$file" | grep -Eq '^#!.*bash'; then
+        print_error "Not a bash script: $file"
+        exit 1
+    fi
+
+    scripts+=("$file")
+done
+
+if (( invalid )); then
+    exit 1
+fi
+
+IFS=$'\n' scripts=($(printf '%s\n' "${scripts[@]}" | sort -V))
+unset IFS
+
+for script in "${scripts[@]}"; do
+    print_step "Running $script"
+
+    if ! "$script"; then
+        code=$?
+        print_error "\nScript failed: $script. ($code)\n"
+        exit "$code"
+    fi
+done
