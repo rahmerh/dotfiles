@@ -13,9 +13,6 @@ for file in install-scripts/**/*; do
     [[ $file == *"/lib/"* ]] && continue
     [[ $file == *"/assets/"* ]] && continue
 
-    # Temporary, until migrated
-    [[ $file == *.fish ]] && continue
-
     name=${file##*/}
 
     if [[ ! $name =~ ^[0-9]{2}-[^/]+$ ]]; then
