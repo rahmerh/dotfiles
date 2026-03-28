@@ -24,7 +24,6 @@ fi
 
 core_packages=(
     neovim
-    fish
     kitty
     bat
     lsd

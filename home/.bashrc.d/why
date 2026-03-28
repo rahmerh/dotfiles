@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+why() {
+    local code=$?
+    local red=$'\033[31m'
+    local reset=$'\033[0m'
+    local last_cmd max_len shown_cmd signal
+
+    if (( code == 0 )); then
+        echo "Why what? Nothing went wrong."
+        return 0
+    fi
+
+    printf '%s%s%s' "$red" "$code" "$reset"
+
+    case "$code" in
+        1)
+            echo " – general error (e.g. test failed)"
+            ;;
+        2)
+            echo " – misuse of shell builtins"
+            ;;
+        126)
+            echo " – permission denied or not executable"
+            ;;
+        127)
+            echo " – command not found"
+            ;;
+        128)
+            echo " – invalid exit value or repo error"
+            ;;
+        130)
+            echo " – terminated by Ctrl-C (SIGINT)"
+            ;;
+        139)
+            echo " – segmentation fault"
+            ;;
+        *)
+            if (( code >= 129 && code <= 255 )); then
+                signal=$((code - 128))
+
+                case "$signal" in
+                    9)
+                        echo " – killed (SIGKILL)"
+                        ;;
+                    15)
+                        echo " – terminated (SIGTERM)"
+                        ;;
+                    *)
+                        echo " – exited via signal $signal"
+                        ;;
+                esac
+            else
+                echo " – unknown or uncommon error"
+            fi
+            ;;
+    esac
+
+    last_cmd=$(fc -ln -2 -2 2>/dev/null)
+
+    max_len=50
+    if (( ${#last_cmd} > max_len )); then
+        shown_cmd="${last_cmd:0:max_len}... [truncated]"
+    else
+        shown_cmd="$last_cmd"
+    fi
+
+    printf '↳ "%s"\n' "$shown_cmd"
+}
