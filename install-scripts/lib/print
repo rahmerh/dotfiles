@@ -14,5 +14,5 @@ print_step() {
 }
 
 print_error() {
-    printf "%b\n--! %s\n\n%b" "$red" "$1" "$reset"
+    printf "%b--! %s\n%b" "$red" "$1" "$reset"
 }

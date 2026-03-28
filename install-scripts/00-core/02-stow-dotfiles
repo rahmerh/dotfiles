@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/machine-type"
+
+force_stow() {
+    # Force stow removes the file if it already exists.
+    # Will prompt if there's a symlink there that didn't come from this repo.
+    # Also creates parent dirs so it only symlinks the files.
+
+    local stow_target="$1"
+    local package="$2"
+    local base_dir
+    local src rel dest expected actual_path
+
+    base_dir="$(pwd)/$package"
+
+    while read -r src; do
+        rel="${src#"$package"/}"
+        dest="$stow_target$rel"
+        expected="$base_dir/$rel"
+
+        if [[ -f "$dest" && ! -L "$dest" ]]; then
+            sudo rm -rf "$dest"
+            continue;
+        fi
+
+        if [[ -L "$dest" ]]; then
+            actual_path="$(sudo realpath "$dest" 2>/dev/null || true)"
+
+            if [[ -z "$actual_path" || "$actual_path" != "$expected" ]]; then
+                if gum confirm "Unexpected symlink while stowing to $dest. Remove link from '${actual_path:-<unresolved>}'?"; then
+                    sudo rm -f "$dest"
+                fi
+                continue;
+            fi
+        fi
+
+        parent="$(dirname "$dest")"
+        sudo mkdir -p "$parent"
+    done < <(find "$package" \( -type f -o -type l \))
+
+    print_step "Stowing $package"
+    sudo stow --target="$stow_target" "$package"
+}
+
+print_step "Stowing home"
+stow home
+
+cd system/
+
+force_stow / greetd
+force_stow / logind
+
+if mt_is_work; then
+    force_stow / logid
+fi
+
+print_step Done

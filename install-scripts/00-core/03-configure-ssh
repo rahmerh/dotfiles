@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+shopt -s nullglob
+
+ssh_dir="$HOME/.ssh"
+config_file="$ssh_dir/config"
+
+print_step "Generating default SSH key"
+
+for file in "$ssh_dir"/*; do
+    [[ -f $file ]] || continue;
+    [[ $file == *.pub ]] && continue;
+
+    case "$(basename $file)" in
+        config|known_hosts|authorized_keys) continue ;;
+    esac
+
+    [[ $file == *.old ]] && continue;
+    [[ $file == *.bak ]] && continue;
+    [[ $file == *.tmp ]] && continue;
+
+    if [[ -f "$file.pub" ]]; then
+        candidates+=("$file")
+    fi
+done
+
+if (( ${#candidates[@]} == 0 )); then
+    key_path="$ssh_dir/id_ed25519"
+
+    print_step "No SSH keys found. Generating a new ed25519 key: $key_path"
+
+    ssh-keygen -t ed25519 -a 64 -f "$key_path"
+else
+    print_step "SSH key found, not generating default"
+fi
+
+if [[ -f $config_file ]]; then
+    print_step "SSH config found, not creating default"
+else
+    print_step "Creating SSH config: $config_file"
+
+    printf "Host *\n    AddKeysToAgent yes\n" >"$config_file"
+fi
+
+print_step Done

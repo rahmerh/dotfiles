@@ -151,4 +151,8 @@ cargo install --locked gpu-usage-waybar
 cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
 
+print_step "Installing yazi plugins"
+
+ya pkg install
+
 print_step Done

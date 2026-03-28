@@ -6,8 +6,6 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 shopt -s nullglob globstar
 
-print_header "Running install scripts"
-
 scripts=()
 invalid=0
 for file in install-scripts/**/*; do
@@ -46,7 +44,7 @@ IFS=$'\n' scripts=($(printf '%s\n' "${scripts[@]}" | sort -V))
 unset IFS
 
 for script in "${scripts[@]}"; do
-    print_step "Running $script"
+    print_header "Running $script"
 
     if ! "$script"; then
         code=$?
