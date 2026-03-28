@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+theme_repo="$HOME/repos/firefox-theme"
+
+if [[ ! -d "$theme_repo" ]]; then
+    gum spin --spinner line --title "Cloning cascade repository to '$theme_repo'" -- \
+        git clone https://github.com/cascadefox/cascade.git "$theme_repo"
+else
+    gum spin --spinner line --title "Updating theme repo '$theme_repo'" -- \
+        git -C "$theme_repo" pull
+fi
+
+profile_dir=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -n 1)
+if [[ -z "$profile_dir" ]]; then
+    print_error "firefox profile not found. Launch firefox once and retry."
+    exit 1
+fi
+
+cp -r "$theme_repo/chrome" "$profile_dir"
+
+print_step Done
