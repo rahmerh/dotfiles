@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+export XDG_CONFIG_HOME=~/.config
+export VISUAL=nvim
+export EDITOR=nvim
+export MANPAGER="bat -plman"
+export QT_QPA_PLATFORM=wayland
+export LIBDECOR_DISABLE=1
+export CHROME_EXECUTABLE=/usr/bin/google-chrome-stable

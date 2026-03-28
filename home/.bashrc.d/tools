@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if [[ $- == *i* ]]; then
+    if command -v keychain >/dev/null 2>&1; then
+        eval "$(keychain --eval --quiet)"
+    fi
+fi
+
+eval "$(zoxide init bash)"
+eval "$(mcfly init bash)"

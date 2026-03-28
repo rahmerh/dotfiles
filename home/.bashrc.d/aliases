@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+alias ls='lsd -la'
+alias cat='bat'
+alias lg='lazygit'
