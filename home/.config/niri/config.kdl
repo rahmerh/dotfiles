@@ -40,7 +40,7 @@ spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings.fish"
-spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper.fish"
+spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
 
 binds {
     Mod+Space {

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+pkill swaybg
+
+shopt -s nullglob
+wallpapers=("$HOME/Pictures/wallpapers"/*)
+shopt -u nullglob
+
+(( ${#wallpapers[@]} )) || {
+    notify-send "No wallpapers found"
+    exit 1
+}
+
+random_wallpaper="${wallpapers[RANDOM % ${#wallpapers[@]}]}"
+
+swaybg -i "$random_wallpaper" -m fill &
