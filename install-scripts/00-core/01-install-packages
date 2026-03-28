@@ -4,6 +4,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
 . "$SCRIPT_DIR/../lib/machine-type"
+. "$SCRIPT_DIR/../lib/wine"
 
 if ! command -v yay &>/dev/null; then
     sudo pacman -S --needed git base-devel
@@ -29,6 +30,7 @@ core_packages=(
     lsd
     ripgrep
     jq
+    curl
     stow
     pv
     gnupg
@@ -37,6 +39,7 @@ core_packages=(
     7zip
     yazi
     wine
+    winetricks
     imagemagick
     bc
     pastel
@@ -154,5 +157,22 @@ cargo install --locked zoxide
 print_step "Installing yazi plugins"
 
 ya pkg install
+
+print_step "Installing apps in wine"
+
+if mt_is_personal; then
+    install_package_in_cache dotnet48
+    install_package_in_cache vcrun2022
+    install_package_in_cache corefonts
+
+    # Mod organizer 2
+    install_package_from_cache dotnet48 modorganizer
+    install_package_from_cache vcrun2022 modorganizer
+    install_package_from_cache corefonts modorganizer
+
+    install_exe_in_app "https://aka.ms/vs/17/release/vc_redist.x64.exe" "vc_redistx64_installer.exe" modorganizer
+
+    install_wine_app modorganizer ModOrganizer2/modorganizer
+fi
 
 print_step Done

@@ -1,0 +1,153 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/print"
+
+install_wine_app() {
+    local app_name=$1
+    local github_repo=$2
+
+    if [[ -z "$app_name" || -z "$github_repo" ]]; then
+        printf "Usage: install_wine_app <name> <owner/repo> <packages>\n"
+        return 1
+    fi
+
+    local prefix_path="$HOME/.local/wine/prefixes/$app_name"
+    if [[ -f "$prefix_path/.installed" ]]; then
+        return 0
+    fi
+
+    for cmd in wine winetricks jq curl; do
+        if ! command -v $cmd &>/dev/null; then
+            print_error "$cmd is not installed"
+            return 1
+        fi
+    done
+
+    export WINEPREFIX="$prefix_path"
+    export WINEARCH=win64
+
+    gum spin --spinner line --title "Booting prefix..." -- \
+        wineboot -u
+
+    exe_urls=$(curl -s "https://api.github.com/repos/$github_repo/releases/latest" \
+        | jq -r '.assets[] | select(.name | endswith(".exe")) | "\(.name)|\(.browser_download_url)"')
+
+    if [[ "${#exe_urls[@]}" -eq 1 ]]; then
+        selected_entry="${exe_urls[0]}"
+    else
+        print_error "Multiple exes found for $app_name, implement this else block."
+        exit 1
+    fi
+
+    IFS='|' read -ra parts <<< "$selected_entry"
+
+    local selected_name="${parts[0]}"
+    local selected_url="${parts[1]}"
+
+    local installer="$prefix_path/installer.exe"
+    gum spin --spinner line --title "Downloading $selected_name..." -- \
+        curl -L "$selected_url" -o "$installer"
+
+    gum spin --spinner line --title "Running installer '$installer'..." -- \
+        wine "$installer"
+
+    print_step "Successfully installed $app_name"
+
+    touch "$prefix_path/.installed"
+}
+
+install_package_in_cache() {
+    local package_name=$1
+
+    local package_prefix_path="$HOME/.local/wine/packages/$package_name"
+
+    if [[ -d "$package_prefix_path" ]]; then
+        print_warning "$package_name already installed"
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$package_prefix_path")"
+
+    local temp_dir=$(mktemp -d)
+
+    export WINEPREFIX="$temp_dir"
+    export WINEARCH=win64
+
+    gum spin --spinner line --title "Booting temp dir '$temp_dir'..." -- \
+        wineboot -u
+
+    gum spin --spinner line --title "Installing '$package_name' in '$temp_dir'..." -- \
+        winetricks -q $package_name
+
+    mv $temp_dir $package_prefix_path
+
+    print_step "Successfully installed $package_name"
+}
+
+install_package_from_cache() {
+    local package_name=$1
+    local app_name=$2
+
+    if [[ -z "$package_name" || -z "$app_name" ]]; then
+        printf "Usage: install_package_from_cache <package_name> <app_name>\n"
+        return 1
+    fi
+
+    local target_prefix_path="$HOME/.local/wine/prefixes/$app_name"
+    if [[ ! -d $target_prefix_path ]]; then
+        mkdir -p $target_prefix_path
+    fi
+
+    if grep -q "$package_name" "$target_prefix_path/.installed-packages"; then
+        return 0
+    fi
+
+    local package_path="$HOME/.local/wine/packages/$package_name"
+    if [[ ! -d $package_path ]]; then
+        # Maybe just install it instead of exit?
+        print_error "Package $package_name is not installed yet."
+        exit 1
+    fi
+
+    cp -a "$package_path/." "$target_prefix_path"
+
+    export WINEPREFIX="$target_prefix_path"
+    export WINEARCH=win64
+
+    gum spin --spinner line --title "Registering '$package_name' in $app_name..." -- \
+        winetricks -q $package_name
+
+    echo "$package_name" >> "$target_prefix_path/.installed-packages"
+
+    print_step "Successfully installed $package_name in $app_name from cache"
+}
+
+install_exe_in_app() {
+    local exe_url=$1
+    local exe_name=$2
+    local app_name=$3
+
+    local target_prefix_path="$HOME/.local/wine/prefixes/$app_name"
+    local prefix_installer_dir="$target_prefix_path/installers"
+
+    mkdir -p "$prefix_installer_dir" || return 1
+
+    if grep -q "$exe_name" "$target_prefix_path/.installed-packages"; then
+        return 0
+    fi
+
+    export WINEPREFIX="$HOME/.local/wine/prefixes/$app_name"
+    export WINEARCH=win64
+
+    gum spin --spinner line --title "Downloading $exe_name..." -- \
+        curl -L "$exe_url" -o "$prefix_installer_dir/$exe_name"
+
+    gum spin --spinner line --title "Installing $exe_name..." -- \
+        wine "$prefix_installer_dir/$exe_name"
+
+    echo "$exe_name" >> "$target_prefix_path/.installed-packages"
+
+    print_step "Successfully installed $exe_name in $app_name"
+}
