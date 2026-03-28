@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+
+print_step Done

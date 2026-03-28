@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+icon_dir="$HOME/Pictures/icons"
+wallpapers_dir="$HOME/Pictures/wallpapers"
+
+mkdir -p "$icon_dir"
+mkdir -p "$wallpapers_dir"
+
+cp "$SCRIPT_DIR/../assets/icons/screenshot.png" "$icon_dir"
+cp "$SCRIPT_DIR/../assets/wallpapers/"* "$wallpapers_dir"
+
+print_step Done

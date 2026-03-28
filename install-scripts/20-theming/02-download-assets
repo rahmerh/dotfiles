@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+icon_dir="$HOME/.local/share/icons"
+
+download_favicon() {
+    local domain=$1
+    local target=$2
+
+    if [[ -z "$domain" || -z "$target" ]]; then
+        echo "Usage: download_favicon <domain> <output_path>"
+        return 1
+    fi
+
+    [[ -f "$target" ]] && return 0
+
+    mkdir -p "$(dirname "$target")"
+
+    curl -fLsS "https://www.google.com/s2/favicons?sz=256&domain=$domain" -o "$target"
+}
+
+download_favicon "nexusmods.com" "$icon_dir/nexusmods.png"
+
+print_step Done
