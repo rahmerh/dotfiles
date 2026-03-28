@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/machine-type"
+
+if mt_is_work; then
+    return 0
+fi
+
+if ! command -v ufw >/dev/null; then
+    print_error "Script only works for ufw, please adjust to support your current firewall."
+    exit 1
+fi
+
+if ! grep -q "active" <<< "$(sudo ufw status | head -n 1)"; then
+    print_error "Ufw is not active"
+    exit 1
+fi
+
+rules=$(sudo ufw status | grep "59100")
+
+if [[ -z "$rules" ]]; then
+    print_step "Setting firewall rules for audiorelay"
+
+    sudo ufw allow 59100:59103/tcp >/dev/null
+    sudo ufw allow 59100:59103/udp >/dev/null
+    gum spin --spinner "line" --title "Reloading ufw..." -- \
+        sudo ufw reload >/dev/null
+fi
+
+prefs_file="$HOME/.java/.userPrefs/com/azefsw/audioconnect/prefs.xml"
+if [[ ! -f "$prefs_file" ]]; then
+    timeout 1s audiorelay
+
+    # Allow audiorelay to quit and generate prefs.xml
+    sleep 1
+
+    if [[ ! -f "$prefs_file" ]]; then
+        print_error "Could not create prefs file, please start audio relay manually and verify it's at '$prefs_file'"
+        exit 1
+    fi
+fi
+
+ensure_entry() {
+    key=$1
+    value=$2
+
+    if xmlstarlet sel -t -v "/map/entry[@key='$key']" "$prefs_file" 2>/dev/null | grep -q .; then
+        xmlstarlet ed -L \
+            -u "/map/entry[@key='$key']/@value" \
+            -v "$value" \
+            "$prefs_file"
+    else
+        xmlstarlet ed -L \
+            -s "/map" \
+            -t elem -n entryTMP -v "" \
+            -i "/map/entryTMP" -t attr -n key -v "$key" \
+            -i "/map/entryTMP" -t attr -n value -v "$value" \
+            -r "/map/entryTMP" -v entry \
+            "$prefs_file"
+    fi
+}
+
+ensure_entry device_capture_id AudioRelay-Virtual-Speaker
+ensure_entry device_render_id AudioRelay-Virtual-Mic
+ensure_entry dark_mode true
+
+print_step Done

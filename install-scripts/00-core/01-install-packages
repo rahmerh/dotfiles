@@ -43,6 +43,7 @@ core_packages=(
     imagemagick
     bc
     pastel
+    xmlstarlet
 )
 
 gui_packages=(
