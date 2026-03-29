@@ -1,35 +1,122 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    drun-display-format: "{name}";
+    font: "JetBrainsMono Nerd Font Mono 12";
+}
+
 * {
-    background: #2D2E3066;
-    foreground: #2D2E3066;
-	spacing: 0;
-	background-color: transparent;
-    text-color: #FFFFFF;
+    bg:             #2D2E30ee;
+    bg-alt:         #2D2E30ee;
+    fg:             #f2f2f5;
+    fg-dim:         #a9a9b3;
+    accent:         #e1579c;
+    accent-soft:    #e1579c33;
+    border-color:   #00000000;
+    selected-fg:    #ffffff;
+
+    background-color: transparent;
+    text-color: @fg;
 }
 
 window {
-    transparency: "real";
-    background-color: @background;
+    location: west;
+    anchor: west;
+    x-offset: 0px;
+    y-offset: 0px;
+    width: 420px;
+    height: 90%;
+    border: 0px;
     border-radius: 0px;
-    width: 20%;
-    text-color: @foreground;
+    background-color: @bg;
+    padding: 24px 0px 24px 0px;
 }
 
 mainbox {
-    padding: 10px;
+    background-color: transparent;
+    spacing: 18px;
+    children: [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    background-color: transparent;
     border: 0px;
-}
-
-entry {
-  padding: 0 0 10px 0;
-}
-
-element selected {
-  text-color: #1A1A40;  // Dark text for contrast on selection
-  background-color: #FF61A6;
-  border-radius: 0px;
+    border-radius: 0px;
+    padding: 0px 0px 12px 20px;
+    spacing: 12px;
+    children: [ "prompt", "entry" ];
 }
 
 prompt {
-  enabled: false;
+    enabled: false;
+    padding: 6px 10px 6px 0px;
 }
 
+entry {
+    background-color: transparent;
+    text-color: @fg;
+    placeholder: "Search";
+    placeholder-color: @fg-dim;
+    expand: true;
+    padding: 6px 0px;
+}
+
+message {
+    enabled: false;
+}
+
+listview {
+    background-color: transparent;
+    border: 0px;
+    spacing: 8px;
+    margin: 0px;
+    padding: 0px;
+    lines: 12;
+    columns: 1;
+    fixed-height: false;
+    cycle: true;
+    dynamic: true;
+    scrollbar: false;
+    layout: vertical;
+}
+
+element {
+    background-color: transparent;
+    text-color: @fg;
+    orientation: horizontal;
+    border: 0px;
+    border-radius: 0px;
+    padding: 10px 20px;
+    spacing: 10px;
+}
+
+element normal.normal {
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element selected.normal {
+    background-color: @accent-soft;
+    text-color: @selected-fg;
+    border: 0px 0px 0px 10px;
+    border-color: @accent;
+}
+
+element selected.active {
+    background-color: @accent-soft;
+    text-color: @selected-fg;
+    border: 1px;
+    border-color: @accent;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    expand: true;
+    vertical-align: 0.5;
+    horizontal-align: 0.0;
+}
+
+mode-switcher {
+    enabled: false;
+}
