@@ -64,7 +64,7 @@ set_color_for_all_devices() {
 
         if [[ -n "$picked_mode" ]]; then
             echo "Setting color on device $id: $name ($picked_mode)"
-            openrgb -d "$id" -m "Direct" -c "$color" -b 100 >/dev/null
+            openrgb -d "$id" -m "$picked_mode" -c "$color" -b 100 >/dev/null
         fi
     done
 }
