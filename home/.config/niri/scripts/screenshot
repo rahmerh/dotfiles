@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+screenshots_dir="$HOME/Pictures/screenshots"
+mkdir -p "$screenshots_dir"
+
+
+usage() {
+    echo "Usage: screenshot.fish <save|copy|both>"
+    exit 1
+}
+
+if [[ $# -ne 1 ]]; then
+    usage
+fi
+
+action=$1
+
+area=$(slurp -b 00000088 -s 00000000 -w 0 2>/dev/null)
+
+[[ -z "$area" ]] && exit 0
+
+case "$action" in
+    save)
+        timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+        file="$screenshots_dir/$timestamp.png"
+
+        grim -g "$area" "$file"
+
+        clicked=$(notify-send \
+            -i "$HOME/.local/share/icons/screenshot.png" \
+            --action=default=Open \
+            "Screenshot saved" \
+            "$file")
+
+        if [[ "$clicked" == "default" ]]; then
+            feh "$file" &
+        fi
+        ;;
+    copy)
+        grim -g "$area" - | wl-copy --type image/png
+        ;;
+    both)
+        timestamp=$(date +'%Y-%m-%d_%H-%M-%S')
+        file="$screenshots_dir/$timestamp.png"
+
+        grim -g "$area" "$file"
+
+        wl-copy --type image/png <"$file"
+
+        clicked=$(notify-send \
+            -i "$HOME/.local/share/icons/screenshot.png" \
+            --action=default=Open \
+            "Screenshot saved" \
+            "$file")
+
+        if [[ "$clicked" == "default" ]]; then
+            feh "$file" &
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac

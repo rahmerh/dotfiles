@@ -39,7 +39,7 @@ spawn-at-startup "discord" "--start-minimized"
 spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
-spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings.fish"
+spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
 
 binds {
@@ -49,11 +49,11 @@ binds {
 
     Mod+T { spawn "kitty"; }
 
-    Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot.fish copy"; }
-    Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot.fish save"; }
-    Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot.fish both"; }
+    Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot copy"; }
+    Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot save"; }
+    Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot both"; }
 
-    Mod+R { spawn-sh "fish -c ~/.config/niri/scripts/reload-desktop-apps.fish"; }
+    Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
 
     Ctrl+Shift+L { spawn "hyprlock"; }
 

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+if ! command -v openrgb >/dev/null; then
+    printf "Openrgb not installed, exiting\n" >&2
+    exit 1
+fi
+
+# Vibe coded the shit out of this, openrgb's cli is garbage
+set_color_for_all_devices() {
+    local color="$1"
+    if [[ -z "$color" ]]; then
+        echo "Usage: set_color_for_all_devices RRGGBB" >&2
+        return 1
+    fi
+
+    color="${color#\#}"
+
+    local -a dev_ids=()
+    local -a dev_names=()
+    local -a dev_modes=()
+
+    local cur_id=""
+    local cur_name=""
+    local cur_modes=""
+
+    while IFS= read -r line; do
+        if [[ $line =~ ^([0-9]+):[[:space:]](.*)$ ]]; then
+            if [[ -n "$cur_id" ]]; then
+                dev_ids+=("$cur_id")
+                dev_names+=("$cur_name")
+                dev_modes+=("$cur_modes")
+            fi
+
+            cur_id="${BASH_REMATCH[1]}"
+            cur_name="${BASH_REMATCH[2]}"
+            cur_modes=""
+            continue
+        fi
+
+        if [[ $line =~ ^[[:space:]]*Modes:[[:space:]]*(.*)$ ]]; then
+            cur_modes="${BASH_REMATCH[1]}"
+            continue
+        fi
+    done < <(openrgb -l)
+
+    if [[ -n "$cur_id" ]]; then
+        dev_ids+=("$cur_id")
+        dev_names+=("$cur_name")
+        dev_modes+=("$cur_modes")
+    fi
+
+    local i
+    for ((i = 0; i < ${#dev_ids[@]}; i++)); do
+        local id="${dev_ids[i]}"
+        local name="${dev_names[i]}"
+        local modes="${dev_modes[i]}"
+        local picked_mode=""
+
+        if [[ $modes =~ (^|[[:space:]])Direct($|[[:space:]]) ]]; then
+            picked_mode="Direct"
+        elif [[ $modes =~ (^|[[:space:]])Static($|[[:space:]]) ]]; then
+            picked_mode="Static"
+        fi
+
+        if [[ -n "$picked_mode" ]]; then
+            echo "Setting color on device $id: $name ($picked_mode)"
+            openrgb -d "$id" -m "Direct" -c "$color" -b 100 >/dev/null
+        fi
+    done
+}
+
+openrgb -l 2>/dev/null | set_color_for_all_devices "d700ff"
+
+if command -v razer-cli >/dev/null; then
+    razer-cli --dpi 7000
+fi
