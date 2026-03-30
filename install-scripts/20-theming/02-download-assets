@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
 
-icon_dir="$HOME/.local/share/icons"
+icon_dir="$HOME/Pictures/icons"
 
 download_favicon() {
     local domain=$1

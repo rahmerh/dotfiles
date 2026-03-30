@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+mt_is_personal() {
+    grep -qx "personal" "$SCRIPT_DIR/../../.machine-type"
+}
+
+mt_is_work() {
+    grep -qx "work" "$SCRIPT_DIR/../../.machine-type"
+}

@@ -27,7 +27,7 @@ case "$action" in
         grim -g "$area" "$file"
 
         clicked=$(notify-send \
-            -i "$HOME/.local/share/icons/screenshot.png" \
+            -i "$HOME/Pictures/icons/screenshot.png" \
             --action=default=Open \
             "Screenshot saved" \
             "$file")
@@ -48,7 +48,7 @@ case "$action" in
         wl-copy --type image/png <"$file"
 
         clicked=$(notify-send \
-            -i "$HOME/.local/share/icons/screenshot.png" \
+            -i "$HOME/Pictures/icons/screenshot.png" \
             --action=default=Open \
             "Screenshot saved" \
             "$file")
