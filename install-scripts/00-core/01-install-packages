@@ -71,6 +71,7 @@ wm_packages=(
     slurp
     wl-clipboard
     xdg-desktop-portal
+    xdg-desktop-portal-gnome
     xdg-desktop-portal-termfilechooser-hunkyburrito-git
     xwayland-satellite
     hypridle
