@@ -45,6 +45,9 @@ core_packages=(
     xmlstarlet
     wireguard-tools
     ufw
+    wl-clipboard
+    wf-recorder
+    wl-mirror
 )
 
 gui_packages=(
@@ -68,7 +71,6 @@ wm_packages=(
     mako
     grim
     slurp
-    wl-clipboard
     xdg-desktop-portal
     xdg-desktop-portal-gnome
     xdg-desktop-portal-termfilechooser-hunkyburrito-git

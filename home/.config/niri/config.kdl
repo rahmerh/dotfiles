@@ -53,6 +53,11 @@ binds {
     Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot save"; }
     Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot both"; }
 
+    Mod+D repeat=false { spawn-sh "wl-mirror $(niri msg --json focused-output | jq -r .name)"; }
+
+    // Mod+Ctrl+Shift+L { move-column-to-monitor-right; }
+    // Mod+Ctrl+Shift+H  { move-column-to-monitor-left; }
+
     Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
 
     Ctrl+Shift+L { spawn "hyprlock"; }
