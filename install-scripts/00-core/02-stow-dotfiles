@@ -52,7 +52,10 @@ stow home
 cd system/
 
 force_stow / greetd
-force_stow / logind
+
+if mt_is_personal; then
+    force_stow / system-backup
+fi
 
 if mt_is_work; then
     force_stow / logid

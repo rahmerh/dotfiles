@@ -1,0 +1,8 @@
+[Unit]
+Description=Runs backup script
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-system
