@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+sudo systemctl daemon-reload
+
+if [[ -f "/etc/systemd/system/backup-system.timer" ]]; then
+    sudo systemctl enable --now backup-system.timer
+fi
+
+print_step Done

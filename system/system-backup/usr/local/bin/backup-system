@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+CONF_FILE="/etc/backup-system.conf"
+if [[ ! -f "$CONF_FILE" ]]; then
+    echo "Config file was not found at $CONF_FILE, make sure this file exists before running this script." >&2
+    exit 1
+fi
+
+source "$CONF_FILE"
+
+for var_name in DESTINATION BACKUP_DIRS SSH_KEY_FILE; do
+    if [[ -z "${!var_name:-}" ]]; then
+        echo "$var_name not set." >&2
+        exit 1
+    fi
+done
+
+# TODO: Add notifications when starting/completing backup
+
+IFS=":" read -r -a dirs <<< "$BACKUP_DIRS"
+sudo rsync -aAXH --delete --info=progress2 \
+    -e "ssh -i $SSH_KEY_FILE -o IdentitiesOnly=yes" \
+    "${dirs[@]}" \
+    "$DESTINATION"
