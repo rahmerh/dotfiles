@@ -1,3 +1,197 @@
 #!/usr/bin/env bash
 
-echo "It works!"
+yn_prompt() {
+    while true; do
+        read -p "$* [y/n]: " yn
+        case $yn in
+            [Yy]*) return 0 ;;
+            [Nn]*) return 1 ;;
+        esac
+    done
+}
+
+spinner() {
+    local pid=$1
+    local message="${2:-Working...}"
+    local spin='-\|/'
+    local i=0
+
+    printf "%s " "$message"
+
+    while kill -0 "$pid" 2>/dev/null; do
+        i=$(((i + 1) % 4))
+        printf "\r%s %s" "$message" "${spin:$i:1}"
+        sleep 0.1
+    done
+
+    wait "$pid"
+    local exit_code=$?
+
+    if [[ $exit_code -eq 0 ]]; then
+        printf "\r%s done\n" "$message"
+    else
+        printf "\r%s failed\n" "$message" >&2
+    fi
+
+    return "$exit_code"
+}
+
+run_with_spinner() {
+    local message=$1
+    shift
+
+    local stdout_file stderr_file exit_code
+    stdout_file=$(mktemp)
+    stderr_file=$(mktemp)
+
+    "$@" >"$stdout_file" 2>"$stderr_file" &
+    local pid=$!
+
+    spinner "$pid" "$message"
+    exit_code=$?
+
+    if (( exit_code != 0 )); then
+        echo
+        echo "Command failed: $*" >&2
+
+        if [[ -s "$stdout_file" ]]; then
+            echo "--- stdout ---" >&2
+            cat "$stdout_file" >&2
+        fi
+
+        if [[ -s "$stderr_file" ]]; then
+            echo "--- stderr ---" >&2
+            cat "$stderr_file" >&2
+        fi
+    fi
+
+    rm -f "$stdout_file" "$stderr_file"
+    return "$exit_code"
+}
+
+get_partition_path() {
+    local disk=$1
+    local part=$2
+
+    if [[ "$disk" =~ (nvme|mmcblk|loop) ]]; then
+        echo "${disk}p${part}"
+    else
+        echo "${disk}${part}"
+    fi
+}
+
+if [[ ! -d "/run/archiso" ]]; then
+    echo "/run/archiso/ was not found, this is probably not a live install medium. Are you sure you want to continue?"
+
+    yn_prompt || exit 0
+fi
+
+echo -e "\n===== Starting arch installation =====\n"
+
+uefi_bitness=$(cat /sys/firmware/efi/fw_platform_size)
+if [[ "$uefi_bitness" != "64" ]]; then
+    echo "This script is made for 64-bit x64 UEFI, current bitness is $uefi_bitness" >&2
+    exit 1
+fi
+
+if ! ping -c 1 -q ping.archlinux.org >/dev/null; then
+    # TODO: Test this on laptop for maybe assisted connection to wifi?
+
+    echo "No internet connectivity, please connect to the internet first" >&2
+
+    if iwctl device list | awk 'NR > 4 { print $2 }' | grep -q .; then
+        echo "Wifi devices found, please connect to wifi using iwctl: https://wiki.archlinux.org/title/Iwd#iwctl" >&2
+        exit 1
+    else
+        echo "No wifi devices found, please connect through ethernet before continouing." >&2
+        exit 1
+    fi
+else
+    echo "Internet connectivity is fine"
+fi
+
+timedatectl set-ntp true
+loadkeys us
+
+echo -e "\n===== Partition and format disk =====\n"
+# TODO: I left out swap partition here, check if I want this in the future.
+# TODO: Study up on btrfs, sticking with ext4 until then.
+if yn_prompt "Do you want to (re)install arch on disk?"; then
+    while true; do
+        lsblk -d -o NAME,TYPE,SIZE
+        echo
+
+        read -r -p "Type disk name to partition: " selected_disk
+
+        if lsblk -dn -o NAME,TYPE | awk '$2 == "disk" { print $1 }' | grep -Fxq "$selected_disk"; then
+            selected_disk="/dev/$selected_disk"
+            break
+        fi
+
+        echo -e "Invalid disk: $selected_disk, try again.\n"
+    done
+
+    # Just in case
+    umount -R /mnt
+
+    run_with_spinner "Wiping partition table from disk" sgdisk --zap-all "$selected_disk" || exit 1
+
+    run_with_spinner "Creating EFI partition" sgdisk \
+        --new=1:0:+1G \
+        --typecode=1:ef00 \
+        --change-name=1:EFI \
+        "$selected_disk" || exit 1
+
+    run_with_spinner "Creating ROOT partition" sgdisk \
+        --new=2:0:0 \
+        --typecode=2:8300 \
+        --change-name=2:ROOT \
+        "$selected_disk" || exit 1
+
+    partprobe "$selected_disk"
+    udevadm settle
+
+    efi_partition=$(get_partition_path "$selected_disk" 1)
+    root_partition=$(get_partition_path "$selected_disk" 2)
+
+    run_with_spinner "Formatting EFI partition (fat)" mkfs.fat -F32 "$efi_partition" || exit 1
+    run_with_spinner "Formatting ROOT partition (ext4)" mkfs.ext4 -F "$root_partition" || exit 1
+
+    if ! findmnt -rn -S "$root_partition" -M /mnt >/dev/null; then
+        mount "$root_partition" /mnt
+    fi
+
+    mkdir -p /mnt/boot
+
+    if ! findmnt -rn -S "$efi_partition" -M /mnt/boot >/dev/null; then
+        mount "$efi_partition" /mnt/boot
+    fi
+
+    run_with_spinner \
+        "Installing base system" \
+        pacstrap -K /mnt base linux linux-firmware networkmanager sudo vim
+
+    genfstab -U /mnt >> /mnt/etc/fstab
+fi
+
+# TODO: Generate fstab
+# TODO: Chroot into installed system
+
+# TODO: Set timezone
+# TODO: Configure locale
+# TODO: Set hostname
+# TODO: Configure /etc/hosts
+# TODO: Set root password
+
+# TODO: Install bootloader
+# TODO: Configure bootloader entry
+# TODO: Enable network manager/service
+
+# TODO: Create user
+# TODO: Set user password
+# TODO: Configure sudo
+
+# TODO: Unmount partitions
+# TODO: Reboot into installed system
+
+echo Done
