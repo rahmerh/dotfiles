@@ -3,3 +3,7 @@
 reload() {
     exec bash
 }
+
+ipi() {
+    curl -sS ipinfo.io | jq
+}

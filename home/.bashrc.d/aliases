@@ -1,5 +1,43 @@
 #!/usr/bin/env bash
 
+wg_is_up() {
+    ip link show wg0 >/dev/null 2>&1
+}
+
+wg_quick_up() {
+    if wg_is_up; then
+        echo "Wireguard is already up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f /etc/wireguard/wg0.conf; then
+        echo "No wg0.conf found in wireguard dir" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick up wg0
+}
+
+wg_quick_down() {
+    if ! wg_is_up; then
+        echo "Wireguard is not up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f /etc/wireguard/wg0.conf; then
+        echo "No wg0.conf found in wireguard dir" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick down wg0
+}
+
 alias ls='lsd -la'
 alias cat='bat'
 alias lg='lazygit'
+alias wg-up="wg_quick_up"
+alias wg-down="wg_quick_down"

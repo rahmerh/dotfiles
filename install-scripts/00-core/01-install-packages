@@ -43,6 +43,7 @@ core_packages=(
     bc
     pastel
     xmlstarlet
+    wireguard-tools
 )
 
 gui_packages=(
