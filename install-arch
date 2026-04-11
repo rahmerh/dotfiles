@@ -10,6 +10,59 @@ yn_prompt() {
     done
 }
 
+password_prompt() {
+    local prompt="$1"
+    local target_var="$2"
+    local first=""
+    local second=""
+
+    local -n out="$target_var"
+
+    while true; do
+        first=""
+        second=""
+
+        printf '%s' "$prompt"
+        while IFS= read -r -s -n 1 char; do
+            if [[ -z "$char" ]]; then
+                break
+            fi
+
+            if [[ $char == $'\177' ]] ; then
+                printf '\b \b'
+                first="${first%?}"
+            else
+                printf '*'
+                first+="$char"
+            fi
+        done
+        echo
+
+        printf "Confirm password: "
+        while IFS= read -r -s -n 1 char; do
+            if [[ -z "$char" ]]; then
+                break
+            fi
+
+            if [[ $char == $'\177' ]] ; then
+                printf '\b \b'
+                second="${second%?}"
+            else
+                printf '*'
+                second+="$char"
+            fi
+        done
+        echo
+
+        if [[ "$first" == "$second" ]]; then
+            out="$first"
+            return 0
+        fi
+
+        echo "Passwords do not match, try again." >&2
+    done
+}
+
 spinner() {
     local pid=$1
     local message="${2:-Working...}"
@@ -28,9 +81,9 @@ spinner() {
     local exit_code=$?
 
     if [[ $exit_code -eq 0 ]]; then
-        printf "\r%s done\n" "$message"
+        printf "\r%s - done\n" "$message"
     else
-        printf "\r%s failed\n" "$message" >&2
+        printf "\r%s - failed\n" "$message" >&2
     fi
 
     return "$exit_code"
@@ -81,117 +134,293 @@ get_partition_path() {
 }
 
 if [[ ! -d "/run/archiso" ]]; then
-    echo "/run/archiso/ was not found, this is probably not a live install medium. Are you sure you want to continue?"
+    echo "This does not appear to be an Arch live medium. Continue?"
 
     yn_prompt || exit 0
 fi
 
-echo -e "\n===== Starting arch installation =====\n"
+echo -e "\n===== Arch installation =====\n"
 
 uefi_bitness=$(cat /sys/firmware/efi/fw_platform_size)
 if [[ "$uefi_bitness" != "64" ]]; then
-    echo "This script is made for 64-bit x64 UEFI, current bitness is $uefi_bitness" >&2
+    echo "This installer requires 64-bit UEFI. Detected: $uefi_bitness-bit." >&2
+
     exit 1
 fi
 
 if ! ping -c 1 -q ping.archlinux.org >/dev/null; then
     # TODO: Test this on laptop for maybe assisted connection to wifi?
 
-    echo "No internet connectivity, please connect to the internet first" >&2
+    echo "No internet connection detected. Connect to the network first." >&2
 
     if iwctl device list | awk 'NR > 4 { print $2 }' | grep -q .; then
-        echo "Wifi devices found, please connect to wifi using iwctl: https://wiki.archlinux.org/title/Iwd#iwctl" >&2
+        echo "Wi-Fi devices found. Use iwctl to connect: https://wiki.archlinux.org/title/Iwd#iwctl" >&2
         exit 1
     else
-        echo "No wifi devices found, please connect through ethernet before continouing." >&2
+        echo "No Wi-Fi hardware detected. Connect using Ethernet before continuing." >&2
         exit 1
     fi
 else
-    echo "Internet connectivity is fine"
+    echo "Internet connectivity is fine."
 fi
 
 timedatectl set-ntp true
 loadkeys us
 
-echo -e "\n===== Partition and format disk =====\n"
-# TODO: I left out swap partition here, check if I want this in the future.
-# TODO: Study up on btrfs, sticking with ext4 until then.
-if yn_prompt "Do you want to (re)install arch on disk?"; then
-    while true; do
-        lsblk -d -o NAME,TYPE,SIZE
-        echo
+# ======================================================================
 
-        read -r -p "Type disk name to partition: " selected_disk
+echo -e "\n===== Partitioning and formatting =====\n"
+while true; do
+    lsblk -d -o NAME,TYPE,SIZE | awk '{ print "\t" $0 }'
+    echo
 
-        if lsblk -dn -o NAME,TYPE | awk '$2 == "disk" { print $1 }' | grep -Fxq "$selected_disk"; then
-            selected_disk="/dev/$selected_disk"
-            break
-        fi
+    read -r -p "Enter the target disk name: " selected_disk
 
-        echo -e "Invalid disk: $selected_disk, try again.\n"
-    done
-
-    # Just in case
-    umount -R /mnt
-
-    run_with_spinner "Wiping partition table from disk" sgdisk --zap-all "$selected_disk" || exit 1
-
-    run_with_spinner "Creating EFI partition" sgdisk \
-        --new=1:0:+1G \
-        --typecode=1:ef00 \
-        --change-name=1:EFI \
-        "$selected_disk" || exit 1
-
-    run_with_spinner "Creating ROOT partition" sgdisk \
-        --new=2:0:0 \
-        --typecode=2:8300 \
-        --change-name=2:ROOT \
-        "$selected_disk" || exit 1
-
-    partprobe "$selected_disk"
-    udevadm settle
-
-    efi_partition=$(get_partition_path "$selected_disk" 1)
-    root_partition=$(get_partition_path "$selected_disk" 2)
-
-    run_with_spinner "Formatting EFI partition (fat)" mkfs.fat -F32 "$efi_partition" || exit 1
-    run_with_spinner "Formatting ROOT partition (ext4)" mkfs.ext4 -F "$root_partition" || exit 1
-
-    if ! findmnt -rn -S "$root_partition" -M /mnt >/dev/null; then
-        mount "$root_partition" /mnt
+    if lsblk -dn -o NAME,TYPE | awk '$2 == "disk" { print $1 }' | grep -Fxq "$selected_disk"; then
+        selected_disk="/dev/$selected_disk"
+        break
     fi
 
-    mkdir -p /mnt/boot
+    echo -e "Invalid disk: $selected_disk. Try again.\n"
+done
 
-    if ! findmnt -rn -S "$efi_partition" -M /mnt/boot >/dev/null; then
-        mount "$efi_partition" /mnt/boot
+if ! yn_prompt "This will wipe the selected disk completely. Proceed?"; then
+    exit 0
+fi
+
+if mountpoint -q /mnt; then
+    if ! umount -R /mnt; then
+        echo "/mnt is in use and could not be unmounted." >&2
+        exit 1
+    fi
+fi
+
+# TODO: I left out swap partition here, check if I want this in the future.
+# TODO: Study up on btrfs, sticking with ext4 until then.
+# TODO: Disk encryption?
+run_with_spinner "Wiping partition table" sgdisk --zap-all "$selected_disk" || exit 1
+
+run_with_spinner "Creating EFI system partition" sgdisk \
+    --new=1:0:+1G \
+    --typecode=1:ef00 \
+    --change-name=1:EFI \
+    "$selected_disk" || exit 1
+
+run_with_spinner "Creating system partition" sgdisk \
+    --new=2:0:0 \
+    --typecode=2:8300 \
+    --change-name=2:ROOT \
+    "$selected_disk" || exit 1
+
+partprobe "$selected_disk"
+udevadm settle
+
+efi_partition=$(get_partition_path "$selected_disk" 1)
+root_partition=$(get_partition_path "$selected_disk" 2)
+
+run_with_spinner "Formatting EFI system partition (FAT32)" mkfs.fat -F32 "$efi_partition" || exit 1
+run_with_spinner "Formatting system partition (ext4)" mkfs.ext4 -F "$root_partition" || exit 1
+
+# ======================================================================
+
+echo -e "\n===== Mounting and installing =====\n"
+
+if ! findmnt -rn -S "$root_partition" -M /mnt >/dev/null; then
+    mount "$root_partition" /mnt
+fi
+
+mkdir -p /mnt/boot
+
+if ! findmnt -rn -S "$efi_partition" -M /mnt/boot >/dev/null; then
+    mount "$efi_partition" /mnt/boot
+fi
+
+run_with_spinner \
+    "Installing core packages" \
+    pacstrap -K /mnt base linux linux-firmware networkmanager sudo vim git
+
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# ======================================================================
+
+echo -e "\n===== Hardware packages setup =====\n"
+
+sed -i '/^\s*#\s*\[multilib\]/,/^\s*#\s*Include/s/^\s*#\s*//' /etc/pacman.conf
+sed -i '/^\s*#\s*\[multilib\]/,/^\s*#\s*Include/s/^\s*#\s*//' /mnt/etc/pacman.conf
+
+cpu_vendor=$(awk -F: '/vendor_id/ { gsub(/^[ \t]+/, "", $2); print $2; exit }' /proc/cpuinfo)
+
+case "$cpu_vendor" in
+    GenuineIntel)
+        microcode_package="intel-ucode"
+        ;;
+    AuthenticAMD)
+        microcode_package="amd-ucode"
+        ;;
+    *)
+        echo "Unsupported or unknown CPU vendor: $cpu_vendor" >&2
+        exit 1
+        ;;
+esac
+
+run_with_spinner \
+    "Installing CPU package ($microcode_package)" \
+    pacstrap -K /mnt "$microcode_package"
+
+gpu_lines=$(lspci | grep -E 'VGA|3D|Display')
+
+has_intel=0
+has_amd=0
+has_nvidia=0
+
+while IFS= read -r line; do
+    [[ "$line" == *Intel* ]] && has_intel=1
+    [[ "$line" == *AMD* || "$line" == *ATI* ]] && has_amd=1
+    [[ "$line" == *NVIDIA* ]] && has_nvidia=1
+done <<< "$gpu_lines"
+
+if (( has_intel || has_amd || has_nvidia )); then
+    packages=(mesa vulkan-icd-loader)
+
+    wants_32bit_packages=0
+    if yn_prompt "Do you want 32 bit graphic packages?"; then
+        wants_32bit_packages=1
+    fi
+
+    if (( wants_32bit_packages )); then
+        packages+=(lib32-mesa lib32-vulkan-icd-loader)
+    fi
+
+    if (( has_intel )); then
+        packages+=(vulkan-intel)
+
+        if (( wants_32bit_packages )); then
+            packages+=(lib32-vulkan-intel)
+        fi
+    fi
+
+    if (( has_amd )); then
+        packages+=(vulkan-radeon)
+
+        if (( wants_32bit_packages )); then
+            packages+=(lib32-vulkan-radeon)
+        fi
+    fi
+
+    if (( has_nvidia )); then
+        packages+=(nvidia-open nvidia-utils)
+
+        if (( wants_32bit_packages )); then
+            packages+=(lib32-nvidia-utils)
+        fi
+
+        sed -i 's/^MODULES=.*/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /mnt/etc/mkinitcpio.conf
     fi
 
     run_with_spinner \
-        "Installing base system" \
-        pacstrap -K /mnt base linux linux-firmware networkmanager sudo vim
-
-    genfstab -U /mnt >> /mnt/etc/fstab
+        "Installing GPU packages" \
+        pacstrap -K /mnt "${packages[@]}"
+else
+    echo "No supported GPU detected, skipping graphics package installation."
 fi
 
-# TODO: Generate fstab
-# TODO: Chroot into installed system
+audio_packages=(
+    wireplumber
+    pipewire
+    pipewire-audio
+    pipewire-alsa
+    pipewire-pulse
+    sof-firmware)
 
-# TODO: Set timezone
-# TODO: Configure locale
-# TODO: Set hostname
-# TODO: Configure /etc/hosts
-# TODO: Set root password
+run_with_spinner \
+    "Installing audio packages" \
+    pacstrap -K /mnt "${audio_packages[@]}"
 
-# TODO: Install bootloader
-# TODO: Configure bootloader entry
-# TODO: Enable network manager/service
+# ======================================================================
 
-# TODO: Create user
-# TODO: Set user password
-# TODO: Configure sudo
+echo -e "\n===== System configuration =====\n"
 
-# TODO: Unmount partitions
-# TODO: Reboot into installed system
+run_with_spinner \
+    "Configuring timezone" \
+    arch-chroot /mnt /bin/bash -c '
+        ln -sf /usr/share/zoneinfo/Europe/Amsterdam /etc/localtime
+        hwclock --systohc
+    '
 
-echo Done
+run_with_spinner \
+    "Configuring locale" \
+    arch-chroot /mnt /bin/bash -c '
+        sed -i "s/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/" /etc/locale.gen
+        echo "LANG=en_US.UTF-8" > /etc/locale.conf
+        echo "KEYMAP=us" > /etc/vconsole.conf
+        locale-gen
+    '
+
+arch-chroot /mnt /bin/bash -c "systemctl enable NetworkManager"
+
+read -r -p "Enter hostname: " hostname
+arch-chroot /mnt /bin/bash -c "echo '$hostname' > /etc/hostname"
+
+# ======================================================================
+
+echo -e "\n===== User/sudo setup =====\n"
+
+read -r -p "Choose a username: " default_username
+password_prompt "Choose password for $default_username: " default_password
+
+arch-chroot /mnt /bin/bash -c "useradd -m $default_username"
+echo "$default_username:$default_password" | arch-chroot /mnt chpasswd
+
+arch-chroot /mnt /bin/bash -c "usermod -aG wheel $default_username"
+
+if yn_prompt "Use same password for root?"; then
+    echo "root:$default_password" | arch-chroot /mnt chpasswd
+else
+    password_prompt "Enter root password: " root_password
+    echo "root:$root_password" | arch-chroot /mnt chpasswd
+fi
+
+arch-chroot /mnt /bin/bash -c "mkdir -p /etc/sudoers.d; echo '%wheel      ALL=(ALL:ALL) ALL' > /etc/sudoers.d/10-wheel"
+
+# ======================================================================
+
+echo -e "\n===== Bootloader setup =====\n"
+
+arch-chroot /mnt bootctl install
+
+root_uuid=$(awk '$2 == "/" { sub(/^UUID=/, "", $1); print $1 }' /mnt/etc/fstab)
+
+arch-chroot /mnt /bin/bash <<EOF
+cat > /boot/loader/loader.conf <<'INNER'
+default arch.conf
+timeout 4
+console-mode max
+editor no
+INNER
+
+cat > /boot/loader/entries/arch.conf <<INNER
+title   Arch Linux
+linux   /vmlinuz-linux
+initrd  /$microcode_package.img
+initrd  /initramfs-linux.img
+options root=UUID=$root_uuid rw
+INNER
+EOF
+
+echo "Configured systemd entries."
+
+run_with_spinner "Rebuilding initramfs" arch-chroot /mnt mkinitcpio -P
+
+# ======================================================================
+
+echo -e "\n===== Post-install bootstrap =====\n"
+run_with_spinner \
+    "Cloning dotfiles repo for $default_username" \
+    arch-chroot /mnt bash -c "git clone https://github.com/Rahmerh/dotfiles.git /home/$default_username/dotfiles"
+
+echo
+if yn_prompt "Arch installation completed. Do you want to reboot?"; then
+    echo "Rebooting in 5s"
+    sleep 5
+    reboot now
+fi

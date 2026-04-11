@@ -12,8 +12,17 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/rahmerh/dotfiles/main/auto
 
 I have an auto install script that installs linux from a live boot medium on to your machine.
 
-> Fair warning, I'm working on this as an exercise in both bash and arch, use at your own risk.
+> This script is very specific for my setup. It was made as a learning exercise so there's probably some issues. Use at your own risk.
 
 ```shell
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/rahmerh/dotfiles/main/install-arch)"
 ```
+
+This script installs arch linux on a single disk. It creates an EFI and root partition (no swap) and installs arch on the disk.
+
+Features I want to add:
+
+- Wifi connection for laptops
+- Disk encryption
+- Multiple drive setup
+- Maybe btrfs setup?
