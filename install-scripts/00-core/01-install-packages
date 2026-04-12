@@ -75,6 +75,8 @@ wm_packages=(
     xwayland-satellite
     hypridle
     hyprlock
+    greetd
+    greetd-tuigreet
 )
 
 font_packages=(ttf-jetbrains-mono-nerd)
