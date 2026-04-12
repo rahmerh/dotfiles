@@ -27,6 +27,7 @@ force_stow() {
 
         local expected_dirname=$(dirname "$expected")
 
+        # Create all parent dirs if not exists, to only symlink files.
         if [[ ! -d "$expected_dirname" ]]; then
             if (( use_sudo )); then
                 sudo mkdir -p "$expected_dirname"
@@ -54,8 +55,6 @@ force_stow() {
 force_stow "$HOME" home 0
 
 cd system
-
-sudo -v || exit 1
 
 force_stow / greetd 1
 

@@ -14,12 +14,6 @@ else
         git -C "$theme_repo" pull
 fi
 
-profile_dir=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -n 1)
-if [[ -z "$profile_dir" ]]; then
-    print_error "firefox profile not found. Launch firefox once and retry."
-    exit 1
-fi
-
-cp -r "$theme_repo/chrome" "$profile_dir"
+cp -r "$theme_repo/chrome" "$HOME/.mozilla/firefox/default/"
 
 print_step Done

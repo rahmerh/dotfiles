@@ -148,8 +148,6 @@ if ! command -v mcfly &>/dev/null; then
     curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sudo sh -s -- --git cantino/mcfly
 fi
 
-cargo install --locked cargo-nextest
-cargo install --locked cargo-llvm-cov
 cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
 
