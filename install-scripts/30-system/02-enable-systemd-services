@@ -10,4 +10,8 @@ if [[ -f "/etc/systemd/system/backup-system.timer" ]]; then
     sudo systemctl enable --now backup-system.timer
 fi
 
+if ! systemctl is-enabled --quiet greetd.service; then
+    sudo systemctl enable greetd.service
+fi
+
 print_step Done
