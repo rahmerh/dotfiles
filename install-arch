@@ -235,6 +235,8 @@ if ! findmnt -rn -S "$efi_partition" -M /mnt/boot >/dev/null; then
     mount "$efi_partition" /mnt/boot
 fi
 
+echo "Mounted target system under /mnt."
+
 run_with_spinner \
     "Installing core packages" \
     pacstrap -K /mnt base linux linux-firmware networkmanager sudo vim git
@@ -414,13 +416,18 @@ run_with_spinner "Rebuilding initramfs" arch-chroot /mnt mkinitcpio -P
 # ======================================================================
 
 echo -e "\n===== Post-install bootstrap =====\n"
+# TODO: Chown this for the actual user, is now root's
 run_with_spinner \
     "Cloning dotfiles repo for $default_username" \
-    arch-chroot /mnt bash -c "git clone https://github.com/Rahmerh/dotfiles.git /home/$default_username/dotfiles"
+    arch-chroot /mnt su - "$default_username" -c \
+    "git clone https://github.com/rahmerh/dotfiles.git /home/$default_username/dotfiles"
 
+echo "Dotfiles cloned, reboot and run '/home/$default_username/dotfiles/apply' to finish up."
 echo
-if yn_prompt "Arch installation completed. Do you want to reboot?"; then
-    echo "Rebooting in 5s"
-    sleep 5
-    reboot now
-fi
+
+for ((i=5; i>0; i--)); do
+    printf '\rRebooting in %ss... Press Ctrl+C to cancel.' "$i"
+    sleep 1
+done
+
+reboot

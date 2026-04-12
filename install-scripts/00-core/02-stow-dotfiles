@@ -6,59 +6,65 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/../lib/machine-type"
 
 force_stow() {
-    # Force stow removes the file if it already exists.
-    # Will prompt if there's a symlink there that didn't come from this repo.
-    # Also creates parent dirs so it only symlinks the files.
-
-    local stow_target="$1"
+    local target="$1"
     local package="$2"
-    local base_dir
-    local src rel dest expected actual_path
+    local use_sudo="${3:-0}"
+
+    local stow_cmd=()
+
+    if (( use_sudo )); then
+        stow_cmd+=(sudo)
+    fi
+
+    stow_cmd+=(stow --target="$target" "$package")
 
     base_dir="$(pwd)/$package"
 
-    while read -r src; do
-        rel="${src#"$package"/}"
-        dest="$stow_target$rel"
-        expected="$base_dir/$rel"
+    mapfile -d '' files < <(find "$base_dir" -type f -print0)
 
-        if [[ -f "$dest" && ! -L "$dest" ]]; then
-            sudo rm -rf "$dest"
-            continue;
-        fi
+    for entry in "${files[@]}"; do
+        local expected="$target${entry/$base_dir/}"
 
-        if [[ -L "$dest" ]]; then
-            actual_path="$(sudo realpath "$dest" 2>/dev/null || true)"
+        local expected_dirname=$(dirname "$expected")
 
-            if [[ -z "$actual_path" || "$actual_path" != "$expected" ]]; then
-                if gum confirm "Unexpected symlink while stowing to $dest. Remove link from '${actual_path:-<unresolved>}'?"; then
-                    sudo rm -f "$dest"
-                fi
-                continue;
+        if [[ ! -d "$expected_dirname" ]]; then
+            if (( use_sudo )); then
+                sudo mkdir -p "$expected_dirname"
+            else
+                mkdir -p "$expected_dirname"
             fi
         fi
 
-        parent="$(dirname "$dest")"
-        sudo mkdir -p "$parent"
-    done < <(find "$package" \( -type f -o -type l \))
+        if [[ -L "$expected" ]]; then
+            # TODO: Check if symlink to dotfiles or not. Prompt to delete if not.
+            continue;
+        elif [[ -f "$expected" ]]; then
+            if (( use_sudo )); then
+                sudo rm "$expected"
+            else
+                rm "$expected"
+            fi
+        fi
+    done
 
     print_step "Stowing $package"
-    sudo stow --target="$stow_target" "$package"
+    "${stow_cmd[@]}"
 }
 
-print_step "Stowing home"
-stow home
+force_stow "$HOME" home 0
 
-cd system/
+cd system
 
-force_stow / greetd
+sudo -v || exit 1
+
+force_stow / greetd 1
 
 if mt_is_personal; then
-    force_stow / system-backup
+    force_stow / system-backup 1
 fi
 
 if mt_is_work; then
-    force_stow / logid
+    force_stow / logid 1
 fi
 
-print_step Done
+print_step "Done"
