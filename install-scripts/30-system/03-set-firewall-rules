@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+sudo -v || exit 1
+
+gum spin --spinner line --title "ufw deny incoming" -- \
+    sudo ufw default deny incoming
+
+gum spin --spinner line --title "ufw allow outgoing" -- \
+    sudo ufw default allow outgoing
+
+gum spin --spinner line --title "ufw deny routed" -- \
+    sudo ufw default deny routed
+
+gum spin --spinner line --title "ufw logging low" -- \
+    sudo ufw logging low
+
+gum spin --spinner line --title "ufw enable" -- \
+    sudo ufw enable
+
+print_step Done

@@ -44,11 +44,11 @@ core_packages=(
     pastel
     xmlstarlet
     wireguard-tools
+    ufw
 )
 
 gui_packages=(
     firefox
-    firewalld
     lazygit
     pulsemixer
     rofi
