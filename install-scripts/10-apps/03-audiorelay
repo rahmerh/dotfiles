@@ -32,7 +32,8 @@ fi
 
 prefs_file="$HOME/.java/.userPrefs/com/azefsw/audioconnect/prefs.xml"
 if [[ ! -f "$prefs_file" ]]; then
-    timeout 1s audiorelay
+    gum spin --spinner line --title "Booting audiorelay" -- \
+        timeout 1s audiorelay
 
     # Allow audiorelay to quit and generate prefs.xml
     sleep 1
