@@ -152,7 +152,6 @@ fi
 
 cargo install --locked cargo-nextest
 cargo install --locked cargo-llvm-cov
-cargo install --locked gpu-usage-waybar
 cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
 
