@@ -3,7 +3,7 @@ return {
         "nvim-neotest/neotest",
         dependencies = {
             "rouge8/neotest-rust",
-            "Issafalcon/neotest-dotnet",
+            "nsidorenco/neotest-vstest",
             "sidlatau/neotest-dart",
         },
         keys = {
@@ -17,7 +17,7 @@ return {
             require("neotest").setup({
                 adapters = {
                     require('rustaceanvim.neotest'),
-                    require("neotest-dotnet"),
+                    require("neotest-vstest"),
                     require('neotest-dart') {
                         command = 'fvm flutter',
                         use_lsp = true
