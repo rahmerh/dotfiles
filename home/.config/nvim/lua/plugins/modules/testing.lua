@@ -3,7 +3,8 @@ return {
         "nvim-neotest/neotest",
         dependencies = {
             "rouge8/neotest-rust",
-            "Issafalcon/neotest-dotnet"
+            "Issafalcon/neotest-dotnet",
+            "sidlatau/neotest-dart",
         },
         keys = {
             { "<leader>tn", function() require("neotest").run.run() end,                     desc = "Run nearest test" },
@@ -24,13 +25,6 @@ return {
                 }
             })
         end,
-    },
-    {
-        "sidlatau/neotest-dart",
-        dependencies = {
-            "nvim-neotest/neotest",
-        },
-        lazy = false
     },
     {
         "andythigpen/nvim-coverage",
