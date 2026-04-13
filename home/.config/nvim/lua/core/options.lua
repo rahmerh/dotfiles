@@ -40,6 +40,8 @@ local options = {
         diff = " ",
         msgsep = " ",
     },
+    foldenable = false,
+    foldmethod = "manual",
 }
 
 for k, v in pairs(options) do
