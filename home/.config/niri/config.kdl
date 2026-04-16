@@ -55,9 +55,6 @@ binds {
 
     Mod+D repeat=false { spawn-sh "wl-mirror $(niri msg --json focused-output | jq -r .name)"; }
 
-    // Mod+Ctrl+Shift+L { move-column-to-monitor-right; }
-    // Mod+Ctrl+Shift+H  { move-column-to-monitor-left; }
-
     Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
 
     Ctrl+Shift+L { spawn "hyprlock"; }
@@ -69,8 +66,8 @@ binds {
     Mod+F { fullscreen-window; }
 
     Mod+H { focus-column-left; }
-    Mod+J { focus-window-down; }
-    Mod+K { focus-window-up; }
+    Mod+J { focus-workspace-down; }
+    Mod+K { focus-workspace-up; }
     Mod+L { focus-column-right; }
 
     Mod+Shift+H     { move-column-left; }
@@ -89,8 +86,6 @@ binds {
 
     Mod+C { center-column; }
 
-    Mod+W { focus-workspace-up; }
-    Mod+S { focus-workspace-down; }
     Mod+Shift+W { move-window-to-workspace-up; }
     Mod+Shift+S { move-window-to-workspace-down; }
 }
