@@ -57,6 +57,7 @@ gui_packages=(
     rofi
     feh
     docker
+    docker-buildx
     docker-compose
     nvidia-container-toolkit
     nwg-displays
