@@ -26,7 +26,7 @@ core_packages=(
     neovim
     kitty
     bat
-    lsd
+    eza
     ripgrep
     jq
     curl
@@ -90,6 +90,7 @@ dev_packages=(
     docker-buildx
     docker-compose
     clang
+    android-tools
 )
 
 personal_packages=(

@@ -36,7 +36,8 @@ wg_quick_down() {
     gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick down wg0
 }
 
-alias ls='lsd -la'
+alias ls='eza -a1 --icons=always --group-directories-first'
+alias lo='eza -lah --icons=always --group-directories-first --git --total-size'
 alias cat='bat'
 alias lg='lazygit'
 alias wg-up="wg_quick_up"
