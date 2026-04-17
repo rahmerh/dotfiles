@@ -48,22 +48,19 @@ core_packages=(
     wl-clipboard
     wf-recorder
     wl-mirror
+    wiremix
+    lazygit
+    keychain
 )
 
 gui_packages=(
     firefox
-    lazygit
-    pulsemixer
     rofi
     feh
-    docker
-    docker-buildx
-    docker-compose
     nvidia-container-toolkit
-    nwg-displays
-    keychain
     pinta
     ripdrag
+    waybar
 )
 
 wm_packages=(
@@ -89,6 +86,10 @@ dev_packages=(
     go
     qt5-tools
     luarocks
+    docker
+    docker-buildx
+    docker-compose
+    clang
 )
 
 personal_packages=(
