@@ -54,7 +54,7 @@ core_packages=(
 )
 
 gui_packages=(
-    firefox
+    librewolf-bin
     rofi
     feh
     nvidia-container-toolkit
@@ -160,7 +160,7 @@ cargo install --locked zoxide
 
 print_step "Installing yazi plugins"
 
-ya pkg install
+/usr/bin/ya pkg install
 
 print_step "Installing apps in wine"
 

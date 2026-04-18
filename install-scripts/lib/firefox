@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+get_active_profile_dir() {
+    profiles_base_dir="$1"
+
+    matches=()
+    while IFS= read -r -d '' match; do
+        matches+=("$match")
+    done < <(find "$profiles_base_dir" -type f -name 'prefs.js' -print0)
+
+    if (( "${#matches[@]}" == 0 )); then
+        print_error "No profile folder found in 'profiles_base_dir'"
+        return 0
+    fi
+
+    if (( "${#matches[@]}" > 1 )); then
+        print_error "Multiple profile folders found in 'profiles_base_dir'. Implement selection of profiles to run this script for."
+        return 0
+    fi
+
+    echo "$(dirname "${matches[0]}")"
+}

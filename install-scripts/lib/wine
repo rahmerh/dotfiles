@@ -98,6 +98,7 @@ install_package_from_cache() {
     local target_prefix_path="$HOME/.local/wine/prefixes/$app_name"
     if [[ ! -d $target_prefix_path ]]; then
         mkdir -p $target_prefix_path
+        touch "$target_prefix_path/.installed-packages"
     fi
 
     if grep -q "$package_name" "$target_prefix_path/.installed-packages"; then

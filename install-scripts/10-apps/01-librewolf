@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/firefox"
+
+profile_dir=$(get_active_profile_dir "$HOME/.config/librewolf/librewolf")
+
+set_user_preference() {
+    local key=$1
+    local value=$2
+    prefs_file="$profile_dir/user.js"
+    tmp_file=$(mktemp)
+
+    if [[ -f "$prefs_file" ]]; then
+        # Select non matching lines, redirect to temp file so we can append the pref to set.
+        grep -vF "user_pref(\"$key\"," "$prefs_file" >"$tmp_file"
+    fi
+
+    echo "user_pref(\"$key\", $value);" >>"$tmp_file"
+
+    mv "$tmp_file" "$prefs_file"
+}
+
+install_extension() {
+    local extension_name=$1
+
+    local extensions_dir="$profile_dir/extensions"
+    mkdir -p "$extensions_dir"
+
+    local installed_extensions_file="$profile_dir/extensions/.installed"
+
+    [[ -f "$installed_extensions_file" ]] || touch "$installed_extensions_file"
+
+    if grep -q "$extension_name" "$installed_extensions_file"; then
+        print_warning "$extension_name already installed, skipping"
+        return 0
+    fi
+
+    local tmp_file=$(mktemp)
+
+    curl -sLo "$tmp_file" "https://addons.mozilla.org/firefox/downloads/latest/$extension_name/latest.xpi"
+
+    local external_id=$(unzip -p "$tmp_file" manifest.json | jq -r '.browser_specific_settings.gecko.id')
+
+    if [[ -z "$external_id" ]]; then
+        print_error "Could not extract external id from $extension_name, skipping"
+        return 1
+    fi
+
+    mv "$tmp_file" "$extensions_dir/$external_id.xpi"
+
+    print_step "Installed $extension_name"
+
+    echo "$extension_name" >> "$installed_extensions_file"
+}
+
+install_extension sponsorblock
+install_extension return-youtube-dislikes
+install_extension control-panel-for-youtube
+install_extension proton-pass
+install_extension ublock-origin
+install_extension darkreader
+
+set_user_preference "app.normandy.api_url" '""'
+set_user_preference "app.normandy.enabled" 'false'
+set_user_preference "app.shield.optoutstudies.enabled" 'false'
+set_user_preference "app.update.auto" 'false'
+set_user_preference "browser.selfsupport.url" '""'
+set_user_preference "datareporting.healthreport.service.enabled" 'false'
+set_user_preference "datareporting.healthreport.uploadEnabled" 'false'
+set_user_preference "datareporting.policy.dataSubmissionEnabled" 'false'
+set_user_preference "experiments.activeExperiment" 'false'
+set_user_preference "experiments.enabled" 'false'
+set_user_preference "experiments.manifest.uri" '""'
+set_user_preference "experiments.supported" 'false'
+set_user_preference "extensions.shield-recipe-client.api_url" '""'
+set_user_preference "extensions.shield-recipe-client.enabled" 'false'
+set_user_preference "network.allow-experiments" 'false'
+set_user_preference "toolkit.telemetry.archive.enabled" 'false'
+set_user_preference "toolkit.telemetry.bhrPing.enabled" 'false'
+set_user_preference "toolkit.telemetry.cachedClientID" '""'
+set_user_preference "toolkit.telemetry.enabled" 'false'
+set_user_preference "toolkit.telemetry.firstShutdownPing.enabled" 'false'
+set_user_preference "toolkit.telemetry.hybridContent.enabled" 'false'
+set_user_preference "toolkit.telemetry.newProfilePing.enabled" 'false'
+set_user_preference "toolkit.telemetry.prompted" '2'
+set_user_preference "toolkit.telemetry.rejected" 'true'
+set_user_preference "toolkit.telemetry.reportingpolicy.firstRun" 'false'
+set_user_preference "toolkit.telemetry.server" '""'
+set_user_preference "toolkit.telemetry.shutdownPingSender.enabled" 'false'
+set_user_preference "toolkit.telemetry.unified" 'false'
+set_user_preference "toolkit.telemetry.unifiedIsOptIn" 'false'
+set_user_preference "toolkit.telemetry.updatePing.enabled" 'false'
+
+set_user_preference "breakpad.reportURL" '""'
+set_user_preference "browser.crashReports.unsubmittedCheck.autoSubmit" 'false'
+set_user_preference "browser.crashReports.unsubmittedCheck.autoSubmit2" 'false'
+set_user_preference "browser.crashReports.unsubmittedCheck.enabled" 'false'
+set_user_preference "browser.tabs.crashReporting.sendReport" 'false'
+
+set_user_preference "browser.aboutConfig.showWarning" 'false'
+set_user_preference "browser.disableResetPrompt" 'true'
+set_user_preference "browser.shell.checkDefaultBrowser" 'false'
+set_user_preference "browser.startup.homepage_override.mstone" '"ignore"'
+set_user_preference "browser.newtab.preload" 'false'
+set_user_preference "browser.newtabpage.enhanced" 'false'
+set_user_preference "browser.newtabpage.introShown" 'true'
+set_user_preference "browser.sessionstore.privacy_level" '0'
+set_user_preference "browser.cache.offline.enable" 'false'
+set_user_preference "browser.send_pings" 'false'
+set_user_preference "beacon.enabled" 'false'
+
+set_user_preference "browser.newtabpage.activity-stream.section.highlights.includePocket" 'false'
+set_user_preference "extensions.pocket.enabled" 'false'
+set_user_preference "services.sync.prefs.sync.browser.newtabpage.activity-stream.showSponsoredTopSite" 'false'
+set_user_preference "privacy.usercontext.about_newtab_segregation.enabled" 'true'
+
+set_user_preference "browser.urlbar.groupLabels.enabled" 'false'
+set_user_preference "browser.urlbar.quicksuggest.enabled" 'false'
+set_user_preference "browser.urlbar.speculativeConnect.enabled" 'false'
+set_user_preference "browser.urlbar.trimURLs" 'false'
+set_user_preference "browser.urlbar.placeholderName" '"DuckDuckGo"'
+
+set_user_preference "browser.safebrowsing.appRepURL" '""'
+set_user_preference "browser.safebrowsing.malware.enabled" 'false'
+set_user_preference "extensions.getAddons.cache.enabled" 'false'
+set_user_preference "extensions.getAddons.showPane" 'false'
+set_user_preference "extensions.webservice.discoverURL" '""'
+
+set_user_preference "extensions.greasemonkey.stats.optedin" 'false'
+set_user_preference "extensions.greasemonkey.stats.url" '""'
+
+set_user_preference "media.autoplay.default" '0'
+set_user_preference "media.autoplay.enabled" 'true'
+set_user_preference "media.eme.enabled" 'false'
+set_user_preference "media.gmp-widevinecdm.enabled" 'false'
+set_user_preference "media.navigator.enabled" 'false'
+set_user_preference "media.peerconnection.enabled" 'false'
+set_user_preference "media.video_stats.enabled" 'false'
+
+set_user_preference "device.sensors.ambientLight.enabled" 'false'
+set_user_preference "device.sensors.enabled" 'false'
+set_user_preference "device.sensors.motion.enabled" 'false'
+set_user_preference "device.sensors.orientation.enabled" 'false'
+set_user_preference "device.sensors.proximity.enabled" 'false'
+set_user_preference "dom.battery.enabled" 'false'
+
+set_user_preference "network.captive-portal-service.enabled" 'false'
+set_user_preference "network.cookie.cookieBehavior" '1'
+set_user_preference "network.cookie.lifetimePolicy" '0'
+set_user_preference "network.dns.disablePrefetch" 'true'
+set_user_preference "network.dns.disablePrefetchFromHTTPS" 'true'
+set_user_preference "network.http.referer.spoofSource" 'true'
+set_user_preference "network.http.speculative-parallel-limit" '0'
+set_user_preference "network.predictor.enable-prefetch" 'false'
+set_user_preference "network.predictor.enabled" 'false'
+set_user_preference "network.prefetch-next" 'false'
+set_user_preference "network.trr.mode" '5'
+
+set_user_preference "privacy.donottrackheader.enabled" 'true'
+set_user_preference "privacy.donottrackheader.value" '1'
+set_user_preference "privacy.globalprivacycontrol.enabled" 'true'
+set_user_preference "privacy.globalprivacycontrol.functionality.enabled" 'true'
+set_user_preference "privacy.query_stripping" 'true'
+set_user_preference "privacy.trackingprotection.cryptomining.enabled" 'true'
+set_user_preference "privacy.trackingprotection.enabled" 'true'
+set_user_preference "privacy.trackingprotection.fingerprinting.enabled" 'true'
+set_user_preference "privacy.trackingprotection.pbmode.enabled" 'true'
+
+set_user_preference "privacy.clearOnShutdown.cookies" 'false'
+set_user_preference "privacy.clearOnShutdown.history" 'true'
+set_user_preference "privacy.clearOnShutdown.sessions" 'false'
+set_user_preference "privacy.clearOnShutdown.cache" 'true'
+set_user_preference "privacy.clearOnShutdown.offlineApps" 'true'
+set_user_preference "privacy.clearOnShutdown.siteSettings" 'false'
+
+set_user_preference "dom.event.clipboardevents.enabled" 'true'
+set_user_preference "dom.private-attribution.submission.enabled" 'false'
+
+set_user_preference "security.ssl.disable_session_identifiers" 'true'
+set_user_preference "signon.rememberSignons" 'true'
+set_user_preference "signon.autofillForms" 'true'
+
+set_user_preference "webgl.disabled" 'true'
+set_user_preference "webgl.renderer-string-override" '" "'
+set_user_preference "webgl.vendor-string-override" '" "'
+
+set_user_preference "browser.toolbars.bookmarks.visibility" '"never"'
+set_user_preference "toolkit.legacyUserProfileCustomizations.stylesheets" 'true'
+set_user_preference "widget.use-xdg-desktop-portal.file-picker" '1'
+set_user_preference "widget.gtk.rounded-bottom-corners.enabled" 'false'
+set_user_preference "sidebar.revamp" 'false'
+
+set_user_preference "browser.uiCustomization.state" '"{\"placements\":{\"widget-overflow-fixed-list\":[],\"unified-extensions-area\":[\"ublock0_raymondhill_net-browser-action\",\"sponsorblocker_ajay_app-browser-action\",\"control-panel-for-youtube_jbscript_dev-browser-action\",\"_762f9885-5a13-4abd-9c77-433dcd38b8fd_-browser-action\"],\"nav-bar\":[\"back-button\",\"forward-button\",\"vertical-spacer\",\"urlbar-container\",\"home-button\",\"downloads-button\",\"preferences-button\",\"unified-extensions-button\",\"78272b6fa58f4a1abaac99321d503a20_proton_me-browser-action\"],\"toolbar-menubar\":[\"menubar-items\"],\"TabsToolbar\":[\"tabbrowser-tabs\",\"new-tab-button\",\"alltabs-button\"],\"vertical-tabs\":[],\"PersonalToolbar\":[\"personal-bookmarks\"]},\"seen\":[\"developer-button\",\"screenshot-button\",\"control-panel-for-youtube_jbscript_dev-browser-action\",\"78272b6fa58f4a1abaac99321d503a20_proton_me-browser-action\",\"_762f9885-5a13-4abd-9c77-433dcd38b8fd_-browser-action\",\"sponsorblocker_ajay_app-browser-action\",\"ublock0_raymondhill_net-browser-action\"],\"dirtyAreaCache\":[\"nav-bar\",\"vertical-tabs\",\"unified-extensions-area\",\"TabsToolbar\",\"toolbar-menubar\",\"PersonalToolbar\"],\"currentVersion\":23,\"newElementCount\":4}"'
+
+print_step Done

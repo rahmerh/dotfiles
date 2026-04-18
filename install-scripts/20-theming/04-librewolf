@@ -3,8 +3,11 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/firefox"
 
-theme_repo="$HOME/repos/firefox-theme"
+profile_dir=$(get_active_profile_dir "$HOME/.config/librewolf/librewolf")
+
+theme_repo="$HOME/.repos/librewolf-theme"
 
 if [[ ! -d "$theme_repo" ]]; then
     gum spin --spinner line --title "Cloning cascade repository to '$theme_repo'" -- \
@@ -14,6 +17,8 @@ else
         git -C "$theme_repo" pull
 fi
 
-cp -r "$theme_repo/chrome" "$HOME/.mozilla/firefox/default/"
+rm -rf "$profile_dir/chrome/"
+
+cp -r "$theme_repo/chrome/" "$profile_dir/"
 
 print_step Done
