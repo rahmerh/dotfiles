@@ -1,0 +1,8 @@
+{
+    "custom/time": {
+        "exec": "date '+%H:%M'",
+        "interval": 1,
+        "format": "󰥔   {}",
+        "tooltip": false
+    }
+}

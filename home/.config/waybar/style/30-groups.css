@@ -1,0 +1,15 @@
+/* Most right module, disable border radius to the left, custom expand should be there */
+#network {
+    border-radius: 0 3px 3px 0;
+    padding-left: 0px;
+    box-shadow: none;
+}
+
+/* Group, most left icon is always visible, disable border radius on the right, this should be network */
+#hardware {
+    padding: 7px 11px;
+    margin-top: 5px;
+    border-radius: 3px 0 0 3px;
+    background: alpha(@background, .6);
+    box-shadow: none;
+}
