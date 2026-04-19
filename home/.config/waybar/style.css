@@ -1,25 +1,4 @@
-@define-color background rgba(68, 68, 68, 0.53);
-@define-color foreground #f8f8f2;
-@define-color gray	#44475a;
-
-* {
-  font-family: "monospace";
-  font-size: 16px;
-  font-weight: bold;
-  color: @foreground;
-  border-radius: 0;
-  border: none;
-}
-
-#waybar {
-  background-color: rgba(0, 0, 0, 0);
-}
-
-#tray, 
-#network,
-#battery, 
-#pulseaudio, 
-#clock {
-    background-color: @background;
-    padding: 0px 4px;
-}
+@import url("style/00-vars.css");
+@import url("style/10-base.css");
+@import url("style/20-modules.css");
+@import url("style/30-groups.css");

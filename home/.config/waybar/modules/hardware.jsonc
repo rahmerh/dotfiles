@@ -1,0 +1,27 @@
+{
+    "custom/expand": {
+        "format": "",
+        "tooltip": false
+    },
+    "network": {
+        "format-wifi": "",
+        "format-ethernet": "  ",
+        "format-disconnected": "",
+        "tooltip-format-disconnected": "Error",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+        "tooltip-format-ethernet": "{ifname}"
+    },
+    "group/hardware": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 600,
+            "transition-to-left": true,
+            "click-to-reveal": true
+        },
+        "modules": [
+            "custom/expand",
+            "cpu",
+            "memory"
+        ]
+    }
+}
