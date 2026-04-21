@@ -71,8 +71,8 @@ binds {
     Mod+L { focus-column-right; }
 
     Mod+Shift+H     { move-column-left; }
-    Mod+Shift+J     { move-window-down; }
-    Mod+Shift+K     { move-window-up; }
+    Mod+Shift+J     { move-window-to-workspace-down; }
+    Mod+Shift+K     { move-window-to-workspace-up; }
     Mod+Shift+L     { move-column-right; }
 
     Mod+Ctrl+H { set-column-width "-5%"; }
@@ -85,9 +85,6 @@ binds {
     Mod+Shift+G { expel-window-from-column; }
 
     Mod+C { center-column; }
-
-    Mod+Shift+W { move-window-to-workspace-up; }
-    Mod+Shift+S { move-window-to-workspace-down; }
 }
 
 window-rule {
