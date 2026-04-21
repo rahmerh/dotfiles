@@ -57,6 +57,7 @@ force_stow "$HOME" home 0
 cd system
 
 force_stow / greetd 1
+force_stow / sysctl 1
 
 if mt_is_personal; then
     force_stow / system-backup 1
