@@ -26,6 +26,18 @@ layout {
     focus-ring {
         off
     }
+
+    default-column-width { proportion 0.8; }
+
+   shadow {
+        on
+        softness 10
+        spread 10
+        offset x=0 y=5
+        draw-behind-window true
+        color "#00000070"
+        inactive-color "#00000054"
+    }
 }
 
 prefer-no-csd
@@ -101,4 +113,10 @@ window-rule {
 window-rule {
     match app-id="com-azefsw-audioconnect-desktop-app-MainKt"
     open-floating true
+}
+
+
+window-rule {
+    geometry-corner-radius 5
+    clip-to-geometry true
 }
