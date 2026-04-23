@@ -40,6 +40,49 @@ layout {
     }
 }
 
+animations {
+    workspace-switch {
+        spring damping-ratio=0.80 stiffness=523 epsilon=0.0001
+    }
+
+    window-open {
+        duration-ms 600
+        curve "linear"
+        custom-shader r"
+            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+                float t = niri_clamped_progress;
+                float base = 1.0 - t;
+                float overshoot = 0.035 * sin(t * 3.14159265) * (1.0 - t);
+                float offset_px = (base * 90.0) - (overshoot * 90.0);
+                vec2 coords = coords_geo.xy;
+                coords.x += offset_px / size_geo.x;
+                vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+                vec4 color = texture2D(niri_tex, coords_tex.st);
+                color.a *= smoothstep(0.0, 0.18, t);
+                return color;
+            }
+        "
+    }
+
+    window-close {
+        duration-ms 600
+        curve "linear"
+        custom-shader r"
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                float t = niri_clamped_progress;
+                float pullback = 0.025 * sin(t * 3.14159265) * (1.0 - t);
+                float offset_px = (t * 110.0) - (pullback * 70.0);
+                vec2 coords = coords_geo.xy;
+                coords.x -= offset_px / size_geo.x;
+                vec3 coords_tex = niri_geo_to_tex * vec3(coords, 1.0);
+                vec4 color = texture2D(niri_tex, coords_tex.st);
+                color.a *= 1.0 - smoothstep(0.55, 1.0, t);
+                return color;
+            }
+        "
+    }
+}
+
 prefer-no-csd
 
 workspace "hidden"
