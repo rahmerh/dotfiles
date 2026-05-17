@@ -10,8 +10,8 @@ window#waybar{
 .modules-right > widget > label.module,
 .modules-right > widget > box.module {
     padding: 7px 11px;
-    margin: 5px 10px 0 0;
+    margin: 5px 10px 5px 0;
     border-radius: 3px;
     background: alpha(@background, .6);
-    box-shadow: 0 0 2px rgba(0, 0, 0, .6);
+    box-shadow: 3px -3px 5px rgba(225, 87, 156, .4);
 }

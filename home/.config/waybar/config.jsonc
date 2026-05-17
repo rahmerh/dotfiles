@@ -3,11 +3,13 @@
         "~/.config/waybar/modules/clock.jsonc",
         "~/.config/waybar/modules/date.jsonc",
         "~/.config/waybar/modules/hardware.jsonc",
-        "~/.config/waybar/modules/tray.jsonc"
+        "~/.config/waybar/modules/tray.jsonc",
+        "~/.config/waybar/modules/media.jsonc"
     ],
     "layer": "top",
     "position": "top",
     "modules-right": [
+        "mpris",
         "tray",
         "group/hardware",
         "network",

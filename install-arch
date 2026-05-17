@@ -416,7 +416,6 @@ run_with_spinner "Rebuilding initramfs" arch-chroot /mnt mkinitcpio -P
 # ======================================================================
 
 echo -e "\n===== Post-install bootstrap =====\n"
-# TODO: Chown this for the actual user, is now root's
 run_with_spinner \
     "Cloning dotfiles repo for $default_username" \
     arch-chroot /mnt su - "$default_username" -c \

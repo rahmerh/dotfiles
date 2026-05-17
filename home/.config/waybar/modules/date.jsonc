@@ -2,7 +2,7 @@
     "custom/date": {
         "exec": "date '+%d-%m-%Y'",
         "interval": 60,
-        "format": "󰃭   {}",
+        "format": "󰃭 {}",
         "tooltip": false
     }
 }

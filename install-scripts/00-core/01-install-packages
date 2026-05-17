@@ -51,6 +51,7 @@ core_packages=(
     wiremix
     lazygit
     keychain
+    playerctl
 )
 
 gui_packages=(
@@ -79,7 +80,10 @@ wm_packages=(
     greetd-tuigreet
 )
 
-font_packages=(ttf-jetbrains-mono-nerd)
+font_packages=(
+    ttf-jetbrains-mono-nerd
+    otf-codenewroman-nerd
+)
 
 dev_packages=(
     npm
@@ -157,6 +161,7 @@ fi
 
 cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
+cargo install gpu-usage-waybar
 
 print_step "Installing yazi plugins"
 
