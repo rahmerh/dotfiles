@@ -5,4 +5,4 @@ preview = { fg = "#e1579c" }
 padding = { open = " ", close = " " }
 
 [filetype]
-rules = [{ name = "*/", fg = "#999999" }]
+rules = [{ url = "*/", fg = "#999999" }]
