@@ -2,121 +2,120 @@ configuration {
     modi: "drun,run,window";
     show-icons: true;
     drun-display-format: "{name}";
-    font: "JetBrainsMono Nerd Font Mono 12";
+    font: "CaskaydiaCove Nerd Font Propo 13";
+
+    display-drun: "";
+    display-run: "";
+    display-window: "";
+    display-power: "";
+
+    drun-display-format: "{name}";
+    sidebar-mode: false;
+
+    matching: "fuzzy";
+    sort: true;
+    case-sensitive: false;
 }
 
 * {
-    bg:             #2D2E30ee;
-    bg-alt:         #2D2E30ee;
-    fg:             #f2f2f5;
-    fg-dim:         #a9a9b3;
-    accent:         #e1579c;
-    accent-soft:    #e1579c33;
-    border-color:   #00000000;
-    selected-fg:    #ffffff;
+    bg:              #111111f2;
+    bg-alt:          #181818f2;
+    bg-hover:        #202020f2;
 
-    background-color: transparent;
-    text-color: @fg;
+    fg:              #e8e8e8;
+    fg-muted:        #999999;
+
+    accent:          #e1579c;
+    accent-soft:     #e1579c22;
+
+    spacing:         10px;
+    radius:          5px;
 }
 
 window {
-    location: west;
-    anchor: west;
-    x-offset: 0px;
-    y-offset: 0px;
-    width: 420px;
-    height: 90%;
-    border: 0px;
-    border-radius: 0px;
+    width: 25%;
+    height: 30%;
+
     background-color: @bg;
-    padding: 24px 0px 24px 0px;
+
+    border: 0px;
+    border-radius: @radius;
+
+    padding: 0px;
 }
 
 mainbox {
     background-color: transparent;
-    spacing: 18px;
-    children: [ "inputbar", "message", "listview" ];
+    spacing: 0px;
 }
 
 inputbar {
-    background-color: transparent;
+    background-color: @bg-alt;
+
     border: 0px;
     border-radius: 0px;
-    padding: 0px 0px 12px 20px;
-    spacing: 12px;
-    children: [ "prompt", "entry" ];
+
+    padding: 9px 11px;
+    spacing: 8px;
+
+    children: [ entry ];
 }
 
 prompt {
-    enabled: false;
-    padding: 6px 10px 6px 0px;
+    enabled: true;
+
+    background-color: transparent;
+    text-color: @accent;
+
+    padding: 0px 2px 0px 0px;
 }
 
 entry {
     background-color: transparent;
+
     text-color: @fg;
     placeholder: "Search";
-    placeholder-color: @fg-dim;
-    expand: true;
-    padding: 6px 0px;
-}
-
-message {
-    enabled: false;
+    placeholder-color: @fg-muted;
 }
 
 listview {
     background-color: transparent;
-    border: 0px;
-    spacing: 8px;
-    margin: 0px;
-    padding: 0px;
-    lines: 12;
+
+    lines: 8;
     columns: 1;
+
+    spacing: 5px;
     fixed-height: false;
-    cycle: true;
-    dynamic: true;
+
     scrollbar: false;
-    layout: vertical;
 }
 
 element {
     background-color: transparent;
     text-color: @fg;
-    orientation: horizontal;
+
     border: 0px;
     border-radius: 0px;
-    padding: 10px 20px;
-    spacing: 10px;
+
+    padding: 8px 10px;
+    spacing: 9px;
 }
 
-element normal.normal {
-    background-color: transparent;
+element selected {
+    background-color: @bg-hover;
     text-color: @fg;
+
+    border: 0px;
+    border-radius: 0px;
 }
 
-element selected.normal {
-    background-color: @accent-soft;
-    text-color: @selected-fg;
-    border: 0px 0px 0px 10px;
-    border-color: @accent;
-}
-
-element selected.active {
-    background-color: @accent-soft;
-    text-color: @selected-fg;
-    border: 1px;
-    border-color: @accent;
+element-icon {
+    size: 22px;
+    background-color: transparent;
 }
 
 element-text {
     background-color: transparent;
     text-color: inherit;
-    expand: true;
     vertical-align: 0.5;
-    horizontal-align: 0.0;
-}
-
-mode-switcher {
-    enabled: false;
 }

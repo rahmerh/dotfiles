@@ -82,7 +82,7 @@ wm_packages=(
 
 font_packages=(
     ttf-jetbrains-mono-nerd
-    otf-codenewroman-nerd
+    ttf-cascadia-code-nerd
 )
 
 dev_packages=(

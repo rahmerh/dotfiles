@@ -1,6 +1,2 @@
-configuration {
-    font: "Inter 12";
-    show-icons: true;
-}
 @import "themes/theme.rasi"
 @theme "theme"
