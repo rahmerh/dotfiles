@@ -1,0 +1,11 @@
+home/.config/kitty/themes/kitty-themes
+
+home/.config/nvim/plugin/packer_compiled.lua
+
+home/.config/yazi/flavors
+home/.config/yazi/plugins
+
+.prefs
+
+*.log
+/cspell.json
