@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+export XDG_CONFIG_HOME="$HOME/.config"
+
+export VISUAL=nvim
+export EDITOR=nvim
+
+export MANPAGER="bat -plman"
+export LIBDECOR_DISABLE=1
+
+export CHROME_EXECUTABLE=/usr/bin/google-chrome-stable
+export DOCKER_BUILDKIT=1
+
+path_add() {
+    case ":$PATH:" in
+        *":$1:"*) ;;
+        *) PATH="$1:$PATH" ;;
+    esac
+}
+
+path_add "$HOME/.pub-cache/bin"
+path_add "$HOME/go/bin"
+path_add "$HOME/.cargo/bin"
+path_add "$HOME/.local/bin"
+path_add "$HOME/.fvm_flutter/bin"
+path_add "$HOME/.dotnet/tools"
+
+unset -f path_add

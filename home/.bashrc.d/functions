@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-reload() {
-    exec bash
-}
-
-ipi() {
-    curl -sS ipinfo.io | jq
-}

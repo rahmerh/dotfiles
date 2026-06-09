@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+wg_list() {
+    sudo find /etc/wireguard \
+        -maxdepth 1 \
+        -type f \
+        -name '*.conf' \
+        -printf '%f\n' |
+        sed -e 's/\.conf$//' -e 's/^/ - /'
+}
+
+wg_is_up() {
+    ip link show "$1" >/dev/null 2>&1
+}
+
+wg_quick_up() {
+    local conf="${1:?Provide which conf to up}"
+
+    if wg_is_up "$conf"; then
+        echo "Wireguard conf $conf is already up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
+        echo "No $conf.conf found in /etc/wireguard" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick up "$conf"
+}
+
+wg_quick_down() {
+    local conf="${1:?Provide which conf to down}"
+
+    if ! wg_is_up "$conf"; then
+        echo "Wireguard conf $conf is not up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
+        echo "No $conf.conf found in /etc/wireguard" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Stopping wireguard connection..." -- sudo wg-quick down "$conf"
+}
+
+alias wg-up='wg_quick_up'
+alias wg-down='wg_quick_down'
+alias wg-list='wg_list'

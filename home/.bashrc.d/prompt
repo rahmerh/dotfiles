@@ -61,4 +61,22 @@ set_bash_prompt() {
     PS1="$prompt"
 }
 
-PROMPT_COMMAND=set_bash_prompt
+prompt_hook_registered=false
+for prompt_command in "${PROMPT_COMMAND[@]}"; do
+    if [[ $prompt_command == set_bash_prompt ]]; then
+        prompt_hook_registered=true
+        break
+    fi
+done
+
+if [[ $prompt_hook_registered == false ]]; then
+    if [[ $(declare -p PROMPT_COMMAND 2>/dev/null) == "declare -a"* ]]; then
+        PROMPT_COMMAND+=(set_bash_prompt)
+    elif [[ -n ${PROMPT_COMMAND:-} ]]; then
+        PROMPT_COMMAND=("$PROMPT_COMMAND" set_bash_prompt)
+    else
+        PROMPT_COMMAND=(set_bash_prompt)
+    fi
+fi
+
+unset prompt_command prompt_hook_registered
