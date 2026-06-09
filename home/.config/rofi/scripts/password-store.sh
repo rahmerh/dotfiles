@@ -24,7 +24,10 @@ selection=$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Password")
 
 [[ -n "$selection" ]] || exit 0
 
-if ! pass show --clip "$selection"; then
+entry=$(pass show "$selection")
+password=$(sed -n 's/^password: //p' <<< "$entry" | head -n 1)
+
+if ! printf '%s' "${password:-$entry}" | wl-copy; then
     notify-send "Password store" "Failed to copy $selection"
     exit 1
 fi
