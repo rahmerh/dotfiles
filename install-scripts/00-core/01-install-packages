@@ -40,6 +40,7 @@ cli_packages=(
     httpie
     lazysql
     sax
+    systemctl-tui
 )
 
 system_packages=(
@@ -70,6 +71,7 @@ media_packages=(
     wiremix
     playerctl
     libnotify
+    mpv
 )
 
 gui_packages=(
