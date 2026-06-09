@@ -1,0 +1,8 @@
+[indicator]
+parent = { fg = "#ffffff", bg = "#e1579c" }
+current = { fg = "#ffffff", bg = "#e1579c" }
+preview = { fg = "#e1579c" }
+padding = { open = " ", close = " " }
+
+[filetype]
+rules = [{ url = "*/", fg = "#999999" }]

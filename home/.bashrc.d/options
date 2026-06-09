@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+shopt -s autocd
+
+# Shamelessly stolen from https://gist.github.com/sebastiancarlos/efe3fede207232315c5a895f1be19712
+
+silence_autocd() {
+  exec {BASH_XTRACEFD}>/dev/null
+}
+
+silence_autocd
+
+unsilence_autocd() {
+  exec {BASH_XTRACEFD}>/dev/stdout
+}

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+bash_path="$(command -v bash)"
+current_shell="$(getent passwd "$USER" | cut -d: -f7)"
+bash_real_path="$(readlink -f "$bash_path")"
+current_shell_real_path="$(readlink -f "$current_shell")"
+
+if [[ -z "$bash_path" ]]; then
+    print_error "bash is not installed"
+    exit 1
+fi
+
+if ! grep -Fxq "$bash_path" /etc/shells; then
+    print_error "$bash_path is not listed in /etc/shells"
+    exit 1
+fi
+
+if [[ "$current_shell_real_path" == "$bash_real_path" ]]; then
+    print_warning "Login shell already set to $bash_path, skipping"
+    exit 0
+fi
+
+sudo chsh --shell "$bash_path" "$USER" >/dev/null
+
+print_step Done

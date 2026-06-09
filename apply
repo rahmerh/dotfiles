@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/install-scripts/lib/print"
+. "$SCRIPT_DIR/install-scripts/lib/prefs"
+
+shopt -s nullglob globstar
+
+if ! command -v gum &>/dev/null; then
+    sudo pacman -S --needed --noconfirm gum
+fi
+
+sudo -v || exit 1
+
+prefs_prompt_choose machine_type "Is this a desktop or laptop?" desktop laptop >/dev/null
+prefs_prompt_choose machine_purpose "Is this a personal or work machine?" personal work >/dev/null
+
+scripts=()
+invalid=0
+for file in install-scripts/**/*; do
+    [[ -f $file ]] || continue
+    [[ $file == *"/lib/"* ]] && continue
+    [[ $file == *"/assets/"* ]] && continue
+
+    name=${file##*/}
+
+    if [[ ! $name =~ ^[0-9]{2}-[^/]+$ ]]; then
+        print_error "Invalid script name: $file. Must match NN-name."
+        invalid=1
+    fi
+
+    if [[ ! -x "$file" ]]; then
+        print_error "Not executable: $file"
+        invalid=1
+    fi
+
+    if ! head -n1 "$file" | grep -Eq '^#!.*bash'; then
+        print_error "Not a bash script: $file"
+        invalid=1
+    fi
+
+    scripts+=("$file")
+done
+
+if (( invalid )); then
+    exit 1
+fi
+
+mapfile -t scripts < <(printf '%s\n' "${scripts[@]}" | sort -V)
+
+for script in "${scripts[@]}"; do
+    print_header "Running $script"
+
+    if "$script"; then
+        continue
+    else
+        code=$?
+        print_error "\nScript failed: $script. ($code)\n"
+        exit "$code"
+    fi
+done

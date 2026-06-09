@@ -1,0 +1,184 @@
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    focus-follows-mouse max-scroll-amount="0%"
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+output "Samsung Electric Company LC49G95T H4ZR401290" {
+    scale 1.0
+    mode "5120x1440@119.999"
+}
+
+output "Dell Inc. DELL P2722HE 11CWDH3" {
+    scale 1.0
+    mode "1920x1080@60.00"
+}
+
+layout {
+    gaps 10
+
+    focus-ring {
+        on
+        width 1
+        active-color "#E85A98"
+    }
+
+    default-column-width { proportion 0.5; }
+
+   shadow {
+        on
+        softness 10
+        spread 5
+        offset x=0 y=0
+        draw-behind-window true
+        color "#00000070"
+        inactive-color "#00000054"
+    }
+}
+
+animations {
+    workspace-switch {
+        spring damping-ratio=0.80 stiffness=1500 epsilon=0.0001
+    }
+
+    window-open {
+        spring damping-ratio=0.72 stiffness=900 epsilon=0.0005
+
+        custom-shader r"
+            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+                float slide = (1.0 - niri_progress) * min(size_geo.y * 0.18, 180.0);
+                vec3 coords = vec3(coords_geo.x, coords_geo.y - slide / size_geo.y, 1.0);
+
+                if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+                    return vec4(0.0);
+                }
+
+                vec3 coords_tex = niri_geo_to_tex * coords;
+                vec4 color = texture2D(niri_tex, coords_tex.st);
+                return color * smoothstep(0.0, 0.82, niri_clamped_progress);
+            }
+        "
+    }
+
+    window-close {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0005
+
+        custom-shader r"
+            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                float slide = niri_progress * min(size_geo.y * 0.18, 180.0);
+                vec3 coords = vec3(coords_geo.x, coords_geo.y - slide / size_geo.y, 1.0);
+
+                if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
+                    return vec4(0.0);
+                }
+
+                vec3 coords_tex = niri_geo_to_tex * coords;
+                vec4 color = texture2D(niri_tex, coords_tex.st);
+                return color * (1.0 - smoothstep(0.0, 0.82, niri_clamped_progress));
+            }
+        "
+    }
+}
+
+prefer-no-csd
+
+spawn-at-startup "wired" "--run"
+spawn-at-startup "waybar"
+spawn-at-startup "steam" "-silent"
+spawn-at-startup "discord" "--start-minimized"
+spawn-at-startup "hypridle"
+spawn-at-startup "blueman-applet"
+
+spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
+spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
+spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"
+
+binds {
+    Mod+Space {
+        spawn-sh "rofi -show combi -modi 'combi' -combi-modi 'drun,:~/.config/rofi/scripts/power-menu.sh' -display-drun ''"
+    }
+
+    Mod+T { spawn "kitty"; }
+
+    Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot copy"; }
+    Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot save"; }
+    Ctrl+Shift+D { spawn-sh "~/.config/niri/scripts/screenshot both"; }
+
+    Mod+Shift+D repeat=false { spawn-sh "wl-mirror $(niri msg --json focused-output | jq -r .name)"; }
+
+    Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
+
+    Ctrl+Shift+L { spawn "hyprlock"; }
+
+    Mod+B { spawn "rofi-rbw"; }
+
+    Mod+Q { close-window; }
+    Mod+V { toggle-window-floating; }
+    Mod+F { fullscreen-window; }
+
+    Mod+H { focus-column-left; }
+    Mod+J { focus-workspace-down; }
+    Mod+K { focus-workspace-up; }
+    Mod+L { focus-column-right; }
+
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+J     { move-window-to-workspace-down; }
+    Mod+Shift+K     { move-window-to-workspace-up; }
+    Mod+Shift+L     { move-column-right; }
+
+    Mod+Ctrl+H { set-column-width "-5%"; }
+    Mod+Ctrl+L { set-column-width "+5%"; }
+
+    Mod+Ctrl+F { maximize-column; }
+
+    Mod+Ctrl+J { set-window-height "+5%"; }
+    Mod+Ctrl+K { set-window-height "-5%"; }
+
+    Mod+G { consume-window-into-column; }
+    Mod+Shift+G { expel-window-from-column; }
+
+    Mod+C { center-column; }
+    Mod+D { spawn-sh "~/.config/niri/scripts/equalize-column-widths"; }
+}
+
+window-rule {
+    match app-id="feh"
+    open-floating true
+}
+
+window-rule {
+    match title="rbw"
+    match app-id="Pinentry-gtk"
+    open-floating true
+}
+
+window-rule {
+    match app-id="com-azefsw-audioconnect-desktop-app-MainKt"
+    open-floating true
+}
+
+window-rule {
+    geometry-corner-radius 5
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+window-rule {
+    match title="^wired$"
+    open-floating true
+    open-focused false
+    default-floating-position x=10 y=10 relative-to="top-right"
+
+    focus-ring { off; }
+    border { off; }
+    geometry-corner-radius 3
+    clip-to-geometry true
+}

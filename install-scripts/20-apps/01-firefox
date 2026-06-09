@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/firefox"
+. "$SCRIPT_DIR/../lib/prefs"
+
+profile_dir=$(get_active_profile_dir "$HOME/.config/mozilla/firefox")
+
+if ! firefox_homepage_url="$(prefs_prompt_input firefox_homepage_url "Firefox home page URL: " "")"; then
+    print_error "No Firefox home page URL provided"
+    exit 1
+fi
+
+if [[ ! -d "$profile_dir" ]]; then
+    print_error "No Firefox profile directory found"
+    exit 0
+fi
+
+
+set_user_preference() {
+    local key=$1
+    local value=$2
+    prefs_file="$profile_dir/user.js"
+    tmp_file=$(mktemp)
+
+    if [[ -f "$prefs_file" ]]; then
+        # Select non matching lines, redirect to temp file so we can append the pref to set.
+        grep -vF "user_pref(\"$key\"," "$prefs_file" >"$tmp_file"
+    fi
+
+    echo "user_pref(\"$key\", $value);" >>"$tmp_file"
+
+    mv "$tmp_file" "$prefs_file"
+}
+
+install_extension() {
+    local extension_name=$1
+
+    local extensions_dir="$profile_dir/extensions"
+    mkdir -p "$extensions_dir"
+
+    local installed_extensions_file="$profile_dir/extensions/.installed"
+
+    [[ -f "$installed_extensions_file" ]] || touch "$installed_extensions_file"
+
+    if grep -q "$extension_name" "$installed_extensions_file"; then
+        print_warning "$extension_name already installed, skipping"
+        return 0
+    fi
+
+    local tmp_file
+    tmp_file=$(mktemp)
+
+    curl -sLo "$tmp_file" "https://addons.mozilla.org/firefox/downloads/latest/$extension_name/latest.xpi"
+
+    local external_id
+    external_id=$(unzip -p "$tmp_file" manifest.json | jq -r '.browser_specific_settings.gecko.id')
+
+    if [[ -z "$external_id" ]]; then
+        print_error "Could not extract external id from $extension_name, skipping"
+        return 1
+    fi
+
+    mv "$tmp_file" "$extensions_dir/$external_id.xpi"
+
+    print_step "Installed $extension_name"
+
+    echo "$extension_name" >> "$installed_extensions_file"
+}
+
+install_firefox_policies() {
+    local homepage_url="$1"
+    local policies_file
+    policies_file=$(mktemp)
+
+    jq -n --arg homepage_url "$homepage_url" '{
+        policies: {
+            SearchEngines: {
+                Default: "DuckDuckGo"
+            },
+            Homepage: {
+                URL: $homepage_url,
+                Locked: false,
+                StartPage: "homepage"
+            },
+            OfferToSaveLogins: false,
+            OfferToSaveLoginsDefault: false,
+            PasswordManagerEnabled: false,
+            DisableFormHistory: true,
+            AutofillAddressEnabled: false,
+            AutofillCreditCardEnabled: false
+        }
+    }' >"$policies_file"
+
+    sudo install \
+        --directory \
+        --owner=root \
+        --group=root \
+        --mode=0755 \
+        /etc/firefox/policies
+
+    sudo install \
+        --owner=root \
+        --group=root \
+        --mode=0644 \
+        --no-target-directory \
+        "$policies_file" \
+        /etc/firefox/policies/policies.json
+
+    rm -f "$policies_file"
+}
+
+install_firefox_policies "$firefox_homepage_url"
+
+install_extension sponsorblock
+install_extension return-youtube-dislikes
+install_extension control-panel-for-youtube
+install_extension proton-pass
+install_extension ublock-origin
+
+set_user_preference "browser.toolbars.bookmarks.visibility" '"never"'
+set_user_preference "toolkit.legacyUserProfileCustomizations.stylesheets" 'true'
+set_user_preference "widget.use-xdg-desktop-portal.file-picker" '1'
+set_user_preference "widget.gtk.rounded-bottom-corners.enabled" 'false'
+set_user_preference "sidebar.revamp" 'false'
+
+set_user_preference "browser.urlbar.placeholderName" '"DuckDuckGo"'
+set_user_preference "browser.urlbar.placeholderName.private" '"DuckDuckGo"'
+set_user_preference "browser.search.defaultenginename" '"DuckDuckGo"'
+set_user_preference "browser.search.order.1" '"DuckDuckGo"'
+set_user_preference "browser.search.privateDefault" '"DuckDuckGo"'
+set_user_preference "browser.startup.homepage" "$(printf "%s" "$firefox_homepage_url" | jq -R .)"
+set_user_preference "browser.startup.page" '1'
+
+set_user_preference "signon.rememberSignons" 'false'
+set_user_preference "signon.autofillForms" 'false'
+set_user_preference "signon.generation.enabled" 'false'
+set_user_preference "browser.formfill.enable" 'false'
+set_user_preference "extensions.formautofill.addresses.enabled" 'false'
+set_user_preference "extensions.formautofill.creditCards.enabled" 'false'
+
+set_user_preference "browser.uiCustomization.state" '"{\"placements\":{\"widget-overflow-fixed-list\":[],\"unified-extensions-area\":[\"ublock0_raymondhill_net-browser-action\",\"sponsorblocker_ajay_app-browser-action\",\"control-panel-for-youtube_jbscript_dev-browser-action\",\"_762f9885-5a13-4abd-9c77-433dcd38b8fd_-browser-action\"],\"nav-bar\":[\"back-button\",\"forward-button\",\"vertical-spacer\",\"urlbar-container\",\"home-button\",\"downloads-button\",\"preferences-button\",\"unified-extensions-button\",\"78272b6fa58f4a1abaac99321d503a20_proton_me-browser-action\"],\"toolbar-menubar\":[\"menubar-items\"],\"TabsToolbar\":[\"tabbrowser-tabs\",\"new-tab-button\",\"alltabs-button\"],\"vertical-tabs\":[],\"PersonalToolbar\":[\"personal-bookmarks\"]},\"seen\":[\"developer-button\",\"screenshot-button\",\"control-panel-for-youtube_jbscript_dev-browser-action\",\"78272b6fa58f4a1abaac99321d503a20_proton_me-browser-action\",\"_762f9885-5a13-4abd-9c77-433dcd38b8fd_-browser-action\",\"sponsorblocker_ajay_app-browser-action\",\"ublock0_raymondhill_net-browser-action\"],\"dirtyAreaCache\":[\"nav-bar\",\"vertical-tabs\",\"unified-extensions-area\",\"TabsToolbar\",\"toolbar-menubar\",\"PersonalToolbar\"],\"currentVersion\":23,\"newElementCount\":4}"'
+
+print_step Done

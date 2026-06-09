@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+if ! command -v ufw >/dev/null; then
+    print_error "ufw is not installed"
+    exit 1
+fi
+
+sudo -v || exit 1
+
+ufw_status="$(sudo ufw status verbose)"
+
+ufw_setting_matches() {
+    local pattern="$1"
+
+    grep -q "$pattern" <<< "$ufw_status"
+}
+
+ufw_run() {
+    local title="$1"
+
+    shift
+    gum spin --spinner line --title "$title" -- "$@"
+}
+
+if ! ufw_setting_matches "^Default: deny (incoming), allow (outgoing), deny (routed)$"; then
+    ufw_run "ufw deny incoming" sudo ufw default deny incoming
+    ufw_run "ufw allow outgoing" sudo ufw default allow outgoing
+    ufw_run "ufw deny routed" sudo ufw default deny routed
+fi
+
+if ! ufw_setting_matches "^Logging: on (low)$"; then
+    ufw_run "ufw logging low" sudo ufw logging low
+fi
+
+if ! ufw_setting_matches "^Status: active$"; then
+    ufw_run "ufw enable" sudo ufw --force enable
+fi
+
+print_step Done

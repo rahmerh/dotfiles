@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+pkill swaybg
+~/.config/niri/scripts/set-wallpaper &
+
+pkill waybar
+setsid -f waybar
+
+pkill wired
+setsid -f wired --run
+
+pkill -f "$HOME/.config/niri/scripts/stack-wired-notifications"
+setsid -f ~/.config/niri/scripts/stack-wired-notifications

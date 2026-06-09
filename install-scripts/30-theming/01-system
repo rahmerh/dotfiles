@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+
+if gsettings list-schemas | grep -qx org.blueman.general; then
+    gsettings set org.blueman.general symbolic-status-icons true
+fi
+
+print_step Done

@@ -1,0 +1,121 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    drun-display-format: "{name}";
+    font: "CaskaydiaCove Nerd Font Propo 13";
+
+    display-drun: "";
+    display-run: "";
+    display-window: "";
+    display-power: "";
+
+    drun-display-format: "{name}";
+    sidebar-mode: false;
+
+    matching: "fuzzy";
+    sort: true;
+    case-sensitive: false;
+}
+
+* {
+    bg:              #111111f2;
+    bg-alt:          #181818f2;
+    bg-hover:        #202020f2;
+
+    fg:              #e8e8e8;
+    fg-muted:        #999999;
+
+    accent:          #e1579c;
+    accent-soft:     #e1579c22;
+
+    spacing:         10px;
+    radius:          5px;
+}
+
+window {
+    width: 1000px;
+    height: 400px;
+
+    background-color: @bg;
+
+    border: 0px;
+    border-radius: @radius;
+
+    padding: 0px;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing: 0px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+
+    border: 0px;
+    border-radius: 0px;
+
+    padding: 9px 11px;
+    spacing: 8px;
+
+    children: [ entry ];
+}
+
+prompt {
+    enabled: true;
+
+    background-color: transparent;
+    text-color: @accent;
+
+    padding: 0px 2px 0px 0px;
+}
+
+entry {
+    background-color: transparent;
+
+    text-color: @fg;
+    placeholder: "Search";
+    placeholder-color: @fg-muted;
+}
+
+listview {
+    background-color: transparent;
+
+    lines: 8;
+    columns: 1;
+
+    spacing: 5px;
+    fixed-height: false;
+
+    scrollbar: false;
+}
+
+element {
+    background-color: transparent;
+    text-color: @fg;
+
+    border: 0px;
+    border-radius: 0px;
+
+    padding: 8px 10px;
+    spacing: 9px;
+}
+
+element selected {
+    background-color: @bg-hover;
+    text-color: @fg;
+
+    border: 0px;
+    border-radius: 0px;
+}
+
+element-icon {
+    size: 22px;
+    background-color: transparent;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    vertical-align: 0.5;
+}

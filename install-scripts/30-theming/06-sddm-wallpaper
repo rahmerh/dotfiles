@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+wallpaper_dir="/var/lib/dotfiles/sddm"
+user_id=$(id -u)
+group_id=$(id -g)
+
+sudo install \
+    --directory \
+    --owner=root \
+    --group=root \
+    --mode=0755 \
+    /var/lib/dotfiles
+
+sudo install \
+    --directory \
+    --owner="$user_id" \
+    --group="$group_id" \
+    --mode=0755 \
+    "$wallpaper_dir"
+
+print_step Done

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+last_signature=""
+
+stack_wired_windows() {
+    local windows
+    local signature
+    local id
+    local height
+    local y=10
+
+    windows="$(niri msg --json windows)"
+    signature="$(
+        jq -r '
+            [
+                .[]
+                | select(.app_id == "wired" and .is_floating)
+                | "\(.id):\(.layout.window_size[1])"
+            ]
+            | sort
+            | join(",")
+        ' <<< "$windows"
+    )"
+
+    if [[ -z "$signature" || "$signature" == "$last_signature" ]]; then
+        return
+    fi
+
+    last_signature="$signature"
+
+    while read -r id height; do
+        niri msg action move-floating-window --id "$id" -y "$y" >/dev/null
+        y=$((y + height + 10))
+    done < <(
+        jq -r '
+            [
+                .[]
+                | select(.app_id == "wired" and .is_floating)
+                | { id, height: (.layout.window_size[1] | floor) }
+            ]
+            | sort_by(.id)[]
+            | "\(.id) \(.height)"
+        ' <<< "$windows"
+    )
+}
+
+stack_wired_windows
+
+niri msg --json event-stream | while read -r event; do
+    if [[ "$event" == *'"app_id":"wired"'* || "$event" == *'"WindowClosed"'* ]]; then
+        stack_wired_windows
+    fi
+done

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+if ! command -v xrandr &>/dev/null; then
+    exit 0
+fi
+
+xrandr --query | awk '
+    function flush_output() {
+        if (output != "" && best_mode != "" && best_rate != "") {
+            print output, best_mode, best_rate
+        }
+    }
+
+    function refresh_rate(field) {
+        gsub(/[*+]/, "", field)
+        return field + 0
+    }
+
+    function consider_mode(mode, rate) {
+        split(mode, size, "x")
+        area = size[1] * size[2]
+
+        if (
+            area > best_area ||
+            (area == best_area && rate > best_rate)
+        ) {
+            best_mode = mode
+            best_rate = rate
+            best_area = area
+        }
+    }
+
+    /^[^[:space:]]+ connected/ {
+        flush_output()
+        output = $1
+        best_mode = ""
+        best_rate = 0
+        best_area = 0
+        next
+    }
+
+    /^[^[:space:]]+ disconnected/ {
+        flush_output()
+        output = ""
+        next
+    }
+
+    output != "" && /^[[:space:]]+[0-9]+x[0-9]+/ {
+        mode = $1
+        for (i = 2; i <= NF; i++) {
+            consider_mode(mode, refresh_rate($i))
+        }
+    }
+
+    END {
+        flush_output()
+    }
+' | while read -r output mode rate; do
+    xrandr --output "$output" --mode "$mode" --rate "$rate" || true
+done

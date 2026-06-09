@@ -1,0 +1,27 @@
+/* Most right module, disable border radius to the left, custom expand should be there */
+#network {
+    border-radius: 0 3px 3px 0;
+    padding-left: 0px;
+}
+
+#pulseaudio {
+    border-radius: 0 3px 3px 0;
+    padding-left: 0px;
+}
+
+/* Group, most left icon is always visible, disable border radius on the right, this should be network */
+#hardware {
+    padding: 7px 11px;
+    margin: 5px 0 5px 0;
+    border-radius: 3px 0 0 3px;
+    background: alpha(@background, .6);
+    box-shadow: 3px -3px 5px rgba(50, 50, 50, .4);
+}
+
+#audio {
+    padding: 7px 11px;
+    margin: 5px 0 5px 0;
+    border-radius: 3px 0 0 3px;
+    background: alpha(@background, .6);
+    box-shadow: 3px -3px 5px rgba(50, 50, 50, .4);
+}

@@ -1,0 +1,7 @@
+prev_img
+next_img
+
+zoom_in C-4 # Ctrl + scroll up
+zoom_out C-5 # Ctrl + scroll down
+
+pan 1

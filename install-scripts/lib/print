@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+pink="\033[38;2;225;87;156m"
+red="\033[38;2;239;68;68m"
+yellow="\033[38;2;234;179;8m"
+white="\033[38;2;255;255;255m"
+reset="\033[0m"
+
+print_header() {
+    printf "%b\n%s\n\n%b" "$pink" "$1" "$reset"
+}
+
+print_step() {
+    printf "%b-- %s%b\n" "$white" "$1" "$reset"
+}
+
+print_error() {
+    printf "%b--! %s\n%b" "$red" "$1" "$reset" >&2
+}
+
+print_warning() {
+    printf "%b--> %s\n%b" "$yellow" "$1" "$reset"
+}

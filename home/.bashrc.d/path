@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+path_add() {
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) PATH="$1:$PATH" ;;
+  esac
+}
+
+path_add "$HOME/.pub-cache/bin"
+path_add "$HOME/go/bin"
+path_add "$HOME/.cargo/bin"
+path_add "$HOME/.local/bin"
+path_add "$HOME/.fvm_flutter/bin"
+path_add "$HOME/.dotnet/tools"

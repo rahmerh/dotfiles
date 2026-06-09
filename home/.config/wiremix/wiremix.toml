@@ -1,0 +1,4 @@
+[names]
+stream = [ "{node:node.name}: {node:media.name}" ]
+endpoint = [ "{node:node.description}", "{device:device.nick}", "{device:device.description}" ]
+device = [ "{device:device.description}", "{device:device.nick}" ]

@@ -1,0 +1,14 @@
+{
+    "Rust test": {
+        "prefix": "test",
+        "description": "Create a Rust test function",
+        "body": [
+            "#[test]",
+            "fn ${1:method}_${2:test_name}() {",
+            "    // Arrange",
+            "    // Act",
+            "    // Assert",
+            "}"
+        ]
+    }
+}

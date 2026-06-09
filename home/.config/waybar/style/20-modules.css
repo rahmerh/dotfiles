@@ -1,0 +1,69 @@
+#cpu,
+#memory,
+#temperature {
+    padding: 0px 5px;
+}
+
+#battery.warning:not(.charging) {
+    color: #f0c674;
+}
+
+#battery.critical:not(.charging) {
+    color: #e1579c;
+}
+
+#cpu {
+    padding-left: 15px;
+}
+
+#custom-divider {
+    color: #e1579c;
+    padding: 0 5px;
+    font-size: 18px;
+}
+
+#workspaces {
+    padding: 4px 7px;
+}
+
+#workspaces button {
+    all: unset;
+    padding: 0 4px;
+    color: #d6d9e0;
+}
+
+#workspaces button.empty {
+    color: rgba(214, 217, 224, .45);
+}
+
+#workspaces button.active,
+#workspaces button.focused {
+    color: #e1579c;
+}
+
+#pulseaudio-slider {
+    padding: 0 1px 0 14px;
+    margin: 0;
+}
+
+#pulseaudio-slider slider {
+    min-height: 2px;
+    min-width: 2px;
+    background-image: none;
+    border: none;
+    background: #d6d9e0;
+    box-shadow: 0 0 0 1px alpha(@background, .8);
+}
+
+#pulseaudio-slider trough {
+    min-height: 8px;
+    min-width: 100px;
+    border-radius: 4px;
+    background: alpha(#d6d9e0, .18);
+}
+
+#pulseaudio-slider highlight {
+    min-width: 8px;
+    border-radius: 4px;
+    background: #e1579c;
+}

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+calc() {
+    echo "scale=10; $*" | bc -l
+}

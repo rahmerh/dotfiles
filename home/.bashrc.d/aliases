@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+wg_list() {
+    sudo find /etc/wireguard \
+        -maxdepth 1 \
+        -type f \
+        -name '*.conf' \
+        -printf '%f\n' |
+
+    sed -e 's/\.conf$//' -e 's/^/ - /'
+}
+
+wg_is_up() {
+    ip link show "$1" >/dev/null 2>&1
+}
+
+wg_quick_up() {
+    conf="${1:?Provide which conf to up}"
+
+    if wg_is_up "$conf"; then
+        echo "Wireguard conf $conf is already up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
+        echo "No $conf.conf found in /etc/wireguard" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick up "$conf"
+}
+
+wg_quick_down() {
+    conf="${1:?Provide which conf to down}"
+
+    if ! wg_is_up "$conf"; then
+        echo "Wireguard conf $conf is not up"
+        return 0
+    fi
+
+    sudo -v || return 1
+
+    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
+        echo "No $conf.conf found in /etc/wireguard" >&2
+        return 1
+    fi
+
+    gum spin --spinner line --title="Stopping wireguard connection..." -- sudo wg-quick down "$conf"
+}
+
+ls() {
+    if [[ -t 1 ]]; then
+        eza -a1 --icons=always --group-directories-first --color=always "$@" | sed 's/^/  /'
+        return "${PIPESTATUS[0]}"
+    fi
+
+    eza -a1 --icons=always --group-directories-first "$@"
+}
+
+alias lo='eza -lah --icons=always --group-directories-first --git --total-size'
+alias cat='bat'
+alias lg='lazygit'
+alias wg-up="wg_quick_up"
+alias wg-down="wg_quick_down"
+alias wg-list="wg_list"
+alias v="nvim"
+alias v-old="NVIM_APPNAME=nvim-old nvim"
+
+handmirror() {
+    local device="${1:-/dev/video0}"
+    local fps="${HANDMIRROR_FPS:-60}"
+    local size="${HANDMIRROR_SIZE:-1280x720}"
+
+    if ! command -v ffplay >/dev/null 2>&1; then
+        echo "handmirror requires ffplay from the ffmpeg package" >&2
+        return 127
+    fi
+
+    ffplay \
+        -hide_banner \
+        -loglevel warning \
+        -fflags nobuffer \
+        -flags low_delay \
+        -framedrop \
+        -sync ext \
+        -an \
+        -f v4l2 \
+        -framerate "$fps" \
+        -video_size "$size" \
+        -i "$device" \
+        -vf hflip
+}

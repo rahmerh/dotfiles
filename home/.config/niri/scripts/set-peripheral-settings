@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+
+# #d700ff
+COLOUR="d700ff"
+BRIGHTNESS="100"
+DEFAULT_ZONE_SIZE="48"
+RAZER_DPI="7000"
+
+count_openrgb_items() {
+    local value="$1"
+
+    if [[ -z "$value" ]]; then
+        printf '0\n'
+        return
+    fi
+
+    grep -oE "'[^']+'|[^[:space:]]+" <<< "$value" | wc -l
+}
+
+openrgb_mode_supported() {
+    local modes="$1"
+    local mode="$2"
+
+    modes="${modes//,/ }"
+    modes="${modes//[/ }"
+    modes="${modes//]/ }"
+
+    [[ " ${modes,,} " == *" ${mode,,} "* ]]
+}
+
+openrgb_mode_candidates() {
+    local modes="$1"
+    local mode
+
+    # Static is preferred because the desired end state is one fixed color.
+    for mode in Static static Direct direct; do
+        if openrgb_mode_supported "$modes" "$mode"; then
+            printf '%s\n' "$mode"
+        fi
+    done
+}
+
+openrgb_list_devices() {
+    local attempt
+    local output
+    local status
+
+    for attempt in 1 2 3; do
+        output="$(openrgb -l 2>&1)"
+        status=$?
+
+        if (( status == 0 )); then
+            printf '%s\n' "$output"
+            return 0
+        fi
+
+        echo "openrgb -l failed on attempt $attempt with status $status" >&2
+        sleep 2
+    done
+
+    return "$status"
+}
+
+detect_openrgb_devices() {
+    local devices="$1"
+    local current_id=""
+    local current_name=""
+    local current_modes=""
+    local current_zones=""
+    local current_leds=""
+    local line
+
+    emit_current_device() {
+        local zone_count
+        local led_count
+
+        [[ -n "$current_id" ]] || return 0
+
+        zone_count="$(count_openrgb_items "$current_zones")"
+        led_count="$(count_openrgb_items "$current_leds")"
+
+        printf '%s\t%s\t%s\t%s\t%s\n' \
+            "$current_id" \
+            "$current_name" \
+            "$current_modes" \
+            "$zone_count" \
+            "$led_count"
+    }
+
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^([0-9]+):[[:space:]]*(.+)$ ]]; then
+            emit_current_device
+            current_id="${BASH_REMATCH[1]}"
+            current_name="${BASH_REMATCH[2]}"
+            current_modes=""
+            current_zones=""
+            current_leds=""
+            continue
+        fi
+
+        if [[ "$line" =~ ^[[:space:]]*Modes:[[:space:]]*(.*)$ ]]; then
+            current_modes="${BASH_REMATCH[1]}"
+        elif [[ "$line" =~ ^[[:space:]]*Zones:[[:space:]]*(.*)$ ]]; then
+            current_zones="${BASH_REMATCH[1]}"
+        elif [[ "$line" =~ ^[[:space:]]*LEDs:[[:space:]]*(.*)$ ]]; then
+            current_leds="${BASH_REMATCH[1]}"
+        fi
+    done <<< "$devices"
+
+    emit_current_device
+}
+
+try_openrgb_device_color() {
+    local id="$1"
+    local color="$2"
+    local mode="${3:-}"
+
+    if [[ -z "$mode" ]]; then
+        openrgb -d "$id" -c "$color" -b "$BRIGHTNESS" >/dev/null 2>&1
+    else
+        openrgb -d "$id" -m "$mode" -c "$color" -b "$BRIGHTNESS" >/dev/null 2>&1
+    fi
+}
+
+prepare_openrgb_device_zones() {
+    local id="$1"
+    local name="$2"
+    local color="$3"
+    local zone_count="$4"
+    local led_count="$5"
+    local zone
+
+    if (( zone_count == 0 || led_count > 0 )); then
+        return 0
+    fi
+
+    echo "device $id: $name has $zone_count zone(s) but no LEDs; trying zone size $DEFAULT_ZONE_SIZE" >&2
+
+    for ((zone = 0; zone < zone_count; zone++)); do
+        if openrgb -d "$id" -z "$zone" -sz "$DEFAULT_ZONE_SIZE" -c "$color" -b "$BRIGHTNESS" >/dev/null 2>&1; then
+            echo "set OpenRGB device $id: $name zone $zone size to $DEFAULT_ZONE_SIZE" >&2
+        else
+            echo "OpenRGB device $id: $name zone $zone did not accept size $DEFAULT_ZONE_SIZE" >&2
+        fi
+    done
+}
+
+set_openrgb_device_color() {
+    local id="$1"
+    local name="$2"
+    local modes="$3"
+    local zone_count="$4"
+    local led_count="$5"
+    local color="$6"
+    local mode
+
+    prepare_openrgb_device_zones "$id" "$name" "$color" "$zone_count" "$led_count"
+
+    while IFS= read -r mode; do
+        if try_openrgb_device_color "$id" "$color" "$mode"; then
+            echo "set OpenRGB device $id: $name ($mode)" >&2
+            return 0
+        fi
+    done < <(openrgb_mode_candidates "$modes")
+
+    if try_openrgb_device_color "$id" "$color"; then
+        echo "set OpenRGB device $id: $name (direct color)" >&2
+        return 0
+    fi
+
+    echo "failed to set OpenRGB device $id: $name" >&2
+    return 1
+}
+
+set_openrgb_color() {
+    local color="$1"
+    local devices
+    local detected
+    local id
+    local name
+    local modes
+    local zone_count
+    local led_count
+    local failed=0
+    local found=0
+
+    if ! command -v openrgb >/dev/null; then
+        echo "openrgb is not installed; skipping RGB settings" >&2
+        return 0
+    fi
+
+    if ! devices="$(openrgb_list_devices)"; then
+        echo "could not list OpenRGB devices; skipping RGB settings" >&2
+        return 0
+    fi
+
+    detected="$(detect_openrgb_devices "$devices")"
+
+    while IFS=$'\t' read -r id name modes zone_count led_count; do
+        [[ -n "$id" ]] || continue
+        found=1
+        echo "detected OpenRGB device $id: $name ($zone_count zone(s), $led_count LED(s))" >&2
+        set_openrgb_device_color "$id" "$name" "$modes" "$zone_count" "$led_count" "$color" || failed=1
+    done <<< "$detected"
+
+    if (( ! found )); then
+        echo "no OpenRGB devices detected" >&2
+    fi
+
+    return "$failed"
+}
+
+set_openrgb_color "$COLOUR"
+
+if command -v razer-cli >/dev/null; then
+    if razer-cli --dpi "$RAZER_DPI" >/dev/null 2>&1; then
+        echo "set Razer DPI to $RAZER_DPI" >&2
+    else
+        echo "failed to set Razer DPI to $RAZER_DPI" >&2
+    fi
+fi

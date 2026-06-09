@@ -1,0 +1,40 @@
+{
+    "custom/audio-expand": {
+        "format": "",
+        "tooltip": false
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 muted",
+        "format-icons": {
+            "default": [
+                "󰕿",
+                "󰖀",
+                "󰕾"
+            ]
+        },
+        "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
+        "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
+        "max-volume": 150,
+        "scroll-step": 5,
+        "tooltip-format": "{desc}"
+    },
+    "pulseaudio/slider": {
+        "min": 0,
+        "max": 100,
+        "orientation": "horizontal"
+    },
+    "group/audio": {
+        "orientation": "horizontal",
+        "drawer": {
+            "transition-duration": 600,
+            "transition-to-left": true,
+            "click-to-reveal": true
+        },
+        "modules": [
+            "custom/audio-expand",
+            "pulseaudio/slider"
+        ]
+    }
+}

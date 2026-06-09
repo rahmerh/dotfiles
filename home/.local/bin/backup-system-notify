@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+status_file="${1:-/var/lib/backup-system/status}"
+icon_file="$HOME/Pictures/icons/backup.png"
+notify_args=(--app-name="System backup")
+
+if [[ -r "$icon_file" ]]; then
+    notify_args+=(--icon="$icon_file")
+fi
+
+if [[ ! -r "$status_file" ]]; then
+    exit 0
+fi
+
+IFS=$'\t' read -r timestamp state message < "$status_file"
+
+body="$message"
+if [[ -n "$timestamp" ]]; then
+    body="${body:+$body$'\n'}$timestamp"
+fi
+
+case "$state" in
+    running)
+        notify-send "${notify_args[@]}" --urgency=low "System backup" "${body:-Started.}"
+        ;;
+    completed)
+        notify-send "${notify_args[@]}" --urgency=normal "System backup" "${body:-Completed.}"
+        ;;
+    error)
+        notify-send "${notify_args[@]}" --urgency=critical "System backup" "${body:-Failed.}"
+        ;;
+esac

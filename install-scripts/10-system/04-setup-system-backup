@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/prefs"
+
+backup_dir="/var/lib/backup-system"
+conf_file="$backup_dir/config"
+backup_key_path="/root/.ssh/backup-system"
+
+if sudo test -f "$conf_file" \
+    && sudo test -f "$backup_key_path" \
+    && sudo test -f "$backup_key_path.pub" \
+    && systemctl is-enabled --quiet backup-system.timer \
+    && systemctl --user is-enabled --quiet backup-system-notify.path; then
+    print_step "Backup system already configured"
+    exit 0
+fi
+
+if ! prefs_prompt_confirm backup_system_enabled "Do you want this system to make backups?"; then
+    exit 0
+fi
+
+print_step "Configuring backup system"
+
+if sudo test -e "$backup_key_path" || sudo test -e "$backup_key_path.pub"; then
+    print_step "Backup SSH key found, not generating dedicated key"
+else
+    print_step "Generating backup SSH key: $backup_key_path"
+
+    sudo install --directory --owner=root --group=root --mode=0700 /root/.ssh
+    sudo ssh-keygen -t ed25519 -a 64 -N "" -f "$backup_key_path"
+
+    backup_target="$(gum input --prompt="Backup SSH target for ssh-copy-id (user@host): ")"
+    if [[ -z "$backup_target" ]]; then
+        print_error "Backup SSH target is required"
+        exit 1
+    fi
+
+    sudo ssh-copy-id -i "$backup_key_path.pub" "$backup_target"
+fi
+
+if sudo test -f "$conf_file"; then
+    print_step "Backup config found, not creating default"
+else
+    print_step "Creating backup config: $conf_file"
+
+    sudo install --directory --owner=root --group=root --mode=0755 "$backup_dir"
+
+    destination="$(gum input \
+        --prompt="Backup destination: " \
+        --placeholder="backup-host:/srv/backups/system" \
+        --value="backup-host:/srv/backups/system")"
+    if [[ -z "$destination" ]]; then
+        print_error "Backup destination is required"
+        exit 1
+    fi
+
+    backup_dirs="$(gum input \
+        --prompt="Backup directories: " \
+        --placeholder="$HOME/" \
+        --value="$HOME/")"
+    if [[ -z "$backup_dirs" ]]; then
+        print_error "Backup directories are required"
+        exit 1
+    fi
+
+    excludes="/.cache:/.local/share/Trash"
+
+    temp_file="$(mktemp)"
+    {
+        printf 'DESTINATION=%q\n' "$destination"
+        printf 'BACKUP_DIRS=%q\n' "$backup_dirs"
+        printf 'SSH_KEY_FILE=%q\n' "$backup_key_path"
+        printf 'EXCLUDES=%q\n' "$excludes"
+    } > "$temp_file"
+
+    sudo install \
+        --owner=root \
+        --group=root \
+        --mode=0600 \
+        "$temp_file" \
+        "$conf_file"
+    rm --force "$temp_file"
+fi
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now backup-system.timer
+
+if systemctl --user daemon-reload \
+    && systemctl --user enable --now backup-system-notify.path; then
+    print_step "Enabled backup notifications"
+else
+    print_warning "Could not enable backup notifications"
+fi
+
+print_step Done

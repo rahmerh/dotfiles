@@ -1,0 +1,11 @@
+[Unit]
+Description=Runs backup script
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup-system
+Restart=on-failure
+RestartSec=30min

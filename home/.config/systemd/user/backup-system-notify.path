@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch system backup status
+
+[Path]
+PathChanged=/var/lib/backup-system/status
+
+[Install]
+WantedBy=default.target

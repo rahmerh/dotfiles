@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+force_stow() {
+    local target="$1"
+    local package="$2"
+
+    base_dir="$(pwd)/$package"
+
+    mapfile -d '' files < <(find "$base_dir" -type f -print0)
+
+    for entry in "${files[@]}"; do
+        local expected="$target${entry/$base_dir/}"
+
+        local expected_dirname
+        expected_dirname=$(dirname "$expected")
+
+        # Create all parent dirs if not exists, to only symlink files.
+        if [[ ! -d "$expected_dirname" ]]; then
+            mkdir -p "$expected_dirname"
+        fi
+
+        if [[ -L "$expected" ]]; then
+            # TODO: Check if symlink to dotfiles or not. Prompt to delete if not.
+            continue;
+        elif [[ -f "$expected" ]]; then
+            rm "$expected"
+        fi
+    done
+
+    print_step "Stowing $package"
+    stow --target="$target" "$package"
+}
+
+force_stow "$HOME" home
+
+print_step "Done"

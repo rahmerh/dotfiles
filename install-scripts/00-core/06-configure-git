@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/prefs"
+
+print_step "Configuring Git"
+
+current_name="$(git config --global --get user.name || true)"
+current_email="$(git config --global --get user.email || true)"
+
+if ! git_name="$(prefs_prompt_input git_user_name "Git user.name: " "$current_name")"; then
+    print_error "Git user.name is required"
+    exit 1
+fi
+
+if ! git_email="$(prefs_prompt_input git_user_email "Git user.email: " "$current_email")"; then
+    print_error "Git user.email is required"
+    exit 1
+fi
+
+git config --global user.name "$git_name"
+git config --global user.email "$git_email"
+git config --global pull.rebase true
+git config --global init.defaultBranch main
+
+print_step Done

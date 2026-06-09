@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+PREFS_LIB_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PREFS_REPO_ROOT="$PREFS_LIB_DIR/../.."
+PREFS_FILE="$PREFS_REPO_ROOT/.prefs"
+
+prefs_validate_key() {
+    [[ $1 =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]
+}
+
+prefs_get() {
+    local key="$1"
+
+    if ! prefs_validate_key "$key"; then
+        return 2
+    fi
+
+    if [[ ! -f "$PREFS_FILE" ]]; then
+        return 1
+    fi
+
+    (
+        set -a
+        # shellcheck disable=SC1090
+        . "$PREFS_FILE"
+        printf "%s" "${!key-}"
+    )
+}
+
+prefs_set() {
+    local key="$1"
+    local value="$2"
+    local quoted_value
+    local temp_file
+
+    if ! prefs_validate_key "$key"; then
+        return 2
+    fi
+
+    printf -v quoted_value "%q" "$value"
+    temp_file="$(mktemp "$PREFS_FILE.XXXXXX")"
+
+    if [[ -f "$PREFS_FILE" ]]; then
+        grep -Ev "^$key=" "$PREFS_FILE" > "$temp_file" || true
+    fi
+
+    printf "%s=%s\n" "$key" "$quoted_value" >> "$temp_file"
+    mv --force --no-target-directory "$temp_file" "$PREFS_FILE"
+}
+
+prefs_prompt_choose() {
+    local key="$1"
+    local header="$2"
+    local value
+    local choice
+    local valid=0
+
+    shift 2
+
+    value="$(prefs_get "$key")"
+    for choice in "$@"; do
+        if [[ "$value" == "$choice" ]]; then
+            valid=1
+            break
+        fi
+    done
+
+    if [[ -z "$value" || $valid == 0 ]]; then
+        value="$(gum choose --header="$header" "$@")"
+        prefs_set "$key" "$value"
+    fi
+
+    printf "%s" "$value"
+}
+
+prefs_prompt_input() {
+    local key="$1"
+    local prompt="$2"
+    local default_value="${3-}"
+    local value
+
+    value="$(prefs_get "$key")"
+    if [[ -z "$value" ]]; then
+        if [[ -n "$default_value" ]]; then
+            value="$(gum input \
+                --prompt="$prompt" \
+                --placeholder="$default_value" \
+                --value="$default_value")"
+        else
+            value="$(gum input --prompt="$prompt")"
+        fi
+
+        if [[ -z "$value" ]]; then
+            return 1
+        fi
+
+        prefs_set "$key" "$value"
+    fi
+
+    printf "%s" "$value"
+}
+
+prefs_prompt_confirm() {
+    local key="$1"
+    local prompt="$2"
+    local value
+
+    value="$(prefs_get "$key")"
+    if [[ "$value" != "true" && "$value" != "false" ]]; then
+        if gum confirm "$prompt"; then
+            value=true
+        else
+            value=false
+        fi
+
+        prefs_set "$key" "$value"
+    fi
+
+    [[ "$value" == "true" ]]
+}
+
+mt_is_desktop() {
+    [[ $(prefs_get machine_type) == "desktop" ]]
+}
+
+mt_is_laptop() {
+    [[ $(prefs_get machine_type) == "laptop" ]]
+}
+
+mp_is_personal() {
+    [[ $(prefs_get machine_purpose) == "personal" ]]
+}
+
+mp_is_work() {
+    [[ $(prefs_get machine_purpose) == "work" ]]
+}

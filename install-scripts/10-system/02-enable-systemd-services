@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/prefs"
+
+sudo systemctl daemon-reload
+
+if ! systemctl is-enabled --quiet sddm.service; then
+    sudo systemctl enable sddm.service
+fi
+
+print_step Done

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+focused_workspace_id=$(niri msg --json workspaces | jq -r '.[] | select(.is_focused) | .id')
+
+if [[ -z "$focused_workspace_id" ]]; then
+    exit 0
+fi
+
+windows_json=$(niri msg --json windows)
+focused_window_id=$(jq -r '.[] | select(.is_focused) | .id' <<<"$windows_json")
+
+mapfile -t column_indices < <(
+    jq -r --argjson workspace_id "$focused_workspace_id" '
+        [
+            .[]
+            | select(.workspace_id == $workspace_id)
+            | select(.is_floating | not)
+            | .layout.pos_in_scrolling_layout[0]
+        ]
+        | unique
+        | sort
+        | .[]
+    ' <<<"$windows_json"
+)
+
+column_count=${#column_indices[@]}
+
+if (( column_count == 0 )); then
+    exit 0
+fi
+
+if (( column_count == 1 )); then
+    center_column_index=${column_indices[0]}
+    center_width="100%"
+    side_width="100%"
+else
+    center_column_index=${column_indices[column_count / 2]}
+    center_width="50%"
+    side_width=$(awk -v count="$column_count" 'BEGIN { printf "%.6f%%", 50 / (count - 1) }')
+fi
+
+for column_index in "${column_indices[@]}"; do
+    niri msg action focus-column "$column_index"
+
+    if [[ "$column_index" == "$center_column_index" ]]; then
+        niri msg action set-column-width "$center_width"
+    else
+        niri msg action set-column-width "$side_width"
+    fi
+done
+
+niri msg action center-visible-columns
+
+if [[ -n "$focused_window_id" ]]; then
+    niri msg action focus-window --id "$focused_window_id"
+fi

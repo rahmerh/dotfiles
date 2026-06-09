@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+source_icon="$SCRIPT_DIR/../assets/icons/spotify-monochrome.svg"
+target_dir="/opt/spotify/icons"
+
+if ! command -v magick &>/dev/null; then
+    print_error "ImageMagick is required to patch Spotify tray icons"
+    exit 1
+fi
+
+if [[ ! -d "$target_dir" ]]; then
+    print_step "Spotify icon directory not found, skipping"
+    exit 0
+fi
+
+temp_dir="$(mktemp -d)"
+
+for size in 16 22 24 32 48 64 128 256 512; do
+    magick "$source_icon" -background white -resize "${size}x${size}" \
+        -alpha off -colorspace Gray -negate \
+        "$temp_dir/spotify-linux-$size-mask.png"
+
+    magick -size "${size}x${size}" canvas:white \
+        "$temp_dir/spotify-linux-$size-mask.png" -alpha off \
+        -compose CopyAlpha -composite \
+        "$temp_dir/spotify-linux-$size.png"
+
+    sudo install -m 0644 "$temp_dir/spotify-linux-$size.png" \
+        "$target_dir/spotify-linux-$size.png"
+done
+
+print_step Done

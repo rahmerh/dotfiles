@@ -1,0 +1,15 @@
+[text]
+format = "{gpu_utilization}% | {mem_utilization}%"
+
+[tooltip]
+format = """GPU: {gpu_utilization}%
+MEM USED: {mem_used:MiB.0}/{mem_total:MiB} MiB ({mem_utilization}%)
+MEM R/W: {mem_rw}%
+DEC: {decoder_utilization}%
+ENC: {encoder_utilization}%
+TEMP: {temperature:c}°C
+POWER: {power:w}W
+PSTATE: {p_state}
+PLEVEL: {p_level}
+FAN SPEED: {fan_speed}%
+"""

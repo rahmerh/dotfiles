@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+get_active_profile_dir() {
+    local profiles_base_dir="$1"
+    local matches=()
+
+    while IFS= read -r -d '' match; do
+        matches+=("$match")
+    done < <(find "$profiles_base_dir" -type f -name 'prefs.js' -print0)
+
+    if (( "${#matches[@]}" == 0 )); then
+        print_error "No Firefox profile directory found in '$profiles_base_dir'"
+        return 0
+    fi
+
+    if (( "${#matches[@]}" > 1 )); then
+        print_error "Multiple Firefox profile directories found in '$profiles_base_dir'. Profile selection is not implemented."
+        return 0
+    fi
+
+    dirname "${matches[0]}"
+}

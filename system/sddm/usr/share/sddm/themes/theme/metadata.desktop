@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Theme
+Description=Local SDDM greeter theme
+Author=Bas
+License=MIT
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=theme
+Theme-API=2.2
+QtVersion=6

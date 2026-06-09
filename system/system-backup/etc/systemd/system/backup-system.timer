@@ -1,0 +1,9 @@
+[Unit]
+Description=Run backup-system at boot
+
+[Timer]
+OnBootSec=1min
+Unit=backup-system.service
+
+[Install]
+WantedBy=timers.target

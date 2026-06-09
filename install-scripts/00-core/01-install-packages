@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/prefs"
+. "$SCRIPT_DIR/../lib/wine"
+
+if ! command -v yay &>/dev/null; then
+    sudo pacman -S --needed git base-devel --noconfirm
+
+    temp_dir=$(mktemp -d)
+
+    git clone https://aur.archlinux.org/yay.git "$temp_dir"
+
+    cd "$temp_dir" || exit 1
+
+    makepkg -si
+
+    yay -Y --gendb --noconfirm
+    yay -Syu --devel --noconfirm
+    yay -Y --devel --save --noconfirm
+fi
+
+cli_packages=(
+    neovim
+    kitty
+    bat
+    eza
+    fzf
+    ripgrep
+    jq
+    stow
+    tealdeer
+    fastfetch
+    yazi
+    lazygit
+    lazydocker
+    openai-codex-bin
+    httpie
+    lazysql
+    sax
+)
+
+system_packages=(
+    curl
+    pv
+    gnupg
+    wireguard-tools
+    ufw
+    keychain
+    rsync
+    jmtpfs
+    cifs-utils
+    croc
+)
+
+media_packages=(
+    7zip
+    wine
+    winetricks
+    imagemagick
+    ffmpeg
+    bc
+    pastel
+    xmlstarlet
+    wl-clipboard
+    wf-recorder
+    wl-mirror
+    wiremix
+    playerctl
+    libnotify
+)
+
+gui_packages=(
+    firefox
+    rofi
+    feh
+    nvidia-container-toolkit
+    pinta
+    ripdrag
+    waybar
+    spotify
+)
+
+wm_packages=(
+    niri
+    swaybg
+    wired
+    grim
+    slurp
+    xdg-desktop-portal
+    xdg-desktop-portal-gnome
+    xdg-desktop-portal-termfilechooser-hunkyburrito-git
+    xorg-xrandr
+    xwayland-satellite
+    hypridle
+    hyprlock
+    sddm
+    qt6-5compat
+    qt6-imageformats
+)
+
+font_packages=(
+    ttf-jetbrains-mono-nerd
+    ttf-cascadia-code-nerd
+)
+
+dev_packages=(
+    npm
+    bun
+    go
+    gopls
+    bash-language-server
+    typescript
+    typescript-language-server
+    vue-language-server
+    vscode-css-languageserver
+    vscode-html-languageserver
+    vscode-json-languageserver
+    cspell-lsp
+    shellcheck
+    qt5-tools
+    luarocks
+    lua-language-server
+    docker
+    docker-buildx
+    docker-compose
+    clang
+    rust-analyzer
+    codelldb-bin
+    android-tools
+    dotnet-sdk
+    netcoredbg
+    buf
+)
+
+desktop_packages=(
+    openrazer-meta
+    audiorelay
+    gamemode
+    discord
+    steam
+    razer-cli
+    openrgb
+)
+
+laptop_packages=(
+    logiops
+    blueman
+)
+
+work_packages=(
+    rofi-rbw
+    github-copilot-cli
+    google-chrome
+    visual-studio-code-bin
+    gitlab-ci-local
+    slack-desktop
+    delve
+    flutter
+)
+
+if mt_is_laptop; then
+    mt_packages=("${laptop_packages[@]}")
+
+    if ! systemctl is-enabled --quiet logid.service; then
+        sudo systemctl enable --now logid.service
+    fi
+elif mt_is_desktop; then
+    mt_packages=("${desktop_packages[@]}")
+else
+    print_error "Unknown machine type"
+    exit 1
+fi
+
+if mp_is_work; then
+    mt_packages+=("${work_packages[@]}")
+fi
+
+print_step "Installing packages"
+
+yay --needed -S \
+    "${cli_packages[@]}" \
+    "${system_packages[@]}" \
+    "${media_packages[@]}" \
+    "${gui_packages[@]}" \
+    "${font_packages[@]}" \
+    "${dev_packages[@]}" \
+    "${wm_packages[@]}" \
+    "${mt_packages[@]}" \
+    --noconfirm
+
+print_step "Installing manual packages"
+
+if ! command -v rustc &>/dev/null; then
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+fi
+
+if ! command -v pass-cli &>/dev/null; then
+    curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
+fi
+
+cargo install --locked tree-sitter-cli
+cargo install --locked zoxide
+cargo install gpu-usage-waybar
+cargo install cargo-edit
+
+if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx easydotnet; then
+    dotnet tool install --global EasyDotnet
+fi
+
+print_step "Installing yazi plugins"
+
+/usr/bin/ya pkg install
+
+print_step "Installing apps in wine"
+
+if mt_is_desktop; then
+    install_package_in_cache dotnet48
+    install_package_in_cache vcrun2022
+    install_package_in_cache corefonts
+
+    # Mod organizer 2
+    install_package_from_cache dotnet48 modorganizer
+    install_package_from_cache vcrun2022 modorganizer
+    install_package_from_cache corefonts modorganizer
+
+    install_exe_in_app "https://aka.ms/vs/17/release/vc_redist.x64.exe" "vc_redistx64_installer.exe" modorganizer
+
+    install_wine_app modorganizer ModOrganizer2/modorganizer
+fi
+
+print_step Done

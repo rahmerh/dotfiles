@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+. "$SCRIPT_DIR/../lib/prefs"
+
+copy_system_package() {
+    local package="$1"
+
+    print_step "Copying $package"
+
+    sudo bash -s -- "$package" <<'EOF'
+package="$1"
+base_dir="$(pwd)/$package"
+
+mapfile -d '' files < <(find "$base_dir" -type f -print0)
+
+for entry in "${files[@]}"; do
+    target="/${entry/$base_dir/}"
+    target_dirname=$(dirname "$target")
+    mode=$(stat -c '%a' "$entry")
+
+    install \
+        --directory \
+        --owner=root \
+        --group=root \
+        --mode=0755 \
+        "$target_dirname"
+
+    target_tmp=$(mktemp "$target_dirname/.${target##*/}.XXXXXX")
+
+    install \
+        --owner=root \
+        --group=root \
+        --mode="$mode" \
+        --no-target-directory \
+        "$entry" \
+        "$target_tmp"
+
+    mv --force --no-target-directory "$target_tmp" "$target"
+done
+EOF
+}
+
+cd system || exit 1
+
+copy_system_package sysctl
+copy_system_package sddm
+copy_system_package system-backup
+
+if mt_is_laptop; then
+    copy_system_package logid
+fi
+
+print_step "Done"

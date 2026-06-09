@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/niri"
+wallpaper_state="$state_dir/wallpaper"
+sddm_wallpaper="/var/lib/dotfiles/sddm/background"
+
+sync_sddm_wallpaper() {
+    local source=$1
+    local target_dir
+    local target_tmp
+
+    target_dir=$(dirname "$sddm_wallpaper")
+    target_tmp=$(mktemp "$target_dir/.background.XXXXXX") || return 1
+
+    if ! install --mode=0644 -- "$source" "$target_tmp" ||
+        ! mv --force --no-target-directory "$target_tmp" "$sddm_wallpaper"; then
+        rm --force -- "$target_tmp"
+        return 1
+    fi
+}
+
+current_wallpaper=""
+[[ -r "$wallpaper_state" ]] && current_wallpaper="$(<"$wallpaper_state")"
+
+if [[ -z "$current_wallpaper" ]]; then
+    while IFS= read -r swaybg_process; do
+        [[ "$swaybg_process" =~ [[:space:]]-i[[:space:]]([^[:space:]]+) ]] || continue
+        current_wallpaper="${BASH_REMATCH[1]}"
+        break
+    done < <(pgrep -a swaybg)
+fi
+
+shopt -s nullglob nocaseglob
+wallpapers=("$HOME/Pictures/wallpapers"/*.{jpg,jpeg,png,webp})
+shopt -u nullglob nocaseglob
+
+(( ${#wallpapers[@]} )) || {
+    notify-send "No wallpapers found"
+    exit 1
+}
+
+candidates=("${wallpapers[@]}")
+
+if (( ${#wallpapers[@]} > 1 )) && [[ -n "$current_wallpaper" ]]; then
+    candidates=()
+
+    for wallpaper in "${wallpapers[@]}"; do
+        [[ "$wallpaper" == "$current_wallpaper" ]] && continue
+        candidates+=("$wallpaper")
+    done
+fi
+
+random_wallpaper="${candidates[RANDOM % ${#candidates[@]}]}"
+
+mkdir -p "$state_dir"
+printf '%s\n' "$random_wallpaper" > "$wallpaper_state"
+
+if ! sync_sddm_wallpaper "$random_wallpaper"; then
+    notify-send "Failed to update SDDM wallpaper"
+fi
+
+pkill swaybg
+swaybg -i "$random_wallpaper" -m fill &

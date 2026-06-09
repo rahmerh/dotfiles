@@ -1,0 +1,6 @@
+[Unit]
+Description=Send system backup notification
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env bash %h/.local/bin/backup-system-notify
