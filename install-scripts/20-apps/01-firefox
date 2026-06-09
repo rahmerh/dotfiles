@@ -118,7 +118,7 @@ install_extension sponsorblock
 install_extension return-youtube-dislikes
 install_extension control-panel-for-youtube
 install_extension proton-pass
-install_extension ublock-origin
+install_extension adnauseam
 
 set_user_preference "browser.toolbars.bookmarks.visibility" '"never"'
 set_user_preference "toolkit.legacyUserProfileCustomizations.stylesheets" 'true'
