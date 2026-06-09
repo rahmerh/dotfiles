@@ -1,33 +1,25 @@
 #!/usr/bin/env bash
 
-store_dir=${1:-$HOME/.password-store}
-
-if [[ ! -d "$store_dir" ]]; then
-    notify-send "Password store" "No password store found at $store_dir"
-    exit 1
-fi
-
-mapfile -t entries < <(
-    fd \
-        --base-directory "$store_dir" \
-        --type f \
-        --extension gpg \
-        --format '{.}' |
-        sort
+entries=$(
+    while IFS= read -r vault; do
+        pass-cli item list \
+            --filter-type login \
+            --filter-state active \
+            --sort-by alphabetic-asc \
+            --output json \
+            "$vault" |
+            jq -r --arg vault "$vault" '
+                .items[] |
+                ["\(.title) [\($vault)]", "pass://\(.share_id)/\(.id)/password"] |
+                @tsv
+            '
+    done < <(pass-cli vault list --output json | jq -r '.vaults[].name')
 )
 
-if (( ${#entries[@]} == 0 )); then
-    exit 0
-fi
-
-selection=$(printf '%s\n' "${entries[@]}" | rofi -dmenu -i -p "Password")
+selection=$(printf '%s\n' "$entries" | rofi -dmenu -i -p "Password" -display-columns 1)
 
 [[ -n "$selection" ]] || exit 0
 
-entry=$(pass show "$selection")
-password=$(sed -n 's/^password: //p' <<< "$entry" | head -n 1)
+password=$(pass-cli item view "${selection#*$'\t'}") || exit 1
 
-if ! printf '%s' "${password:-$entry}" | wl-copy; then
-    notify-send "Password store" "Failed to copy $selection"
-    exit 1
-fi
+printf '%s' "$password" | wl-copy --sensitive --paste-once
