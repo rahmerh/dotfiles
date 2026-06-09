@@ -28,6 +28,7 @@ cli_packages=(
     bat
     eza
     fzf
+    fd
     ripgrep
     jq
     stow

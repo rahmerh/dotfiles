@@ -119,6 +119,7 @@ binds {
     Ctrl+Shift+L { spawn "hyprlock"; }
 
     Mod+B { spawn "rofi-rbw"; }
+    Mod+P repeat=false { spawn-sh "~/.config/rofi/scripts/password-store.sh"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
