@@ -90,6 +90,10 @@ animations {
 
 prefer-no-csd
 
+environment {
+    PROTON_PASS_LINUX_KEYRING "dbus"
+}
+
 spawn-at-startup "wired" "--run"
 spawn-at-startup "waybar"
 spawn-at-startup "steam" "-silent"
@@ -97,6 +101,7 @@ spawn-at-startup "discord" "--start-minimized"
 spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
+spawn-sh-at-startup "~/.local/bin/pass-cli ssh-agent daemon start"
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
 spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"

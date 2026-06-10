@@ -10,6 +10,8 @@ export LIBDECOR_DISABLE=1
 
 export CHROME_EXECUTABLE=/usr/bin/google-chrome-stable
 export DOCKER_BUILDKIT=1
+export PROTON_PASS_LINUX_KEYRING=dbus
+export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 
 path_add() {
     case ":$PATH:" in

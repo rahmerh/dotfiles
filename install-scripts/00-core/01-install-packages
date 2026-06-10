@@ -50,7 +50,6 @@ system_packages=(
     gnupg
     wireguard-tools
     ufw
-    keychain
     rsync
     jmtpfs
     cifs-utils
@@ -88,6 +87,7 @@ gui_packages=(
 
 wm_packages=(
     niri
+    gnome-keyring
     swaybg
     wired
     grim
