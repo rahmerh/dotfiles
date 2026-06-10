@@ -1,5 +1,7 @@
 # Linux dotfiles for Arch-based distros
 
-## apply
+## How to use
 
-Idempotent install script, designed to be run multiple times. Sets up the complete system, prompts for prefs when required.
+Clone this repo to `~/dotfiles` and run `./apply`.
+
+This is an idempotent provisioning script, designed to be run multiple times. Sets up the complete system, prompts for prefs when required.

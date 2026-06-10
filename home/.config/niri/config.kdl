@@ -102,6 +102,7 @@ spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.local/bin/pass-cli ssh-agent daemon start"
+spawn-sh-at-startup "~/.local/bin/sync-password-store"
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
 spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"
@@ -123,8 +124,7 @@ binds {
 
     Ctrl+Shift+L { spawn "hyprlock"; }
 
-    Mod+B { spawn "rofi-rbw"; }
-    Mod+P repeat=false { spawn-sh "~/.config/rofi/scripts/password-store.sh"; }
+    Mod+B repeat=false { spawn "rofi-rbw"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
