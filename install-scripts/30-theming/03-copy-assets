@@ -12,6 +12,7 @@ mkdir -p "$wallpapers_dir"
 
 cp "$SCRIPT_DIR/../assets/icons/screenshot.png" "$icon_dir"
 cp "$SCRIPT_DIR/../assets/icons/backup.png" "$icon_dir"
+cp "$SCRIPT_DIR/../assets/icons/password-key.png" "$icon_dir"
 
 shopt -s nullglob nocaseglob
 wallpapers=("$SCRIPT_DIR/../assets/wallpapers"/*.{jpg,jpeg,png,webp})
