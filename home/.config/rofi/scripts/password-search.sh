@@ -13,17 +13,17 @@ fi
 if [[ -z "${1:-}" ]]; then
     jq -r '
         sort_by(.title | ascii_downcase)[] |
-        [.share_id, .id, .title] |
+        [.title, .share_id, .id] |
         @tsv
     ' "$passwords_file" |
-        while IFS=$'\t' read -r share_id item_id title; do
-            printf '%s\t%s\0display\x1f%s\x1fmeta\x1f%s\n' \
-                "$share_id" "$item_id" "$title" "$title"
+        while IFS=$'\t' read -r title share_id item_id; do
+            printf '%s\t%s\t%s\0display\x1f%s\n' \
+                "$title" "$share_id" "$item_id" "$title"
         done
     exit 0
 fi
 
-IFS=$'\t' read -r share_id item_id <<<"$1"
+IFS=$'\t' read -r _ share_id item_id <<<"$1"
 
 password=$("$pass_cli" item view \
         --share-id "$share_id" \
