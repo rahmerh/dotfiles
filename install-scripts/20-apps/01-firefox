@@ -133,6 +133,7 @@ set_user_preference "browser.search.order.1" '"DuckDuckGo"'
 set_user_preference "browser.search.privateDefault" '"DuckDuckGo"'
 set_user_preference "browser.startup.homepage" "$(printf "%s" "$firefox_homepage_url" | jq -R .)"
 set_user_preference "browser.startup.page" '1'
+set_user_preference "browser.sessionstore.resume_from_crash" 'false'
 
 set_user_preference "signon.rememberSignons" 'false'
 set_user_preference "signon.autofillForms" 'false'
