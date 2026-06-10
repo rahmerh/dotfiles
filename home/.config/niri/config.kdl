@@ -125,6 +125,7 @@ binds {
     Ctrl+Shift+L { spawn "hyprlock"; }
 
     Mod+B repeat=false { spawn "rofi-rbw"; }
+    Mod+P repeat=false { spawn "rofi" "-show" "password-search"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
