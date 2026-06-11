@@ -40,7 +40,6 @@ cli_packages=(
     openai-codex-bin
     httpie
     lazysql
-    sax
     systemctl-tui
 )
 
@@ -208,6 +207,7 @@ cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
 cargo install gpu-usage-waybar
 cargo install cargo-edit
+cargo install sax
 
 if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx easydotnet; then
     dotnet tool install --global EasyDotnet
