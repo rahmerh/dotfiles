@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+log_dir="$HOME/.cache/proton-pass"
+startup_log="$log_dir/startup.log"
+
+mkdir -p "$log_dir"
+chmod 700 "$log_dir"
+exec >>"$startup_log" 2>&1
+
+printf '\n[%(%Y-%m-%d %H:%M:%S)T] Waiting for GNOME Keyring\n' -1
+
+for ((attempt = 1; attempt <= 30; attempt++)); do
+    keyring_state=$(
+        busctl --user get-property \
+            org.freedesktop.secrets \
+            /org/freedesktop/secrets/collection/login \
+            org.freedesktop.Secret.Collection \
+            Locked 2>/dev/null
+    )
+
+    if [[ $keyring_state == "b false" ]]; then
+        break
+    fi
+
+    sleep 1
+done
+
+if ((attempt > 30)); then
+    printf 'GNOME Keyring login collection was not ready after 30 seconds\n'
+    exit 1
+fi
+
+printf 'Starting Proton Pass SSH agent\n'
+~/.local/bin/pass-cli ssh-agent daemon start \
+    --log-file "$log_dir/ssh-agent.log" || exit 1
+
+printf 'Syncing password store\n'
+sync-password-store

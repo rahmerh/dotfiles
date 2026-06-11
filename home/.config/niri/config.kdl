@@ -12,14 +12,14 @@ hotkey-overlay {
     skip-at-startup
 }
 
-output "Samsung Electric Company LC49G95T H4ZR401290" {
-    scale 1.0
-    mode "5120x1440@119.999"
-}
-
 output "Dell Inc. DELL P2722HE 11CWDH3" {
     scale 1.0
     mode "1920x1080@60.00"
+}
+
+output "Samsung Electric Company LS27A800U H4ZT101647" {
+    scale 1.5
+    mode "3840x2160@59.997"
 }
 
 layout {
@@ -101,8 +101,7 @@ spawn-at-startup "discord" "--start-minimized"
 spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
-spawn-sh-at-startup "~/.local/bin/pass-cli ssh-agent daemon start"
-spawn-sh-at-startup "~/.local/bin/sync-password-store"
+spawn-sh-at-startup "~/.local/bin/start-proton-pass-services"
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
 spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"
