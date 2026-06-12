@@ -35,4 +35,4 @@ printf 'Starting Proton Pass SSH agent\n'
     --log-file "$log_dir/ssh-agent.log" || exit 1
 
 printf 'Syncing password store\n'
-sync-password-store
+~/.local/bin/sync-password-store

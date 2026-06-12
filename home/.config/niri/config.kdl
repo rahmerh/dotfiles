@@ -125,7 +125,7 @@ binds {
 
     Mod+B repeat=false { spawn "rofi-rbw"; }
     Mod+P repeat=false {
-        spawn "rofi" "-show" "password-search" "-sorting-method" "fzf";
+        spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
     }
 
     Mod+Q { close-window; }

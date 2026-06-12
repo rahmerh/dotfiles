@@ -12,8 +12,8 @@ fi
 
 if [[ -z "${1:-}" ]]; then
     jq -r '
-        sort_by(.title | ascii_downcase)[] |
-        [.title, .share_id, .id] |
+        sort_by(.content.title | ascii_downcase)[] |
+        [.content.title, .share_id, .id] |
         @tsv
     ' "$passwords_file" |
         while IFS=$'\t' read -r title share_id item_id; do
