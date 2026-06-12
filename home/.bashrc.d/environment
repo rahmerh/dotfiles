@@ -13,6 +13,8 @@ export DOCKER_BUILDKIT=1
 export PROTON_PASS_LINUX_KEYRING=dbus
 export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 
+export TODO_DIR="$HOME/Documents/todo"
+
 path_add() {
     case ":$PATH:" in
         *":$1:"*) ;;

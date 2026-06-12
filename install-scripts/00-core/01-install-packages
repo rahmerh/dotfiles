@@ -208,6 +208,7 @@ cargo install --locked zoxide
 cargo install gpu-usage-waybar
 cargo install cargo-edit
 cargo install sax
+cargo install --git https://github.com/webstonehq/tuxedo
 
 if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx easydotnet; then
     dotnet tool install --global EasyDotnet
