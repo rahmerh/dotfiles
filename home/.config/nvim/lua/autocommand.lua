@@ -58,6 +58,21 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+local csharpier = require("lib.csharpier")
+
+vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = "cs",
+    desc = "Auto start csharpier server",
+    callback = csharpier.start,
+})
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+    group = group,
+    desc = "Stop the CSharpier server",
+    callback = csharpier.stop,
+})
+
 local function supports_format(buffer)
     return #vim.lsp.get_clients({
         bufnr = buffer,
@@ -72,6 +87,11 @@ vim.api.nvim_create_autocmd("BufWritePre", {
             local view = vim.fn.winsaveview()
             vim.cmd([[%!clang-format --assume-filename=% --style='{BasedOnStyle: Google, IndentWidth: 4}']])
             vim.fn.winrestview(view)
+            return
+        end
+
+        if vim.bo[event.buf].filetype == "cs" then
+            csharpier.format(event.buf)
             return
         end
 

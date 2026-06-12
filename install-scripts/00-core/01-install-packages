@@ -213,6 +213,10 @@ if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx easydotnet; then
     dotnet tool install --global EasyDotnet
 fi
 
+if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx csharpier; then
+    dotnet tool install --global CSharpier
+fi
+
 print_step "Installing yazi plugins"
 
 /usr/bin/ya pkg install
