@@ -69,7 +69,9 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     group = group,
     callback = function(event)
         if vim.bo[event.buf].filetype == "proto" and vim.fn.executable("clang-format") == 1 then
+            local view = vim.fn.winsaveview()
             vim.cmd([[%!clang-format --assume-filename=% --style='{BasedOnStyle: Google, IndentWidth: 4}']])
+            vim.fn.winrestview(view)
             return
         end
 

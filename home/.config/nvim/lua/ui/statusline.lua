@@ -37,42 +37,50 @@ local function cache_current_git_branch(bufnr)
     end
 
     local dir = vim.fn.fnamemodify(fname, ":h")
-    local git_root = vim.fn.systemlist(
-        "git -C " .. vim.fn.shellescape(dir) .. " rev-parse --show-toplevel 2>/dev/null"
-    )[1]
 
-    if vim.v.shell_error ~= 0 or not git_root or git_root == "" then
-        git_cache[bufnr] = { branch = "", status = "clean" }
-        return
-    end
-
-    local branch = vim.fn.systemlist(
-        "git -C " .. vim.fn.shellescape(git_root) .. " rev-parse --abbrev-ref HEAD 2>/dev/null"
-    )[1]
-
-    if vim.v.shell_error ~= 0 or not branch or branch == "" or branch == "HEAD" then
-        git_cache[bufnr] = { branch = "", status = "clean" }
-        return
-    end
-
-    local status_lines = vim.fn.systemlist(
-        "git -C " .. vim.fn.shellescape(git_root) .. " status --porcelain=v2 --branch 2>/dev/null"
-    )
-
-    local dirty = false
-    if vim.v.shell_error == 0 and status_lines and #status_lines > 0 then
-        for _, line in ipairs(status_lines) do
-            if not line:match("^#") then
-                dirty = true
-                break
-            end
+    local function store(entry)
+        if not vim.api.nvim_buf_is_valid(bufnr) then
+            return
         end
+        git_cache[bufnr] = entry
+        vim.cmd.redrawstatus()
     end
 
-    git_cache[bufnr] = {
-        branch = " " .. branch,
-        status = dirty and "dirty" or "clean",
-    }
+    vim.system(
+        { "git", "-C", dir, "rev-parse", "--abbrev-ref", "HEAD" },
+        { text = true },
+        function(branch_result)
+            if branch_result.code ~= 0 then
+                vim.schedule(function()
+                    store({ branch = "", status = "clean" })
+                end)
+                return
+            end
+
+            local branch = vim.trim(branch_result.stdout or "")
+            if branch == "" or branch == "HEAD" then
+                vim.schedule(function()
+                    store({ branch = "", status = "clean" })
+                end)
+                return
+            end
+
+            vim.system(
+                { "git", "-C", dir, "status", "--porcelain" },
+                { text = true },
+                function(status_result)
+                    local dirty = status_result.code == 0 and vim.trim(status_result.stdout or "") ~= ""
+
+                    vim.schedule(function()
+                        store({
+                            branch = " " .. branch,
+                            status = dirty and "dirty" or "clean",
+                        })
+                    end)
+                end
+            )
+        end
+    )
 end
 
 local function git_branch()
@@ -181,6 +189,13 @@ function M.setup()
         group = group,
         callback = function(args)
             cache_current_git_branch(args.buf)
+        end,
+    })
+
+    vim.api.nvim_create_autocmd("BufDelete", {
+        group = group,
+        callback = function(args)
+            git_cache[args.buf] = nil
         end,
     })
 end

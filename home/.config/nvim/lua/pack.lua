@@ -1,3 +1,5 @@
+local files = require("lib.files")
+
 vim.pack.add({
     "https://github.com/Mofiqul/vscode.nvim",
     "https://github.com/nvim-lua/plenary.nvim",
@@ -9,13 +11,9 @@ vim.pack.add({
     "https://github.com/mfussenegger/nvim-dap",
     "https://github.com/rcarriga/nvim-dap-ui",
     "https://github.com/nvim-neotest/nvim-nio",
-    "https://github.com/Weissle/persistent-breakpoints.nvim",
     "https://github.com/nvim-neotest/neotest",
     "https://github.com/nsidorenco/neotest-vstest",
-    "https://github.com/RRethy/vim-illuminate",
-    "https://github.com/numToStr/Comment.nvim",
     "https://github.com/danymat/neogen",
-    "https://github.com/echasnovski/mini.hipatterns",
     "https://github.com/petertriho/nvim-scrollbar",
 })
 
@@ -79,12 +77,6 @@ vim.api.nvim_create_autocmd("FileType", {
     desc = "Enable treesitter highlighting",
 })
 
--- Illuminate
-require("illuminate").configure({
-    delay = 100,
-    disable_keymaps = true,
-})
-
 -- Completion
 require("blink.cmp").setup({
     keymap = {
@@ -110,6 +102,14 @@ require("blink.cmp").setup({
         default = { "lsp", "path", "snippets", "buffer" },
     },
 })
+
+-- rustaceanvim manages rust-analyzer itself and does not auto-detect blink, so
+-- pass blink's capabilities explicitly (matching the other LSP servers).
+vim.g.rustaceanvim = {
+    server = {
+        capabilities = require("blink.cmp").get_lsp_capabilities(),
+    },
+}
 
 -- Dotnet
 local function setup_easy_dotnet()
@@ -142,15 +142,51 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Neotest
+--
+-- rustaceanvim's neotest adapter root() shells out to `cargo metadata` and reads
+-- vim.env synchronously. neotest probes every registered adapter's root() inside
+-- an async (fast event) context, where those calls raise E5560. Replace root()
+-- with a fast-safe filesystem walk so probing non-Rust projects (e.g. dotnet) no
+-- longer crashes neotest.
+local rust_neotest = require("rustaceanvim.neotest")
+
+rust_neotest.root = function(path)
+    local markers = vim.fs.find({ "Cargo.toml", "rust-project.json" }, {
+        upward = true,
+        path = path,
+    })
+    if #markers == 0 then
+        return nil
+    end
+
+    local workspace_root = vim.fs.dirname(markers[1])
+
+    for dir in vim.fs.parents(markers[1]) do
+        local manifest = dir .. "/Cargo.toml"
+        if vim.uv.fs_stat(manifest) then
+            local content = files.read(manifest)
+            if content and content:match("%f[%[]%[workspace%]") then
+                workspace_root = dir
+            end
+        end
+    end
+
+    return workspace_root
+end
+
 require("neotest").setup({
     adapters = {
         require("neotest-vstest"),
-        require("rustaceanvim.neotest"),
+        rust_neotest,
     },
 })
 
--- Comment.nvim
-require("Comment").setup()
+-- neotest-vstest emits positions of type "parameterized", which neotest's
+-- status consumer never registers a sign for, causing E155 on sign_place.
+vim.fn.sign_define("neotest_parameterized", {
+    text = require("neotest.config").icons.namespace,
+    texthl = require("neotest.config").highlights.namespace,
+})
 
 -- Neogen
 require("neogen").setup({
@@ -161,14 +197,6 @@ require("neogen").setup({
                 annotation_convention = "xmldoc",
             },
         },
-    },
-})
-
--- Hipatterns
-local hipatterns = require("mini.hipatterns")
-hipatterns.setup({
-    highlighters = {
-        hex_color = hipatterns.gen_highlighter.hex_color(),
     },
 })
 

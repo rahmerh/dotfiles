@@ -5,7 +5,6 @@ vim.g.maplocalleader = " "
 
 -- General
 vim.keymap.set("n", "<Space>", "<Nop>", options)
-vim.keymap.set("n", "<leader>r", "<CMD>source %<CR>", options)
 
 -- Better split navigation
 vim.keymap.set("n", "<C-l>", "<C-w>l", options)
@@ -14,12 +13,17 @@ vim.keymap.set("n", "<C-j>", "<C-w>j", options)
 vim.keymap.set("n", "<C-k>", "<C-w>k", options)
 
 -- Editing
-vim.keymap.set("n", "D", "dd", options)
-vim.keymap.set("n", "Y", "yy", options)
-
 vim.keymap.set("n", "L", "<CMD>bnext<CR>", options)
 vim.keymap.set("n", "H", "<CMD>bprev<CR>", options)
-vim.keymap.set("n", "Q", "<CMD>bd<CR>", options)
+
+vim.keymap.set("n", "<leader>q", function()
+    local cur = vim.api.nvim_get_current_buf()
+    vim.cmd("bprevious")
+    if vim.api.nvim_get_current_buf() == cur then
+        vim.cmd("enew")
+    end
+    vim.cmd("bdelete " .. cur)
+end, options)
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", options)
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", options)
@@ -128,7 +132,9 @@ vim.keymap.set("n", "<F10>", "<cmd>DapStepOver<cr>", options)
 vim.keymap.set("n", "<F11>", "<cmd>DapStepInto<cr>", options)
 vim.keymap.set("n", "<S-F11>", "<cmd>DapStepOut<cr>", options)
 vim.keymap.set("n", "<S-F5>", "<cmd>DapTerminate<cr>", options)
-vim.keymap.set("n", "<C-b>", "<cmd>PBToggleBreakpoint<cr>", options)
+vim.keymap.set("n", "<C-b>", function()
+    require("debug.breakpoints").toggle()
+end, options)
 vim.keymap.set("n", "<leader>dl", "<cmd>DapToggleRepl<cr>", options)
 
 -- Workflow
@@ -167,7 +173,9 @@ vim.keymap.set("n", "<C-.>", "<cmd>lua vim.lsp.buf.code_action()<CR>", options)
 vim.keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<cr>", options)
 vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<cr>", options)
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", options)
-vim.keymap.set("n", "R", "<cmd>lua vim.lsp.buf.rename()<cr>", options)
+vim.keymap.set("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", options)
+
+vim.keymap.set("n", "<leader>rr", "<cmd>Dotnet lsp restart<cr>", options)
 
 vim.keymap.set("n", "<leader>cc", function()
     require("neogen").generate()

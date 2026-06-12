@@ -19,9 +19,10 @@ vim.o.hlsearch = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.o.scrolloff = 8
+vim.o.updatetime = 250
 
 -- Layout
-vim.o.cmdheight = 3
+vim.o.cmdheight = 1
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.numberwidth = 4

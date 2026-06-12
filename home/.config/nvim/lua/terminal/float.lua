@@ -62,7 +62,6 @@ function M.spawn(command, label, on_exit, opts)
 
     local job_id = vim.fn.jobstart(command, {
         term = true,
-        pty = true,
         on_exit = on_exit,
         cwd = opts.cwd,
     })

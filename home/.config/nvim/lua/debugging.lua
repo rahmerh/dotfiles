@@ -1,6 +1,7 @@
 local M = {}
 
 local dotnet = require("debug.dotnet")
+local breakpoints = require("debug.breakpoints")
 
 function M.setup()
     local dap = require("dap")
@@ -36,10 +37,7 @@ function M.setup()
     dap.listeners.before.event_terminated.dapui_config = dapui.close
     dap.listeners.before.event_exited.dapui_config = dapui.close
 
-    require("persistent-breakpoints").setup({
-        save_dir = vim.fn.stdpath("data") .. "/nvim_checkpoints",
-        load_breakpoints_event = { "BufReadPost" },
-    })
+    breakpoints.setup()
 
     vim.fn.sign_define("DapBreakpoint", {
         text = "●",

@@ -48,7 +48,7 @@ function M.setup()
         callback = apply_highlights,
     })
 
-    vim.api.nvim_create_autocmd({ "BufModifiedSet", "BufWritePost", "TextChanged", "TextChangedI" }, {
+    vim.api.nvim_create_autocmd({ "BufModifiedSet", "BufWritePost", "BufEnter", "BufAdd", "BufDelete" }, {
         group = group,
         callback = function()
             vim.cmd.redrawtabline()
