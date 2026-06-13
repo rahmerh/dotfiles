@@ -180,9 +180,42 @@ if mp_is_work; then
     mt_packages+=("${work_packages[@]}")
 fi
 
-print_step "Installing packages"
+install_packages() {
+    local package
+    local repo_package
+    local -A repo_package_names=()
+    local repo_packages=()
+    local aur_packages=()
 
-yay --needed -S \
+    print_step "Mapping AUR packages"
+    while IFS= read -r repo_package; do
+        repo_package_names["$repo_package"]=1
+    done < <(pacman -Slq)
+
+    for package in "$@"; do
+        if [[ -v "repo_package_names[$package]" ]]; then
+            repo_packages+=("$package")
+        else
+            aur_packages+=("$package")
+        fi
+    done
+
+    if ((${#repo_packages[@]})); then
+        print_step "Installing/updating repository packages"
+        sudo pacman --needed -S --noconfirm "${repo_packages[@]}"
+    fi
+
+    for package in "${aur_packages[@]}"; do
+        print_step "Reviewing AUR package: $package"
+        yay --aur --needed -S \
+            --diffmenu \
+            --answerdiff All \
+            --confirm \
+            "$package"
+    done
+}
+
+install_packages \
     "${cli_packages[@]}" \
     "${system_packages[@]}" \
     "${media_packages[@]}" \
@@ -190,8 +223,7 @@ yay --needed -S \
     "${font_packages[@]}" \
     "${dev_packages[@]}" \
     "${wm_packages[@]}" \
-    "${mt_packages[@]}" \
-    --noconfirm
+    "${mt_packages[@]}"
 
 print_step "Installing manual packages"
 
