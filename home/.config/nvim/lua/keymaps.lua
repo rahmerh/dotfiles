@@ -16,14 +16,17 @@ vim.keymap.set("n", "<C-k>", "<C-w>k", options)
 vim.keymap.set("n", "L", "<CMD>bnext<CR>", options)
 vim.keymap.set("n", "H", "<CMD>bprev<CR>", options)
 
-vim.keymap.set("n", "<leader>q", function()
-    local cur = vim.api.nvim_get_current_buf()
-    vim.cmd("bprevious")
-    if vim.api.nvim_get_current_buf() == cur then
-        vim.cmd("enew")
+local function close_buffer()
+    if #vim.fn.getbufinfo({ buflisted = 1 }) > 1 then
+        local current = vim.api.nvim_get_current_buf()
+        vim.cmd("bnext")
+        vim.cmd("bdelete " .. current)
+    else
+        vim.cmd("close")
     end
-    vim.cmd("bdelete " .. cur)
-end, options)
+end
+
+vim.keymap.set("n", "Q", close_buffer, options)
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", options)
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", options)
