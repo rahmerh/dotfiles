@@ -139,7 +139,6 @@ dev_packages=(
 
 desktop_packages=(
     openrazer-meta
-    audiorelay
     gamemode
     discord
     steam
