@@ -1,0 +1,10 @@
+[Unit]
+Description=Run proton pass password store sync hourly
+
+[Timer]
+OnStartupSec=5min
+OnUnitActiveSec=1h
+Unit=proton-pass-sync.service
+
+[Install]
+WantedBy=timers.target

@@ -11,4 +11,10 @@ if ! systemctl is-enabled --quiet sddm.service; then
     sudo systemctl enable sddm.service
 fi
 
+systemctl --user daemon-reload
+
+if ! systemctl --user is-enabled --quiet proton-pass-sync.timer; then
+    systemctl --user enable --now proton-pass-sync.timer
+fi
+
 print_step Done
