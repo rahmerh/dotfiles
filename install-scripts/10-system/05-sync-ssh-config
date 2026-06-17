@@ -1,20 +1,5 @@
 #!/usr/bin/env bash
 
-# Regenerates ~/.ssh/config and per-key public key files from the SSH key items
-# stored in Proton Pass. Each SSH key item is expected to define a "Host" extra
-# field (and optionally a "Username" extra field); the item title becomes the
-# public key file name.
-#
-# Pinning every host to a single key with IdentitiesOnly stops the agent from
-# blindly offering all loaded keys, which otherwise trips MaxAuthTries on hosts
-# such as sourcehut.
-#
-# Nothing produced here is tracked in this repo: the generated config block and
-# public keys live only on the target machine, so the list of services stays
-# private.
-
-set -euo pipefail
-
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
@@ -24,31 +9,16 @@ ssh_dir="$HOME/.ssh"
 config_file="$ssh_dir/config"
 agent_sock="$ssh_dir/proton-pass-agent.sock"
 keys_dir="$ssh_dir/proton-keys"
-block_begin="# >>> proton-pass (managed by 05-sync-ssh-config) >>>"
-block_end="# <<< proton-pass (managed by 05-sync-ssh-config) <<<"
+block_begin="# >>> proton-pass (managed by dotfiles) >>>"
+block_end="# <<< proton-pass (managed by dotfiles) <<<"
 
-if [[ ! -x $pass_cli ]]; then
-    print_error "pass-cli not found at $pass_cli"
-    exit 1
-fi
-
-if ! command -v jq >/dev/null; then
-    print_error "jq is required but not installed"
-    exit 1
-fi
-
-# Lowercase, collapse anything that is not a-z0-9 into a single dash, trim dashes.
 slugify() {
     printf '%s' "$1" \
         | tr '[:upper:]' '[:lower:]' \
         | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
 }
 
-mkdir -p "$ssh_dir"
-chmod 700 "$ssh_dir"
-
-# Recreate the managed key directory from scratch so removed/renamed items do
-# not leave stale public keys behind.
+# Recreate the managed key directory
 rm -rf "$keys_dir"
 mkdir -p "$keys_dir"
 chmod 700 "$keys_dir"
@@ -103,30 +73,30 @@ for vault in "${vaults[@]}"; do
         block+="    IdentityAgent $agent_sock"$'\n'
         block+=$'\n'
 
-        print_step "Pinned $host -> $slug.pub"
+        print_step "$host -> $slug.pub"
         count=$((count + 1))
     done < <(printf '%s' "$items_json" | jq -r '(.items // .)[] | [.share_id, .id] | @tsv')
 done
 
 block+=$block_end
 
-# Splice the managed block into ~/.ssh/config, preserving anything the user
-# maintains by hand outside the markers.
 tmp=$(mktemp)
+
 if [[ -f $config_file ]]; then
     awk -v b="$block_begin" -v e="$block_end" '
         $0 == b { skip = 1 }
         skip && $0 == e { skip = 0; next }
         !skip { print }
     ' "$config_file" >"$tmp"
-    # Drop a trailing blank line so we do not accumulate gaps on every run.
+
     sed -i -e :a -e '/^\n*$/{$d;N;ba}' "$tmp"
+
     [[ -s $tmp ]] && printf '\n' >>"$tmp"
 fi
+
 printf '%s\n' "$block" >>"$tmp"
 
 mv "$tmp" "$config_file"
 chmod 600 "$config_file"
 
-print_step "Wrote $count host(s) to $config_file"
 print_step Done

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+log_dir="$HOME/.cache/proton-pass"
+log_file="$log_dir/ssh-agent.log"
+
+mkdir -p "$log_dir"
+chmod 700 "$log_dir"
+exec >>"$log_file" 2>&1
+
+printf '\n[%(%Y-%m-%d %H:%M:%S)T] Starting Proton Pass SSH agent\n' -1
+
+for ((attempt = 1; attempt <= 3; attempt++)); do
+    printf 'Attempt %d/3\n' "$attempt"
+
+    if ~/.local/bin/pass-cli ssh-agent daemon start --log-file "$log_file"; then
+        break
+    fi
+
+    printf 'Proton Pass SSH agent start failed\n'
+
+    ((attempt == 3)) && exit 1
+
+    sleep 1
+done
