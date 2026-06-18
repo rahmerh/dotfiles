@@ -75,11 +75,15 @@ Rectangle {
             width: passwordField.width
             height: passwordField.height
             color: "#a6000000"
+            radius: 12
 
             Rectangle {
-                width: 10
-                height: parent.height
-                color: "#e1579c"
+                x: 12
+                anchors.verticalCenter: parent.verticalCenter
+                width: 6
+                height: parent.height - 16
+                radius: 3
+                color: "#d16e9e"
             }
 
             TextInput {
@@ -114,13 +118,17 @@ Rectangle {
             width: 420
             height: 70
             color: "#a6000000"
+            radius: 12
 
             Rectangle {
-                width: 10
-                height: parent.height
+                x: 12
+                anchors.verticalCenter: parent.verticalCenter
+                width: 6
+                height: parent.height - 16
+                radius: 3
                 color: root.loginFailed ? "#ff3117"
                     : root.authenticating ? "#ffffff"
-                    : "#e1579c"
+                    : "#d16e9e"
 
                 SequentialAnimation on opacity {
                     running: root.authenticating && !root.loginFailed

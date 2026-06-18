@@ -5,11 +5,11 @@
 }
 
 #battery.warning:not(.charging) {
-    color: #f0c674;
+    color: #c9b687;
 }
 
 #battery.critical:not(.charging) {
-    color: #e1579c;
+    color: @accent;
 }
 
 #cpu {
@@ -17,7 +17,7 @@
 }
 
 #custom-divider {
-    color: #e1579c;
+    color: alpha(@muted, .6);
     padding: 0 5px;
     font-size: 18px;
 }
@@ -29,16 +29,18 @@
 #workspaces button {
     all: unset;
     padding: 0 4px;
-    color: #d6d9e0;
+    color: @subtext;
+    transition: color .25s ease, text-shadow .25s ease;
 }
 
 #workspaces button.empty {
-    color: rgba(214, 217, 224, .45);
+    color: alpha(@subtext, .40);
 }
 
 #workspaces button.active,
 #workspaces button.focused {
-    color: #e1579c;
+    color: @accent;
+    text-shadow: 0 0 8px alpha(@accent, .55);
 }
 
 #pulseaudio-slider {
@@ -51,7 +53,7 @@
     min-width: 2px;
     background-image: none;
     border: none;
-    background: #d6d9e0;
+    background: @silver;
     box-shadow: 0 0 0 1px alpha(@background, .8);
 }
 
@@ -59,11 +61,11 @@
     min-height: 8px;
     min-width: 100px;
     border-radius: 4px;
-    background: alpha(#d6d9e0, .18);
+    background: alpha(@silver, .16);
 }
 
 #pulseaudio-slider highlight {
     min-width: 8px;
     border-radius: 4px;
-    background: #e1579c;
+    background: @silver;
 }

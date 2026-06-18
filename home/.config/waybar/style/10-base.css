@@ -1,28 +1,29 @@
 * {
     font-size: 15px;
     font-family: "CaskaydiaCove Nerd Font Propo";
+    color: @silver;
 }
 
-window#waybar{
-    all:unset;
+window#waybar {
+    all: unset;
 }
 
-.modules-left > widget > label.module,
-.modules-left > widget > box.module,
-.modules-right > widget > label.module,
-.modules-right > widget > box.module {
-    padding: 7px 11px;
-    border-radius: 3px;
-    background: alpha(@background, .6);
+.modules-left>widget>label.module,
+.modules-left>widget>box.module,
+.modules-right>widget>label.module,
+.modules-right>widget>box.module {
+    padding: 7px 12px;
+    border-radius: 9px;
+    background: alpha(@background, .55);
     box-shadow: 3px -3px 5px rgba(50, 50, 50, .4);
 }
 
-.modules-left > widget > label.module,
-.modules-left > widget > box.module {
-    margin: 5px 0 5px 10px;
+.modules-left>widget>label.module,
+.modules-left>widget>box.module {
+    margin: 6px 0 6px 10px;
 }
 
-.modules-right > widget > label.module,
-.modules-right > widget > box.module {
-    margin: 5px 10px 5px 0;
+.modules-right>widget>label.module,
+.modules-right>widget>box.module {
+    margin: 6px 10px 6px 0;
 }

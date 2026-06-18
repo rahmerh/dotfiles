@@ -1,1 +1,8 @@
-@define-color background #0E0F14;
+@define-color background #0A0B0E;
+@define-color surface    #101216;
+@define-color text       #E6E8EC;
+@define-color subtext    #A8AEB8;
+@define-color muted      #6B7079;
+@define-color silver     #D7DCE3;
+@define-color accent     #D16E9E;
+@define-color edge       #FFFFFF;

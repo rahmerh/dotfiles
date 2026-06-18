@@ -18,47 +18,50 @@ configuration {
 }
 
 * {
-    bg:              #111111f2;
-    bg-alt:          #181818f2;
-    bg-hover:        #202020f2;
+    bg:              #0A0B0Edd;
+    bg-alt:          #101216cc;
+    bg-hover:        #FFFFFF14;
 
-    fg:              #e8e8e8;
-    fg-muted:        #999999;
+    fg:              #E6E8EC;
+    fg-muted:        #8A9099;
 
-    accent:          #e1579c;
-    accent-soft:     #e1579c22;
+    accent:          #D16E9E;
+    edge:            #FFFFFF14;
 
     spacing:         10px;
-    radius:          5px;
+    radius:          14px;
 }
 
 window {
     width: 1000px;
-    height: 400px;
+    height: 420px;
 
     background-color: @bg;
 
-    border: 0px;
+    border: 1px;
+    border-color: @edge;
     border-radius: @radius;
 
-    padding: 0px;
+    padding: 8px;
 }
 
 mainbox {
     background-color: transparent;
-    spacing: 0px;
+    spacing: 8px;
+    padding: 4px;
 }
 
 inputbar {
     background-color: @bg-alt;
 
-    border: 0px;
-    border-radius: 0px;
+    border: 1px;
+    border-color: @edge;
+    border-radius: 10px;
 
-    padding: 9px 11px;
-    spacing: 8px;
+    padding: 11px 13px;
+    spacing: 9px;
 
-    children: [ entry ];
+    children: [ prompt, entry ];
 }
 
 prompt {
@@ -67,7 +70,7 @@ prompt {
     background-color: transparent;
     text-color: @accent;
 
-    padding: 0px 2px 0px 0px;
+    padding: 0px 4px 0px 0px;
 }
 
 entry {
@@ -84,8 +87,9 @@ listview {
     lines: 8;
     columns: 1;
 
-    spacing: 5px;
+    spacing: 3px;
     fixed-height: false;
+    padding: 4px 2px;
 
     scrollbar: false;
 }
@@ -95,18 +99,18 @@ element {
     text-color: @fg;
 
     border: 0px;
-    border-radius: 0px;
+    border-radius: 9px;
 
-    padding: 8px 10px;
-    spacing: 9px;
+    padding: 9px 11px;
+    spacing: 10px;
 }
 
 element selected {
     background-color: @bg-hover;
-    text-color: @fg;
+    text-color: #FFFFFF;
 
     border: 0px;
-    border-radius: 0px;
+    border-radius: 9px;
 }
 
 element-icon {

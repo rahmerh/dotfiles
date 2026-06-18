@@ -23,30 +23,45 @@ output "Samsung Electric Company LS27A800U H4ZT101647" {
 }
 
 layout {
-    gaps 10
+    gaps 12
 
     focus-ring {
         on
-        width 1
-        active-color "#E85A98"
+        width 2
+        active-color "#D16E9E"
+        inactive-color "#FFFFFF14"
     }
 
     default-column-width { proportion 0.5; }
 
    shadow {
         on
-        softness 10
-        spread 5
-        offset x=0 y=0
-        draw-behind-window true
-        color "#00000070"
-        inactive-color "#00000054"
+        softness 32
+        spread 4
+        offset x=0 y=14
+        draw-behind-window false
+        color "#00000099"
+        inactive-color "#00000066"
     }
 }
 
 animations {
+    slowdown 1.05
+
     workspace-switch {
-        spring damping-ratio=0.80 stiffness=1500 epsilon=0.0001
+        spring damping-ratio=0.88 stiffness=1100 epsilon=0.0001
+    }
+
+    window-resize {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+
+    window-movement {
+        spring damping-ratio=0.92 stiffness=900 epsilon=0.0001
+    }
+
+    horizontal-view-movement {
+        spring damping-ratio=0.92 stiffness=900 epsilon=0.0001
     }
 
     window-open {
@@ -174,7 +189,7 @@ window-rule {
 }
 
 window-rule {
-    geometry-corner-radius 5
+    geometry-corner-radius 10
     clip-to-geometry true
     draw-border-with-background false
 }
