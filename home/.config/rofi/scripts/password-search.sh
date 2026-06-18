@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-passwords_file="$HOME/.cache/password-store/entries.json"
+passwords_file="$HOME/.cache/proton-pass/entries.json"
 pass_cli="$HOME/.local/bin/pass-cli"
 notification_icon="$HOME/Pictures/icons/password-key.png"
 
@@ -12,8 +12,15 @@ fi
 
 if [[ -z "${1:-}" ]]; then
     jq -r '
-        sort_by(.content.title | ascii_downcase)[] |
-        [.content.title, .share_id, .id] |
+        map(select(
+            .state == "Active" and
+            .item_type == "login" and
+            (.title | type == "string") and
+            (.share_id | type == "string") and
+            (.id | type == "string")
+        )) |
+        sort_by(.title | ascii_downcase)[] |
+        [.title, .share_id, .id] |
         @tsv
     ' "$passwords_file" |
         while IFS=$'\t' read -r title share_id item_id; do
