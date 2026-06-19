@@ -87,6 +87,7 @@ gui_packages=(
 wm_packages=(
     niri
     gnome-keyring
+    python
     swaybg
     wired
     grim

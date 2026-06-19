@@ -1,0 +1,7 @@
+{
+    "custom/runcat": {
+        "exec": "$HOME/.local/share/waybar/runcat-text/.venv/bin/python $HOME/.local/share/waybar/runcat-text/main.py",
+        "return-type": "json",
+        "restart-interval": 1
+    }
+}

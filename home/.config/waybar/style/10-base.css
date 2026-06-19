@@ -15,7 +15,6 @@ window#waybar {
     padding: 7px 12px;
     border-radius: 9px;
     background: alpha(@background, .55);
-    box-shadow: 3px -3px 5px rgba(50, 50, 50, .4);
 }
 
 .modules-left>widget>label.module,

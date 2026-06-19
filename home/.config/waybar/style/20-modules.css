@@ -30,7 +30,7 @@
     all: unset;
     padding: 0 4px;
     color: @subtext;
-    transition: color .25s ease, text-shadow .25s ease;
+    transition: color .25s ease;
 }
 
 #workspaces button.empty {
@@ -40,7 +40,26 @@
 #workspaces button.active,
 #workspaces button.focused {
     color: @accent;
-    text-shadow: 0 0 8px alpha(@accent, .55);
+}
+
+#custom-runcat {
+    min-width: 28px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-family: "runcat";
+    font-size: 22px;
+}
+
+#custom-runcat.low {
+    color: @subtext;
+}
+
+#custom-runcat.medium {
+    color: @silver;
+}
+
+#custom-runcat.high {
+    color: @accent;
 }
 
 #pulseaudio-slider {
@@ -54,7 +73,6 @@
     background-image: none;
     border: none;
     background: @silver;
-    box-shadow: 0 0 0 1px alpha(@background, .8);
 }
 
 #pulseaudio-slider trough {
