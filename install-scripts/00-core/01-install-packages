@@ -130,6 +130,7 @@ dev_packages=(
     docker-buildx
     docker-compose
     clang
+    rust
     rust-analyzer
     codelldb-bin
     android-tools
@@ -226,10 +227,6 @@ install_packages \
     "${mt_packages[@]}"
 
 print_step "Installing manual packages"
-
-if ! command -v rustc &>/dev/null; then
-    curl https://sh.rustup.rs -sSf | sh -s -- -y
-fi
 
 if ! command -v pass-cli &>/dev/null; then
     curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
