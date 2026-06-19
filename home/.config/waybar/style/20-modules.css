@@ -43,23 +43,12 @@
 }
 
 #custom-runcat {
-    min-width: 28px;
+    min-width: 30px;
     padding-left: 10px;
     padding-right: 10px;
     font-family: "runcat";
-    font-size: 22px;
-}
-
-#custom-runcat.low {
-    color: @subtext;
-}
-
-#custom-runcat.medium {
-    color: @silver;
-}
-
-#custom-runcat.high {
-    color: @accent;
+    font-size: 30px;
+    color: #ffffff;
 }
 
 #pulseaudio-slider {

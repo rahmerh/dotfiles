@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Minimal runcat indicator for Waybar.
+#
+# Animates the runcat font glyphs at a steady pace: faster while media is
+# playing (detected via playerctl) and slower when idle. Colour is handled
+# entirely in the Waybar stylesheet.
+#
+# Runcat font (c) 2023 Bezuglov Viktor, (c) 2021 Yongsheng Xu (BSD-2-Clause).
+
+# Seconds per frame. Lower = faster animation, higher = slower.
+speed_playing=0.08
+speed_idle=0.15
+
+frames=($'\ue900' $'\ue901' $'\ue902' $'\ue903' $'\ue904')
+idx=0
+
+while :; do
+    status="$(playerctl status 2>/dev/null)"
+
+    if [[ "$status" == "Playing" ]]; then
+        delay="$speed_playing"
+        class="playing"
+    else
+        delay="$speed_idle"
+        class="paused"
+    fi
+
+    if [[ -n "$status" ]]; then
+        tooltip="Music ${status,,}"
+    else
+        tooltip="No player"
+    fi
+
+    # Animate for ~1 second, then re-check the player status.
+    deadline=$(( SECONDS + 1 ))
+    while (( SECONDS < deadline )); do
+        printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' \
+            "${frames[idx]}" "$tooltip" "$class"
+        idx=$(( (idx + 1) % ${#frames[@]} ))
+        sleep "$delay"
+    done
+done
