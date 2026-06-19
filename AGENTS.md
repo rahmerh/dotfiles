@@ -2,17 +2,16 @@
 
 ## Project Structure & Module Organization
 
-This repository manages an Arch-based workstation through dotfiles and install scripts. `home/` is a GNU Stow package: its hidden paths mirror the target home directory, for example `home/.config/nvim/` and `home/.bashrc.d/`. `system/` contains files copied into system locations, grouped by feature such as `system/sddm/` and `system/system-backup/`.
+This repository manages an Arch-based workstation through dotfiles and install scripts. `home/` is a GNU Stow package: its hidden paths mirror the target home directory, for example `home/.config/nvim/` and `home/.bashrc.d/`. `system/` contains files copied into system locations, grouped by feature such as `system/sddm/`, `system/system-backup/`, `system/logid/`, and `system/sysctl/`.
 
-Provisioning lives in `install-scripts/`. Numbered directories and scripts define execution order (`00-core/01-install-packages`, `30-theming/04-firefox`). Shared Bash helpers are in `install-scripts/lib/`; wallpapers and icons are in `install-scripts/assets/`. The root entry points are `apply` for post-install configuration and `install-arch` for a live-medium Arch installation.
+Provisioning lives in `install-scripts/`. Numbered directories and the scripts inside them define execution order, sorted with `sort -V`: `00-core` (packages, stow, system files, git, login shell), `10-system` (groups, services, firewall, backups, SSH), `20-apps` (firefox, docker), and `30-theming` (system theme, assets, firefox, icons, SDDM wallpaper). Shared Bash helpers are in `install-scripts/lib/` (`print`, `prefs`, `firefox`, `wine`); wallpapers and icons are in `install-scripts/assets/`. The root entry point is `apply`, which performs post-install configuration; it prompts for machine type and purpose and persists them to `.prefs`.
 
 ## Build, Test, and Development Commands
 
-- `./apply`: validates and runs every executable installer in version order, then stows `home/`. Expect package installs, `sudo`, and machine-specific prompts.
-- `./install-arch`: installs Arch from live media. It partitions a selected disk; read the script before running it.
-- `stow --target="$HOME" home`: apply only the home dotfile package when system provisioning is not needed.
-- `bash -n apply install-arch install-scripts/00-core/01-install-packages`: syntax-check changed Bash entry points and scripts.
-- `shellcheck --exclude=SC1091 apply install-arch install-scripts/00-core/01-install-packages`: lint changed Bash entry points and scripts; dynamic helper imports cannot be resolved statically.
+- `./apply`: validates and runs every executable installer in version order; stowing `home/` is itself an installer (`00-core/02-stow-dotfiles`). Expect package installs, `sudo`, and machine-specific prompts.
+- `stow --target="$HOME" home`: apply only the home dotfile package when system provisioning is not needed. (The installer instead uses a custom `force_stow` that removes conflicting real files before stowing.)
+- `bash -n apply install-scripts/00-core/01-install-packages`: syntax-check changed Bash entry points and scripts.
+- `shellcheck --exclude=SC1091 apply install-scripts/00-core/01-install-packages`: lint changed Bash entry points and scripts; dynamic helper imports cannot be resolved statically.
 
 There is no compiled build step in this repository.
 
@@ -30,7 +29,7 @@ The repository does not currently define an automated test suite or coverage tar
 
 ## Commit & Pull Request Guidelines
 
-Recent history uses short, free-form summaries such as `Sddm theme` and `Copy system files...`; keep commit subjects concise and focused on one behavior. Pull requests should describe the target machine context, list changed provisioning or config paths, call out privileged or destructive steps, and include screenshots for visible theme, SDDM, Waybar, or window-manager changes.
+Recent history uses short, free-form summaries such as `Install rust from arch` and `Add runcat to waybar`; keep commit subjects concise and focused on one behavior. Pull requests should describe the target machine context, list changed provisioning or config paths, call out privileged or destructive steps, and include screenshots for visible theme, SDDM, Waybar, or window-manager changes.
 
 ## Security & Configuration Tips
 
