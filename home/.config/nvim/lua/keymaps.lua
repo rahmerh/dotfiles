@@ -95,6 +95,10 @@ vim.keymap.set("n", "<leader>co", function()
     floatterm.activate("codex")
 end, options)
 
+vim.keymap.set("n", "<leader>cp", function()
+    floatterm.activate("copilot")
+end, options)
+
 -- Build
 vim.keymap.set("n", "<leader>b", function()
     build.project()
