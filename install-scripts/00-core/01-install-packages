@@ -115,6 +115,7 @@ dev_packages=(
     go
     gopls
     bash-language-server
+    shfmt
     typescript
     typescript-language-server
     vue-language-server

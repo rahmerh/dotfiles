@@ -95,6 +95,13 @@ vim.api.nvim_create_autocmd("BufWritePre", {
             return
         end
 
+        if vim.tbl_contains({ "bash", "sh" }, vim.bo[event.buf].filetype) and vim.fn.executable("shfmt") == 1 then
+            local view = vim.fn.winsaveview()
+            vim.cmd([[%!shfmt -i 4 -ci -bn]])
+            vim.fn.winrestview(view)
+            return
+        end
+
         if supports_format(event.buf) then
             vim.lsp.buf.format({
                 bufnr = event.buf,
