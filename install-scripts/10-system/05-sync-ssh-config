@@ -64,7 +64,7 @@ for vault in "${vaults[@]}"; do
         slug=$(slugify "$title")
         pub_file="$keys_dir/$slug.pub"
         printf '%s\n' "$pubkey" >"$pub_file"
-        chmod 644 "$pub_file"
+        chmod 600 "$pub_file"
 
         block+="Host $host"$'\n'
         [[ -n $user ]] && block+="    User $user"$'\n'
