@@ -45,6 +45,13 @@ layout {
     }
 }
 
+blur {
+    passes 2
+    offset 0.5 
+    noise 0.01
+    saturation 1.0
+}
+
 animations {
     slowdown 1.05
 

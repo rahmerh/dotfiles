@@ -14,12 +14,12 @@
     padding: 7px 12px;
     margin: 6px 0 6px 0;
     border-radius: 6px 0 0 6px;
-    background: alpha(@background, .55);
+    background: alpha(@background, .45);
 }
 
 #audio {
     padding: 7px 12px;
     margin: 6px 0 6px 0;
     border-radius: 6px 0 0 6px;
-    background: alpha(@background, .55);
+    background: alpha(@background, .45);
 }
