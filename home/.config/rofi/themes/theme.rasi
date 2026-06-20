@@ -34,7 +34,7 @@ configuration {
 
 window {
     width: 1000px;
-    height: 420px;
+    height: 400px;
 
     background-color: @bg;
 
@@ -42,30 +42,29 @@ window {
     border-color: @edge;
     border-radius: @radius;
 
-    padding: 8px;
+    padding: 0px;
 }
 
 mainbox {
     background-color: transparent;
-    spacing: 8px;
-    padding: 4px;
+    spacing: 0px;
+    padding: 0px;
 }
 
 inputbar {
     background-color: @bg-alt;
 
-    border: 1px;
-    border-color: @edge;
-    border-radius: 10px;
+    border: 0px;
+    border-radius: 0px;
 
-    padding: 11px 13px;
-    spacing: 9px;
+    padding: 9px 11px;
+    spacing: 8px;
 
-    children: [ prompt, entry ];
+    children: [ entry ];
 }
 
 prompt {
-    enabled: true;
+    enabled: false;
 
     background-color: transparent;
     text-color: @accent;
@@ -87,9 +86,9 @@ listview {
     lines: 8;
     columns: 1;
 
-    spacing: 3px;
+    spacing: 0px;
     fixed-height: false;
-    padding: 4px 2px;
+    padding: 0px;
 
     scrollbar: false;
 }
@@ -99,10 +98,10 @@ element {
     text-color: @fg;
 
     border: 0px;
-    border-radius: 9px;
+    border-radius: 0px;
 
-    padding: 9px 11px;
-    spacing: 10px;
+    padding: 8px 10px;
+    spacing: 9px;
 }
 
 element selected {
@@ -110,7 +109,7 @@ element selected {
     text-color: #FFFFFF;
 
     border: 0px;
-    border-radius: 9px;
+    border-radius: 0px;
 }
 
 element-icon {
