@@ -67,12 +67,12 @@
 #pulseaudio-slider trough {
     min-height: 8px;
     min-width: 100px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: alpha(@silver, .16);
 }
 
 #pulseaudio-slider highlight {
     min-width: 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     background: @silver;
 }

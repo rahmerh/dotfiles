@@ -13,7 +13,7 @@ window#waybar {
 .modules-right>widget>label.module,
 .modules-right>widget>box.module {
     padding: 7px 12px;
-    border-radius: 9px;
+    border-radius: 6px;
     background: alpha(@background, .55);
 }
 

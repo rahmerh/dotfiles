@@ -1,11 +1,11 @@
 /* Most right module, disable border radius to the left, custom expand should be there */
 #network {
-    border-radius: 0 9px 9px 0;
+    border-radius: 0 6px 6px 0;
     padding-left: 0px;
 }
 
 #pulseaudio {
-    border-radius: 0 9px 9px 0;
+    border-radius: 0 6px 6px 0;
     padding-left: 0px;
 }
 
@@ -13,13 +13,13 @@
 #hardware {
     padding: 7px 12px;
     margin: 6px 0 6px 0;
-    border-radius: 9px 0 0 9px;
+    border-radius: 6px 0 0 6px;
     background: alpha(@background, .55);
 }
 
 #audio {
     padding: 7px 12px;
     margin: 6px 0 6px 0;
-    border-radius: 9px 0 0 9px;
+    border-radius: 6px 0 0 6px;
     background: alpha(@background, .55);
 }
