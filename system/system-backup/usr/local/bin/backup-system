@@ -15,7 +15,7 @@ STATUS_FILE="$BACKUP_DIR/status"
 # EXCLUDES="/.cache:/.local/share/Trash"
 
 install --directory --owner=root --group=root --mode=0755 "$BACKUP_DIR"
-: > "$LOG_FILE"
+: >"$LOG_FILE"
 chmod 0644 "$LOG_FILE"
 
 log() {
@@ -23,7 +23,7 @@ log() {
 }
 
 write_status() {
-    printf '%s\t%s\t%s\n' "$(date --iso-8601=seconds)" "$1" "$2" > "$STATUS_FILE"
+    printf '%s\t%s\t%s\n' "$(date --iso-8601=seconds)" "$1" "$2" >"$STATUS_FILE"
     chmod 0644 "$STATUS_FILE"
 }
 
@@ -38,7 +38,6 @@ trap 'fail "System backup interrupted."' INT TERM
 today="$(date +%F)"
 if [[ -r "$LAST_SUCCESS_FILE" ]] && [[ "$(cat "$LAST_SUCCESS_FILE")" == "$today" ]]; then
     log "System backup already completed today."
-    write_status completed "System backup already completed today."
     exit 0
 fi
 
@@ -47,7 +46,7 @@ fi
 # shellcheck disable=SC1090
 source "$CONF_FILE"
 
-IFS=":" read -r -a sources <<< "$BACKUP_DIRS"
+IFS=":" read -r -a sources <<<"$BACKUP_DIRS"
 
 rsync_args=(
     -a
@@ -59,7 +58,7 @@ rsync_args=(
 )
 
 if [[ -n "${EXCLUDES:-}" ]]; then
-    IFS=":" read -r -a excludes <<< "$EXCLUDES"
+    IFS=":" read -r -a excludes <<<"$EXCLUDES"
     for exclude in "${excludes[@]}"; do
         rsync_args+=(--exclude="$exclude")
     done
@@ -71,7 +70,7 @@ log "Log: $LOG_FILE"
 write_status running "System backup started."
 
 if rsync "${rsync_args[@]}" "${sources[@]}" "$DESTINATION" 2>&1 | tee -a "$LOG_FILE"; then
-    printf '%s\n' "$today" > "$LAST_SUCCESS_FILE"
+    printf '%s\n' "$today" >"$LAST_SUCCESS_FILE"
     chmod 0644 "$LAST_SUCCESS_FILE"
     log "System backup completed."
     write_status completed "System backup completed."
