@@ -1,25 +1,175 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+pass_cli="$HOME/.local/bin/pass-cli"
+agent_sock="$HOME/.ssh/proton-pass-agent.sock"
+keys_dir="$HOME/.ssh/proton-keys"
 log_dir="$HOME/.cache/proton-pass"
 log_file="$log_dir/ssh-agent.log"
+initial_notify_after=60
+notify_interval=900
+check_interval=30
+agent_pid=""
+last_notify=0
+started_at=$(date +%s)
 
-mkdir -p "$log_dir"
-chmod 700 "$log_dir"
+mkdir -p "$HOME/.ssh" "$log_dir"
+chmod 700 "$HOME/.ssh" "$log_dir"
+
 exec >>"$log_file" 2>&1
 
-printf '\n[%(%Y-%m-%d %H:%M:%S)T] Starting Proton Pass SSH agent\n' -1
+log() {
+    printf '[%(%Y-%m-%d %H:%M:%S)T] %s\n' -1 "$*"
+}
 
-max_attempts=10
-for ((attempt = 1; attempt <= max_attempts; attempt++)); do
-    printf "Attempt %d/$max_attempts\n" "$attempt"
+cleanup() {
+    if [[ -n $agent_pid ]] && kill -0 "$agent_pid" 2>/dev/null; then
+        log "Stopping Proton Pass SSH agent child process $agent_pid"
+        kill "$agent_pid" 2>/dev/null || true
+        wait "$agent_pid" 2>/dev/null || true
+    fi
+}
 
-    if ~/.local/bin/pass-cli ssh-agent daemon start --log-file "$log_file"; then
-        break
+shutdown() {
+    exit 0
+}
+
+notify_waiting() {
+    local now
+
+    command -v notify-send >/dev/null 2>&1 || return 0
+
+    now=$(date +%s)
+    ((now - started_at >= initial_notify_after)) || return 0
+    ((last_notify == 0 || now - last_notify >= notify_interval)) || return 0
+
+    notify-send \
+        "Proton Pass SSH keys not loaded" \
+        "Waiting for Proton Pass/keyring unlock; will keep retrying." \
+        || true
+    last_notify=$now
+}
+
+agent_is_running() {
+    [[ -n $agent_pid ]] && kill -0 "$agent_pid" 2>/dev/null
+}
+
+public_key_fingerprint() {
+    ssh-keygen -lf - 2>/dev/null | awk '$2 ~ /^SHA256:/ { print $2 }'
+}
+
+agent_responds() {
+    local status
+
+    [[ -S $agent_sock ]] || return 1
+
+    SSH_AUTH_SOCK="$agent_sock" ssh-add -l >/dev/null 2>&1
+    status=$?
+
+    # ssh-add exits 1 when the agent is reachable but has no identities.
+    [[ $status -eq 0 || $status -eq 1 ]]
+}
+
+start_agent() {
+    if [[ -e $agent_sock && ! -S $agent_sock ]]; then
+        log "Removing stale non-socket agent path: $agent_sock"
+        rm -f "$agent_sock"
+    elif [[ -S $agent_sock ]] && ! agent_responds; then
+        log "Removing stale unresponsive agent socket: $agent_sock"
+        rm -f "$agent_sock"
     fi
 
-    printf 'Proton Pass SSH agent start failed\n'
+    log "Starting Proton Pass SSH agent"
+    env PROTON_PASS_LINUX_KEYRING=dbus "$pass_cli" ssh-agent start \
+        --socket-path "$agent_sock" \
+        --refresh-interval "$check_interval" &
+    agent_pid=$!
+    log "Proton Pass SSH agent child process is $agent_pid"
+}
 
-    ((attempt == max_attempts)) && exit 1
+load_keys() {
+    PROTON_PASS_LINUX_KEYRING=dbus \
+        SSH_AUTH_SOCK="$agent_sock" \
+        "$pass_cli" ssh-agent load
+}
 
+list_expected_keys() {
+    find "$keys_dir" -maxdepth 1 -type f -name '*.pub' -print0 2>/dev/null \
+        | sort -z \
+        | while IFS= read -r -d '' public_key_file; do
+            public_key_fingerprint <"$public_key_file"
+        done \
+        | sort -u
+}
+
+list_loaded_keys() {
+    SSH_AUTH_SOCK="$agent_sock" ssh-add -l 2>/dev/null | awk '$2 ~ /^SHA256:/ { print $2 }' | sort -u
+}
+
+keys_are_loaded() {
+    local expected_file
+    local loaded_file
+    local missing_count
+
+    expected_file=$(mktemp)
+    loaded_file=$(mktemp)
+
+    if ! list_expected_keys >"$expected_file"; then
+        rm -f "$expected_file" "$loaded_file"
+        log "Could not read Proton Pass SSH key list"
+        return 1
+    fi
+
+    if [[ ! -s $expected_file ]]; then
+        rm -f "$expected_file" "$loaded_file"
+        log "No Proton Pass SSH keys found"
+        return 0
+    fi
+
+    if ! list_loaded_keys >"$loaded_file"; then
+        rm -f "$expected_file" "$loaded_file"
+        log "Could not read loaded SSH agent keys"
+        return 1
+    fi
+
+    missing_count=$(comm -23 "$expected_file" "$loaded_file" | wc -l)
+    rm -f "$expected_file" "$loaded_file"
+
+    if ((missing_count > 0)); then
+        log "$missing_count Proton Pass SSH key(s) are not loaded yet"
+        return 1
+    fi
+
+    log "All Proton Pass SSH keys are loaded"
+}
+
+trap cleanup EXIT
+trap shutdown INT TERM
+
+log "Preparing Proton Pass SSH agent supervisor"
+start_agent
+
+while true; do
+    if ! agent_is_running; then
+        log "Proton Pass SSH agent child process exited"
+        wait "$agent_pid" 2>/dev/null || true
+        start_agent
+    fi
+
+    if ! agent_responds; then
+        log "Waiting for SSH agent socket to become ready"
+        notify_waiting
+        sleep 3
+        continue
+    fi
+
+    if load_keys && keys_are_loaded; then
+        log "Initial Proton Pass SSH key load verified; keeping agent process alive"
+        wait "$agent_pid"
+        exit $?
+    fi
+
+    notify_waiting
     sleep 3
 done

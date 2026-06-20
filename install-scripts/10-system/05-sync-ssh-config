@@ -75,7 +75,10 @@ for vault in "${vaults[@]}"; do
 
         print_step "$host -> $slug.pub"
         count=$((count + 1))
-    done < <(printf '%s' "$items_json" | jq -r '(.items // .)[] | [.share_id, .id] | @tsv')
+    done < <(
+        printf '%s' "$items_json" \
+            | jq -r '(.items // .)[] | select(.state == "Active") | [.share_id, .id] | @tsv'
+    )
 done
 
 block+=$block_end

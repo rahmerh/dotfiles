@@ -13,6 +13,10 @@ fi
 
 systemctl --user daemon-reload
 
+if ! systemctl --user is-enabled --quiet proton-pass-ssh-agent.service; then
+    systemctl --user enable --now proton-pass-ssh-agent.service
+fi
+
 if ! systemctl --user is-enabled --quiet proton-pass-sync.timer; then
     systemctl --user enable --now proton-pass-sync.timer
 fi

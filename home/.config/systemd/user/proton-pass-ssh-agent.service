@@ -1,0 +1,15 @@
+[Unit]
+Description=Proton Pass SSH agent
+After=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Environment=PROTON_PASS_LINUX_KEYRING=dbus
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin
+ExecStart=%h/.local/bin/start-proton-pass-ssh-agent
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=default.target
