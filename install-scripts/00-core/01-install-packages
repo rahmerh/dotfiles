@@ -154,17 +154,6 @@ laptop_packages=(
     blueman
 )
 
-work_packages=(
-    rofi-rbw
-    github-copilot-cli
-    google-chrome
-    visual-studio-code-bin
-    gitlab-ci-local
-    slack-desktop
-    delve
-    flutter
-)
-
 if mt_is_laptop; then
     mt_packages=("${laptop_packages[@]}")
 
@@ -176,10 +165,6 @@ elif mt_is_desktop; then
 else
     print_error "Unknown machine type"
     exit 1
-fi
-
-if mp_is_work; then
-    mt_packages+=("${work_packages[@]}")
 fi
 
 install_packages() {

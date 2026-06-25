@@ -14,7 +14,6 @@ fi
 sudo -v || exit 1
 
 prefs_prompt_choose machine_type "Is this a desktop or laptop?" desktop laptop >/dev/null
-prefs_prompt_choose machine_purpose "Is this a personal or work machine?" personal work >/dev/null
 
 scripts=()
 invalid=0

@@ -37,7 +37,6 @@ trap 'fail "System backup interrupted."' INT TERM
 
 today="$(date +%F)"
 if [[ -r "$LAST_SUCCESS_FILE" ]] && [[ "$(cat "$LAST_SUCCESS_FILE")" == "$today" ]]; then
-    log "System backup already completed today."
     exit 0
 fi
 

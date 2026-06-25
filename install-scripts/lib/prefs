@@ -126,11 +126,3 @@ mt_is_desktop() {
 mt_is_laptop() {
     [[ $(prefs_get machine_type) == "laptop" ]]
 }
-
-mp_is_personal() {
-    [[ $(prefs_get machine_purpose) == "personal" ]]
-}
-
-mp_is_work() {
-    [[ $(prefs_get machine_purpose) == "work" ]]
-}
