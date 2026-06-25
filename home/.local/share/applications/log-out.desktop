@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Log Out
+Comment=End the current session
+Icon=log-out
+Exec=niri msg action quit --skip-confirmation
+Terminal=false
+Categories=System;
+Keywords=logout;log out;session;exit;

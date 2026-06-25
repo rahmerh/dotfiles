@@ -5,19 +5,30 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/../lib/print"
 
 icon_dir="$HOME/Pictures/icons"
+app_icon_dir="$HOME/.local/share/icons/hicolor/256x256/apps"
 wallpapers_dir="$HOME/Pictures/wallpapers"
 
 mkdir -p "$icon_dir"
+mkdir -p "$app_icon_dir"
 mkdir -p "$wallpapers_dir"
 
-cp "$SCRIPT_DIR/../assets/icons/screenshot.png" "$icon_dir"
-cp "$SCRIPT_DIR/../assets/icons/backup.png" "$icon_dir"
-cp "$SCRIPT_DIR/../assets/icons/password-key.png" "$icon_dir"
+shopt -s nullglob
+icons=("$SCRIPT_DIR/../assets/icons"/*.png)
+shopt -u nullglob
+
+if (( ${#icons[@]} > 0 )); then
+    cp "${icons[@]}" "$icon_dir"
+    cp "${icons[@]}" "$app_icon_dir"
+fi
 
 shopt -s nullglob nocaseglob
 wallpapers=("$SCRIPT_DIR/../assets/wallpapers"/*.{jpg,jpeg,png,webp})
 shopt -u nullglob nocaseglob
 
 cp "${wallpapers[@]}" "$wallpapers_dir"
+
+if [[ -f "$HOME/.local/share/icons/hicolor/index.theme" ]] && command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -q "$HOME/.local/share/icons/hicolor" || true
+fi
 
 print_step Done

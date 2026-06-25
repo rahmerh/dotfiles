@@ -129,7 +129,7 @@ spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"
 
 binds {
     Mod+Space {
-        spawn-sh "rofi -show combi -modi 'combi' -combi-modi 'drun,:~/.config/rofi/scripts/power-menu.sh' -display-drun ''"
+        spawn-sh "rofi -show drun -display-drun ''"
     }
 
     Mod+T { spawn "kitty"; }
