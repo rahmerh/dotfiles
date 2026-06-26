@@ -37,7 +37,6 @@ cli_packages=(
     yazi
     lazygit
     lazydocker
-    openai-codex-bin
     httpie
     lazysql
     systemctl-tui
@@ -110,10 +109,7 @@ font_packages=(
 )
 
 dev_packages=(
-    npm
     bun
-    go
-    gopls
     bash-language-server
     shfmt
     typescript
@@ -135,9 +131,6 @@ dev_packages=(
     rust-analyzer
     codelldb-bin
     android-tools
-    dotnet-sdk
-    netcoredbg
-    buf
 )
 
 desktop_packages=(
