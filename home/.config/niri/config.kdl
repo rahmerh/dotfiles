@@ -120,7 +120,6 @@ spawn-at-startup "wired" "--run"
 spawn-at-startup "waybar"
 spawn-at-startup "steam" "-silent"
 spawn-at-startup "discord" "--start-minimized"
-spawn-at-startup "hypridle"
 spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"

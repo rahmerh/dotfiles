@@ -96,7 +96,6 @@ wm_packages=(
     xdg-desktop-portal-termfilechooser-hunkyburrito-git
     xorg-xrandr
     xwayland-satellite
-    hypridle
     hyprlock
     sddm
     qt6-5compat
