@@ -2,6 +2,7 @@
     "custom/runcat": {
         "exec": "$HOME/.local/bin/waybar-runcat",
         "return-type": "json",
-        "restart-interval": 1
+        "restart-interval": 1,
+        "tooltip": false
     }
 }
