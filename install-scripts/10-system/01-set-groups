@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
 
-for group in plugdev openrazer docker libvirt; do
+for group in plugdev openrazer docker libvirt input; do
     getent group "$group" >/dev/null || sudo groupadd "$group"
 
     if ! id -nG "$USER" | grep -qw "$group"; then
