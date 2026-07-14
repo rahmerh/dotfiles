@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import os
+import time
+from pathlib import Path
+from typing import Any
+
+
+STATUS_VERSION = 1
+STATES = {"idle", "listening", "thinking", "active"}
+COLORS = ("#55D6FF", "#9B7BFF", "#EF75B5", "#FFC857")
+WHITE = "#FFFFFF"
+FRAME_INTERVALS = {
+    "off": 0.25,
+    "idle": 1 / 8,
+    "listening": 1 / 15,
+    "thinking": 1 / 12,
+    "active": 1 / 15,
+}
+
+
+def runtime_status_path() -> Path:
+    runtime_root = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
+    return runtime_root / "luca-voice" / "status.json"
+
+
+def process_start_ticks(pid: int) -> int | None:
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+        fields_after_name = stat.rsplit(") ", 1)[1].split()
+        return int(fields_after_name[19])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def read_status(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        pid = payload["pid"]
+        start_ticks = payload["process_start_ticks"]
+        state = payload["state"]
+        levels = payload["levels"]
+        if payload.get("version") != STATUS_VERSION:
+            return None
+        if not isinstance(pid, int) or pid <= 0:
+            return None
+        if not isinstance(start_ticks, int) or process_start_ticks(pid) != start_ticks:
+            return None
+        if state not in STATES:
+            return None
+        if not isinstance(levels, list) or len(levels) != 4:
+            return None
+        payload["levels"] = [max(0.0, min(1.0, float(level))) for level in levels]
+        return payload
+    except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
+        return None
+
+
+def with_alpha(color: str, opacity: float) -> str:
+    alpha = round(max(0.0, min(1.0, opacity)) * 255)
+    return f"{color}{alpha:02X}"
+
+
+def markup(glyphs: list[str], opacities: list[float] | None = None) -> str:
+    if opacities is None:
+        opacities = [1.0] * 4
+    nodes = "".join(
+        f'<span foreground="{with_alpha(color, opacity)}">{glyph}</span>'
+        for color, glyph, opacity in zip(COLORS, glyphs, opacities, strict=True)
+    )
+    return (
+        '<span font_family="CaskaydiaCove Nerd Font Mono" '
+        f'letter_spacing="1536">{nodes}</span>'
+    )
+
+
+def white_orbs(opacity: float = 1.0) -> str:
+    nodes = "".join(
+        f'<span foreground="{with_alpha(WHITE, opacity)}">●</span>'
+        for _ in range(4)
+    )
+    return (
+        '<span font_family="CaskaydiaCove Nerd Font Mono" '
+        f'letter_spacing="1536">{nodes}</span>'
+    )
+
+
+def speaking_orbs(levels: list[float]) -> str:
+    opacity = 0.20 + 0.80 * max(levels)
+    return markup(["●"] * 4, [opacity] * 4)
+
+
+def render(state: str, levels: list[float], elapsed: float) -> dict[str, Any]:
+    if state == "off":
+        return {"text": "", "class": "off", "tooltip": "Assistant not running"}
+
+    if state == "idle":
+        text = white_orbs()
+    elif state == "listening":
+        blink = 0.16 + 0.84 * ((math.sin(elapsed * 6.0) + 1.0) / 2.0)
+        text = white_orbs(blink)
+    elif state == "thinking":
+        head = int(elapsed * 4.5) % 4
+        distances = [min((index - head) % 4, (head - index) % 4) for index in range(4)]
+        opacities = [
+            1.0 if distance == 0 else 0.62 if distance == 1 else 0.32
+            for distance in distances
+        ]
+        text = markup(["●"] * 4, opacities)
+    else:
+        text = speaking_orbs(levels)
+
+    labels = {
+        "idle": "Idle",
+        "listening": "Listening",
+        "thinking": "Thinking",
+        "active": "Talking or acting",
+    }
+    return {
+        "text": text,
+        "class": state,
+        "tooltip": f"Assistant · {labels[state]}",
+    }
+
+
+def emit(payload: dict[str, Any]) -> None:
+    print(json.dumps(payload, separators=(",", ":")), flush=True)
+
+
+def run_once(path: Path, demo_state: str | None) -> None:
+    if demo_state is not None:
+        state = demo_state
+        levels = [0.2, 0.75, 0.45, 0.9]
+    else:
+        status = read_status(path)
+        state = str(status["state"]) if status else "off"
+        levels = status["levels"] if status else [0.0] * 4
+    emit(render(state, levels, 0.65))
+
+
+def run_forever(path: Path) -> None:
+    started_at = time.monotonic()
+    smoothed = [0.0] * 4
+    previous_state = ""
+    while True:
+        status = read_status(path)
+        state = str(status["state"]) if status else "off"
+        raw_levels = status["levels"] if status else [0.0] * 4
+        for index, target in enumerate(raw_levels):
+            factor = 0.68 if target > smoothed[index] else 0.28
+            smoothed[index] += (target - smoothed[index]) * factor
+        elapsed = time.monotonic() - started_at
+        if state != "off" or previous_state != "off":
+            emit(render(state, smoothed, elapsed))
+        previous_state = state
+        time.sleep(FRAME_INTERVALS[state])
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Render Luca voice status for Waybar.")
+    parser.add_argument("--once", action="store_true", help="Emit one frame and exit.")
+    parser.add_argument("--demo-state", choices=["off", *sorted(STATES)])
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    try:
+        if args.once or args.demo_state:
+            run_once(runtime_status_path(), args.demo_state)
+        else:
+            run_forever(runtime_status_path())
+    except (BrokenPipeError, KeyboardInterrupt):
+        return 0
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
