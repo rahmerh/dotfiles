@@ -15,6 +15,9 @@ STATUS_VERSION = 1
 STATES = {"idle", "listening", "thinking", "active"}
 COLORS = ("#55D6FF", "#9B7BFF", "#EF75B5", "#FFC857")
 WHITE = "#FFFFFF"
+WAITING_ORANGE = "#FF9F43"
+WAITING_FRAME_INTERVAL = 1 / 20
+WAITING_GAP = "\u2009"
 FRAME_INTERVALS = {
     "off": 0.25,
     "idle": 1 / 8,
@@ -45,6 +48,7 @@ def read_status(path: Path) -> dict[str, Any] | None:
         start_ticks = payload["process_start_ticks"]
         state = payload["state"]
         levels = payload["levels"]
+        waiting_for_input = payload.get("waiting_for_input", False)
         if payload.get("version") != STATUS_VERSION:
             return None
         if not isinstance(pid, int) or pid <= 0:
@@ -54,6 +58,8 @@ def read_status(path: Path) -> dict[str, Any] | None:
         if state not in STATES:
             return None
         if not isinstance(levels, list) or len(levels) != 4:
+            return None
+        if not isinstance(waiting_for_input, bool):
             return None
         payload["levels"] = [max(0.0, min(1.0, float(level))) for level in levels]
         return payload
@@ -66,44 +72,85 @@ def with_alpha(color: str, opacity: float) -> str:
     return f"{color}{alpha:02X}"
 
 
-def markup(glyphs: list[str], opacities: list[float] | None = None) -> str:
+def waiting_opacity(elapsed: float) -> float:
+    return 0.16 + 0.84 * ((math.sin(elapsed * 6.0) + 1.0) / 2.0)
+
+
+def waiting_orb(waiting_for_input: bool, elapsed: float) -> str:
+    if not waiting_for_input:
+        return ""
+    opacity = waiting_opacity(elapsed)
+    return (
+        f'<span>{WAITING_GAP}</span>'
+        f'<span foreground="{with_alpha(WAITING_ORANGE, opacity)}">●</span>'
+    )
+
+
+def markup(
+    glyphs: list[str],
+    opacities: list[float] | None = None,
+    *,
+    waiting_for_input: bool = False,
+    elapsed: float = 0.0,
+) -> str:
     if opacities is None:
         opacities = [1.0] * 4
     nodes = "".join(
         f'<span foreground="{with_alpha(color, opacity)}">{glyph}</span>'
         for color, glyph, opacity in zip(COLORS, glyphs, opacities, strict=True)
     )
+    nodes += waiting_orb(waiting_for_input, elapsed)
     return (
         '<span font_family="CaskaydiaCove Nerd Font Mono" '
         f'letter_spacing="1536">{nodes}</span>'
     )
 
 
-def white_orbs(opacity: float = 1.0) -> str:
+def white_orbs(
+    opacity: float = 1.0,
+    *,
+    waiting_for_input: bool = False,
+    elapsed: float = 0.0,
+) -> str:
     nodes = "".join(
         f'<span foreground="{with_alpha(WHITE, opacity)}">●</span>'
         for _ in range(4)
     )
+    nodes += waiting_orb(waiting_for_input, elapsed)
     return (
         '<span font_family="CaskaydiaCove Nerd Font Mono" '
         f'letter_spacing="1536">{nodes}</span>'
     )
 
 
-def speaking_orbs(levels: list[float]) -> str:
+def speaking_orbs(
+    levels: list[float], *, waiting_for_input: bool = False, elapsed: float = 0.0
+) -> str:
     opacity = 0.20 + 0.80 * max(levels)
-    return markup(["●"] * 4, [opacity] * 4)
+    return markup(
+        ["●"] * 4,
+        [opacity] * 4,
+        waiting_for_input=waiting_for_input,
+        elapsed=elapsed,
+    )
 
 
-def render(state: str, levels: list[float], elapsed: float) -> dict[str, Any]:
+def render(
+    state: str,
+    levels: list[float],
+    elapsed: float,
+    waiting_for_input: bool = False,
+) -> dict[str, Any]:
     if state == "off":
         return {"text": "", "class": "off", "tooltip": "Assistant not running"}
 
     if state == "idle":
-        text = white_orbs()
+        text = white_orbs(waiting_for_input=waiting_for_input, elapsed=elapsed)
     elif state == "listening":
         blink = 0.16 + 0.84 * ((math.sin(elapsed * 6.0) + 1.0) / 2.0)
-        text = white_orbs(blink)
+        text = white_orbs(
+            blink, waiting_for_input=waiting_for_input, elapsed=elapsed
+        )
     elif state == "thinking":
         head = int(elapsed * 4.5) % 4
         distances = [min((index - head) % 4, (head - index) % 4) for index in range(4)]
@@ -111,9 +158,16 @@ def render(state: str, levels: list[float], elapsed: float) -> dict[str, Any]:
             1.0 if distance == 0 else 0.62 if distance == 1 else 0.32
             for distance in distances
         ]
-        text = markup(["●"] * 4, opacities)
+        text = markup(
+            ["●"] * 4,
+            opacities,
+            waiting_for_input=waiting_for_input,
+            elapsed=elapsed,
+        )
     else:
-        text = speaking_orbs(levels)
+        text = speaking_orbs(
+            levels, waiting_for_input=waiting_for_input, elapsed=elapsed
+        )
 
     labels = {
         "idle": "Idle",
@@ -121,10 +175,13 @@ def render(state: str, levels: list[float], elapsed: float) -> dict[str, Any]:
         "thinking": "Thinking",
         "active": "Talking or acting",
     }
+    tooltip = f"Assistant · {labels[state]}"
+    if waiting_for_input:
+        tooltip += " · Awaiting input"
     return {
         "text": text,
         "class": state,
-        "tooltip": f"Assistant · {labels[state]}",
+        "tooltip": tooltip,
     }
 
 
@@ -136,11 +193,13 @@ def run_once(path: Path, demo_state: str | None) -> None:
     if demo_state is not None:
         state = demo_state
         levels = [0.2, 0.75, 0.45, 0.9]
+        waiting_for_input = False
     else:
         status = read_status(path)
         state = str(status["state"]) if status else "off"
         levels = status["levels"] if status else [0.0] * 4
-    emit(render(state, levels, 0.65))
+        waiting_for_input = bool(status["waiting_for_input"]) if status else False
+    emit(render(state, levels, 0.65, waiting_for_input))
 
 
 def run_forever(path: Path) -> None:
@@ -151,18 +210,20 @@ def run_forever(path: Path) -> None:
         status = read_status(path)
         state = str(status["state"]) if status else "off"
         raw_levels = status["levels"] if status else [0.0] * 4
+        waiting_for_input = bool(status["waiting_for_input"]) if status else False
         for index, target in enumerate(raw_levels):
             factor = 0.68 if target > smoothed[index] else 0.28
             smoothed[index] += (target - smoothed[index]) * factor
         elapsed = time.monotonic() - started_at
         if state != "off" or previous_state != "off":
-            emit(render(state, smoothed, elapsed))
+            emit(render(state, smoothed, elapsed, waiting_for_input))
         previous_state = state
-        time.sleep(FRAME_INTERVALS[state])
+        interval = WAITING_FRAME_INTERVAL if waiting_for_input else FRAME_INTERVALS[state]
+        time.sleep(interval)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Render Luca voice status for Waybar.")
+    parser = argparse.ArgumentParser(description="Render assistant voice status for Waybar.")
     parser.add_argument("--once", action="store_true", help="Emit one frame and exit.")
     parser.add_argument("--demo-state", choices=["off", *sorted(STATES)])
     return parser.parse_args()
