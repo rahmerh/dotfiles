@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+icon="$SCRIPT_DIR/../assets/icons/proton-bridge-tray.svg"
+binary="/usr/lib/protonmail/bridge/bridge-gui"
+
+for style in color mono; do
+    for state in norm error warn update; do
+        sudo install -Dm0644 "$icon" "/usr/local/share/pb-$style-$state.svg"
+    done
+done
+
+sudo perl -0777 -i -pe \
+    's{:/qml/icons/systray-%1-%2\.png}{/usr/local/share/pb-%1-%2.svg}' \
+    "$binary"
+
+print_step Done

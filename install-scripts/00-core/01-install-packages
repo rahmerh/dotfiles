@@ -78,6 +78,7 @@ gui_packages=(
     feh
     nvidia-container-toolkit
     pinta
+    protonmail-bridge
     ripdrag
     waybar
     spotify
