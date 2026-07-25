@@ -87,8 +87,12 @@ gui_packages=(
 wm_packages=(
     niri
     gnome-keyring
+    gtk-layer-shell
     python
+    python-gobject
+    python-markdown-it-py
     swaybg
+    webkit2gtk-4.1
     wired
     grim
     slurp

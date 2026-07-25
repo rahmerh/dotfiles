@@ -2,6 +2,7 @@ input {
     keyboard {
         xkb {
             layout "us"
+            options "caps:escape"
         }
     }
 
@@ -175,6 +176,21 @@ binds {
 
     Mod+C { center-column; }
     Mod+D { spawn-sh "~/.config/niri/scripts/equalize-column-widths"; }
+}
+
+layer-rule {
+    match namespace="^luca-widget$"
+
+    shadow {
+        on
+        softness 28
+        spread 3
+        offset x=0 y=8
+        color "#00000099"
+    }
+
+    geometry-corner-radius 10
+    background-effect { blur true; }
 }
 
 window-rule {
