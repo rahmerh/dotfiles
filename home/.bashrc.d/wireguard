@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 wg_list() {
-    sudo find /etc/wireguard \
+    find "$HOME/.config/wireguard" \
         -maxdepth 1 \
         -type f \
         -name '*.conf' \
-        -printf '%f\n' |
-        sed -e 's/\.conf$//' -e 's/^/ - /'
+        -printf '%f\n' \
+        | sed -e 's/\.conf$//' -e 's/^/ - /'
 }
 
 wg_is_up() {
@@ -23,12 +23,13 @@ wg_quick_up() {
 
     sudo -v || return 1
 
-    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
-        echo "No $conf.conf found in /etc/wireguard" >&2
+    conf_file="$HOME/.config/wireguard/$conf.conf"
+    if ! sudo test -f "$conf_file"; then
+        echo "No $conf.conf found in $HOME/.config/wireguard" >&2
         return 1
     fi
 
-    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick up "$conf"
+    gum spin --spinner line --title="Starting wireguard connection..." -- sudo wg-quick up "$conf_file"
 }
 
 wg_quick_down() {
@@ -41,14 +42,121 @@ wg_quick_down() {
 
     sudo -v || return 1
 
-    if ! sudo test -f "/etc/wireguard/$conf.conf"; then
-        echo "No $conf.conf found in /etc/wireguard" >&2
+    conf_file="$HOME/.config/wireguard/$conf.conf"
+    if ! sudo test -f "$conf_file"; then
+        echo "No $conf.conf found in $HOME/.config/wireguard" >&2
         return 1
     fi
 
-    gum spin --spinner line --title="Stopping wireguard connection..." -- sudo wg-quick down "$conf"
+    gum spin --spinner line --title="Stopping wireguard connection..." -- sudo wg-quick down "$conf_file"
+}
+
+_wg_complete() {
+    # =========================================================================
+    # COURSE: Masterclass on Programmable Bash Completion
+    # =========================================================================
+    #
+    # MODULE 1: The Lifecycle of a Tab Keypress
+    # -------------------------------------------------------------------------
+    # When you register a function with `complete -F _wg_complete wg-up`:
+    #   1. You type `wg-up <TAB>` in your terminal.
+    #   2. Bash pauses line editing and identifies the command ("wg-up").
+    #   3. Bash executes `_wg_complete()` in the current shell environment.
+    #   4. Bash inspects the special array `COMPREPLY` after `_wg_complete()`
+    #      finishes, displaying or auto-inserting matching candidates.
+    #
+    # MODULE 2: Core Bash Completion Variables
+    # -------------------------------------------------------------------------
+    # Bash automatically sets several special variables before calling your function:
+    #
+    #   - COMP_WORDS : Array of all words typed on the command line.
+    #                  COMP_WORDS[0] -> command name (e.g., "wg-up")
+    #                  COMP_WORDS[1] -> first argument, etc.
+    #   - COMP_CWORD : Integer index pointing to the word currently being typed
+    #                  (i.e., position of the cursor in COMP_WORDS).
+    #   - COMP_LINE  : Full command line string typed so far.
+    #   - COMP_POINT : Integer cursor position relative to the start of COMP_LINE.
+    #
+    #   Standard idiom to get the current word being completed:
+    #     local cur="${COMP_WORDS[COMP_CWORD]}"
+    #   And the previous word (useful when parsing flags):
+    #     local prev="${COMP_WORDS[COMP_CWORD-1]}"
+    #
+    # MODULE 3: Returning Candidates via COMPREPLY
+    # -------------------------------------------------------------------------
+    # `COMPREPLY` is an indexed array variable. Your completion function's sole
+    # job is to populate `COMPREPLY` with matching candidates.
+    #
+    #   - 1 match in COMPREPLY  => Bash auto-completes immediately.
+    #   - Multiple matches      => Bash lists all candidates (or completes common prefix).
+    #   - Empty COMPREPLY       => Bash falls back to default filename completion or beeps.
+    #
+    # MODULE 4: Candidate Filtering with `compgen`
+    # -------------------------------------------------------------------------
+    # `compgen` is a Bash builtin designed to filter lists against a prefix.
+    #
+    #   Syntax: compgen -W "word1 word2 word3" -- "$cur"
+    #
+    #   Example:
+    #     cur="ho"
+    #     compgen -W "home house car" -- "$cur"
+    #     --> Outputs matching words: "home", "house"
+    #
+    #   Assigning compgen output into COMPREPLY:
+    #     COMPREPLY=( $(compgen -W "word1 word2 word3" -- "$cur") )
+    #
+    #   Or using `mapfile` / `readarray` (safer for items containing spaces):
+    #     mapfile -t COMPREPLY < <(compgen -W "..." -- "$cur")
+    #
+    # MODULE 5: WireGuard Config Discovery Strategies
+    # -------------------------------------------------------------------------
+    # To complete WireGuard configuration names:
+    #   1. Where do configs live?
+    #      Look in `$HOME/.config/wireguard/*.conf`.
+    #   2. How do you extract just the config names (stripped of path & `.conf`)?
+    #      - Option A: Bash globbing + parameter expansion:
+    #          for file in "$HOME/.config/wireguard"/*.conf; do
+    #              name="${file##*/}"   # strip path
+    #              name="${name%.conf}" # strip extension
+    #          done
+    #      - Option B: Command pipeline (e.g. using `find` or `ls` with `basename`/`sed`).
+    #   3. Feed those names into `compgen -W` filtering by `$cur`.
+    #
+    # EXERCISE / YOUR IMPLEMENTATION TASK:
+    # -------------------------------------------------------------------------
+    # Write the Bash code below to:
+    #   1. Extract the current word `$cur`.
+    #   2. Retrieve available config names from `$HOME/.config/wireguard/`.
+    #   3. Populate `COMPREPLY` using `compgen -W`.
+    #
+    # (Bonus: Don't forget you can also register `wg-down` at the end of the file!)
+    # =========================================================================
+
+    if [[ "$COMP_CWORD" -ne 1 ]]; then
+        return 0
+    fi
+
+    local cur conf_dir file name
+    local configs=()
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    conf_dir="$HOME/.config/wireguard"
+
+    if [[ -d "$conf_dir" ]]; then
+        for file in "$conf_dir"/*.conf; do
+            if [[ -f "$file" ]]; then
+                name="${file##*/}"
+                name="${name%.conf}"
+                configs+=("$name")
+            fi
+        done
+    fi
+
+    mapfile -t COMPREPLY < <(compgen -W "${configs[*]}" -- "$cur")
 }
 
 alias wg-up='wg_quick_up'
 alias wg-down='wg_quick_down'
 alias wg-list='wg_list'
+
+complete -F _wg_complete wg-up wg-down
