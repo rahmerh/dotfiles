@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+interfaces=$(ip -o link show type wireguard 2>/dev/null | awk -F': ' '{print $2}')
+
+if [ -n "$interfaces" ]; then
+    printf '{"text": "󰖂", "tooltip": "Connected to: %s", "class": "connected"}\n' "$interfaces"
+else
+    printf '{"text": "", "tooltip": "", "class": "disconnected"}\n'
+fi

@@ -4,6 +4,12 @@
     padding-left: 0px;
 }
 
+#custom-wireguard {
+    border-radius: 0;
+    margin-right: 0;
+    padding-left: 0;
+}
+
 #pulseaudio {
     border-radius: 0 6px 6px 0;
     padding-left: 0px;
