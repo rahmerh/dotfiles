@@ -215,6 +215,10 @@ if ! command -v pass-cli &>/dev/null; then
     curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
 fi
 
+if ! command -v mcfly &>/dev/null; then
+    curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sudo sh -s -- --git cantino/mcfly
+fi
+
 cargo install --locked tree-sitter-cli
 cargo install --locked zoxide
 cargo install gpu-usage-waybar
