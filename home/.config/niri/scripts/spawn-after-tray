@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# Wait for a StatusNotifier host (waybar's tray module) to own the watcher name
+# before spawning the given command.
+#
+# Electron apps such as Discord probe org.kde.StatusNotifierWatcher exactly once
+# while creating their tray icon and never retry if it is missing, so racing
+# waybar at login leaves them permanently without an icon. Well-behaved
+# indicators (steam, blueman) re-register on NameOwnerChanged and do not need
+# this.
+
+readonly watcher="org.kde.StatusNotifierWatcher"
+readonly timeout=30
+
+(( $# )) || {
+    printf 'usage: %s COMMAND [ARG...]\n' "${0##*/}" >&2
+    exit 2
+}
+
+if gdbus wait --session --timeout "$timeout" "$watcher"; then
+    # Give the host a moment to export the watcher object after taking the name.
+    sleep 0.5
+else
+    printf '%s: %s did not appear within %ss, spawning %s anyway\n' \
+        "${0##*/}" "$watcher" "$timeout" "$1" >&2
+fi
+
+exec "$@"
