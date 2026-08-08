@@ -117,7 +117,7 @@ environment {
     PROTON_PASS_LINUX_KEYRING "dbus"
 }
 
-spawn-at-startup "wired" "--run"
+spawn-at-startup "swaync"
 spawn-at-startup "waybar"
 spawn-at-startup "steam" "-silent"
 spawn-sh-at-startup "~/.config/niri/scripts/spawn-after-tray discord --start-minimized"
@@ -125,7 +125,6 @@ spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.config/niri/scripts/set-wallpaper"
-spawn-sh-at-startup "~/.config/niri/scripts/stack-wired-notifications"
 
 binds {
     Mod+Space {
@@ -148,6 +147,8 @@ binds {
     Mod+P repeat=false {
         spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
     }
+
+    Mod+N { spawn "swaync-client" "--toggle-panel"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
@@ -213,16 +214,4 @@ window-rule {
     geometry-corner-radius 10
     clip-to-geometry true
     draw-border-with-background false
-}
-
-window-rule {
-    match title="^wired$"
-    open-floating true
-    open-focused false
-    default-floating-position x=10 y=10 relative-to="top-right"
-
-    focus-ring { off; }
-    border { off; }
-    geometry-corner-radius 3
-    clip-to-geometry true
 }
