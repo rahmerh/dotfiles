@@ -6,8 +6,5 @@ pkill swaybg
 pkill waybar
 setsid -f waybar
 
-pkill wired
-setsid -f wired --run
-
-pkill -f "$HOME/.config/niri/scripts/stack-wired-notifications"
-setsid -f ~/.config/niri/scripts/stack-wired-notifications
+pkill swaync
+setsid -f swaync

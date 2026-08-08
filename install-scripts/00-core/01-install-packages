@@ -92,8 +92,8 @@ wm_packages=(
     python-gobject
     python-markdown-it-py
     swaybg
+    swaync
     webkit2gtk-4.1
-    wired
     grim
     slurp
     xdg-desktop-portal
