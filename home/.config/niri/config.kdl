@@ -26,6 +26,10 @@ output "Samsung Electric Company LS27A800U H4ZT101647" {
 layout {
     gaps 12
 
+    struts {
+        top -4
+    }
+
     focus-ring {
         on
         width 2
