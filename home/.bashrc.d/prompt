@@ -26,7 +26,7 @@ set_bash_prompt() {
 
     local reset='\[\e[0m\]'
     local red='\[\e[31m\]'
-    local bold_pink='\[\e[1;38;2;232;90;152m\]'
+    local bold_pink='\[\e[1;38;2;255;79;154m\]'
     local yellow='\[\e[38;2;235;203;139m\]'
     local purple='\[\e[38;2;180;142;173m\]'
 

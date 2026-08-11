@@ -18,8 +18,8 @@ local command_overrides = {
             "--delimiter=:",
             "--with-nth=1,2,4..",
             "--color=bg:-1,bg+:-1,gutter:-1,fg:#e8e8e8,fg+:#ffffff",
-            "--color=hl:#e1579c,hl+:#e1579c,info:#999999,prompt:#e1579c",
-            "--color=pointer:#e1579c,marker:#e1579c,spinner:#e1579c,header:#999999",
+            "--color=hl:#ff4f9a,hl+:#ff4f9a,info:#999999,prompt:#ff4f9a",
+            "--color=pointer:#ff4f9a,marker:#ff4f9a,spinner:#ff4f9a,header:#999999",
             "--bind=change:reload:test -n {q} && rg --hidden --glob '!**/.git/**' --column --line-number --no-heading --color=never --smart-case -- {q} "
                 .. vim.fn.shellescape(cwd)
                 .. " || true",
@@ -61,8 +61,8 @@ local command_overrides = {
             "--walker-root=" .. cwd,
             "--walker-skip=.git,node_modules",
             "--color=bg:-1,bg+:-1,gutter:-1,fg:#e8e8e8,fg+:#ffffff",
-            "--color=hl:#e1579c,hl+:#e1579c,info:#999999,prompt:#e1579c",
-            "--color=pointer:#e1579c,marker:#e1579c,spinner:#e1579c,header:#999999",
+            "--color=hl:#ff4f9a,hl+:#ff4f9a,info:#999999,prompt:#ff4f9a",
+            "--color=pointer:#ff4f9a,marker:#ff4f9a,spinner:#ff4f9a,header:#999999",
             "--bind=enter:execute-silent(printf '%s\n' {} > " .. vim.fn.shellescape(tempfile) .. ")+abort",
         }
 
