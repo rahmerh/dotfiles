@@ -13,7 +13,14 @@ export DOCKER_BUILDKIT=1
 export PROTON_PASS_LINUX_KEYRING=dbus
 export SSH_AUTH_SOCK="$HOME/.ssh/proton-pass-agent.sock"
 
-export TODO_DIR="$HOME/Documents/todo"
+export MCFLY_LIGHT=FALSE
+export MCFLY_KEY_SCHEME=vim
+export MCFLY_FUZZY=2
+export MCFLY_RESULTS=20
+export MCFLY_DELETE_WITHOUT_CONFIRM=false
+export MCFLY_INTERFACE_VIEW=TOP
+export MCFLY_DISABLE_MENU=FALSE
+export MCFLY_PROMPT="❱"
 
 path_add() {
     case ":$PATH:" in
