@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+# The Razer mouse is driven by openrazer-daemon via razer-cli. OpenRGB detects
+# the same device natively over hidraw, and two writers fight over it: whichever
+# wrote last gets overwritten. Turn OpenRGB's detectors for it off so razer-cli
+# owns the mouse outright.
+config_file="$HOME/.config/OpenRGB/OpenRGB.json"
+
+if [[ ! -f $config_file ]]; then
+    print_warning "No OpenRGB config at $config_file; run OpenRGB once first"
+    exit 0
+fi
+
+python3 - "$config_file" <<'PYTHON'
+import json
+import sys
+
+config_file = sys.argv[1]
+
+disable = (
+    "Razer Naga Pro V2 (Wired)",
+    "Razer Naga Pro V2 (Wireless)",
+)
+
+with open(config_file) as handle:
+    config = json.load(handle)
+
+detectors = config.setdefault("Detectors", {}).setdefault("detectors", {})
+
+changed = [name for name in disable if detectors.get(name) is not False]
+for name in changed:
+    detectors[name] = False
+
+if changed:
+    with open(config_file, "w") as handle:
+        json.dump(config, handle, indent=4)
+    print("disabled: " + ", ".join(changed))
+PYTHON
+
+print_step Done

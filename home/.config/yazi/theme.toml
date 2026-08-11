@@ -1,7 +1,7 @@
 [indicator]
-parent = { fg = "#ffffff", bg = "#e1579c" }
-current = { fg = "#ffffff", bg = "#e1579c" }
-preview = { fg = "#e1579c" }
+parent = { fg = "#ffffff", bg = "#ff4f9a" }
+current = { fg = "#ffffff", bg = "#ff4f9a" }
+preview = { fg = "#ff4f9a" }
 padding = { open = " ", close = " " }
 
 [filetype]

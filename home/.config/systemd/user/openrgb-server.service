@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenRGB server
+After=graphical-session.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/openrgb --server
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=default.target

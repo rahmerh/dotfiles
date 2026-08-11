@@ -25,7 +25,7 @@ configuration {
     fg:              #E6E8EC;
     fg-muted:        #8A9099;
 
-    accent:          #D16E9E;
+    accent:          #FF4F9A;
     edge:            #FFFFFF14;
 
     spacing:         10px;
