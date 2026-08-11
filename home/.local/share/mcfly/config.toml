@@ -1,0 +1,13 @@
+[colors.menubar]
+bg = "black"
+fg = "grey"
+
+[colors.darkmode]
+prompt = "magenta"
+timing = "dark_grey"
+results_fg = "white"
+results_bg = "black"
+results_hl = "magenta"
+results_selection_fg = "white"
+results_selection_bg = "dark_grey"
+results_selection_hl = "magenta"
