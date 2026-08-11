@@ -131,7 +131,7 @@ dev_packages=(
     docker-buildx
     docker-compose
     clang
-    rust
+    rustup
     rust-analyzer
     codelldb-bin
     android-tools
@@ -208,6 +208,19 @@ install_packages \
     "${dev_packages[@]}" \
     "${wm_packages[@]}" \
     "${mt_packages[@]}"
+
+print_step "Configuring rustup"
+
+if ! rustup toolchain list | grep -q '^stable'; then
+    rustup default stable
+fi
+
+if ! rustup toolchain list | grep -q '^nightly'; then
+    rustup toolchain install nightly
+fi
+
+rustup component add rustfmt clippy --toolchain stable
+rustup component add llvm-tools-preview --toolchain nightly
 
 print_step "Installing manual packages"
 
