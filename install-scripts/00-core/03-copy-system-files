@@ -53,4 +53,8 @@ if mt_is_laptop; then
     copy_system_package logid
 fi
 
+if mt_is_desktop; then
+    copy_system_package fileflows-node-watchdog
+fi
+
 print_step "Done"
