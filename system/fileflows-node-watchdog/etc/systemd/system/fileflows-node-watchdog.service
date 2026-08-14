@@ -1,0 +1,14 @@
+[Unit]
+Description=Detect and recover FileFlows node stuck-config race after boot
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# Give docker compose (restart: always) a moment to bring the container up
+# before polling it.
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/local/bin/fileflows-node-watchdog
+
+[Install]
+WantedBy=multi-user.target

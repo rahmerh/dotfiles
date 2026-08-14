@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+CONTAINER="fileflows-node"
+STATE_DIR="/var/lib/fileflows-node-watchdog"
+LOG_FILE="$STATE_DIR/log"
+MAX_ATTEMPTS=5
+POLL_TIMEOUT=30 # seconds to wait for a success/failure signature per attempt
+POLL_INTERVAL=2
+
+SUCCESS_PATTERN='UpdateConfiguration: Configuration updated|Process file result: CanProcess'
+FAILURE_PATTERN='Updating configuration: Node is null'
+
+install --directory --owner=root --group=root --mode=0755 "$STATE_DIR"
+: >"$LOG_FILE"
+chmod 0644 "$LOG_FILE"
+
+log() {
+    printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*" | tee -a "$LOG_FILE"
+}
+
+for _ in $(seq 1 30); do
+    docker inspect "$CONTAINER" >/dev/null 2>&1 && break
+    sleep 2
+done
+
+if ! docker inspect "$CONTAINER" >/dev/null 2>&1; then
+    log "ERROR: container '$CONTAINER' not found after waiting, giving up."
+    exit 1
+fi
+
+check_outcome() {
+    # Polls logs since $1 (RFC3339 timestamp) for up to POLL_TIMEOUT seconds.
+    # Echoes "success", "failure", or "timeout".
+    local since="$1"
+    local elapsed=0
+    local recent
+
+    while ((elapsed < POLL_TIMEOUT)); do
+        recent="$(docker logs "$CONTAINER" --since "$since" 2>&1)"
+
+        if grep -qE "$FAILURE_PATTERN" <<<"$recent"; then
+            echo failure
+            return
+        fi
+
+        if grep -qE "$SUCCESS_PATTERN" <<<"$recent"; then
+            echo success
+            return
+        fi
+
+        sleep "$POLL_INTERVAL"
+        ((elapsed += POLL_INTERVAL))
+    done
+
+    echo timeout
+}
+
+attempt=1
+since="$(docker inspect "$CONTAINER" --format '{{.State.StartedAt}}')"
+
+while ((attempt <= MAX_ATTEMPTS)); do
+    log "Attempt $attempt/$MAX_ATTEMPTS: checking node health since $since"
+    outcome="$(check_outcome "$since")"
+
+    case "$outcome" in
+        success)
+            log "Node came up healthy (attempt $attempt). Done."
+            exit 0
+            ;;
+        failure)
+            log "Detected stuck-config race (Node is null) on attempt $attempt."
+            ;;
+        timeout)
+            log "No success/failure signature seen within ${POLL_TIMEOUT}s on attempt $attempt; treating as stuck."
+            ;;
+    esac
+
+    if ((attempt == MAX_ATTEMPTS)); then
+        log "ERROR: node still stuck after $MAX_ATTEMPTS attempts. Giving up - manual intervention needed."
+        exit 1
+    fi
+
+    log "Restarting $CONTAINER (attempt $attempt -> $((attempt + 1)))..."
+    docker restart "$CONTAINER" >/dev/null
+    since="$(docker inspect "$CONTAINER" --format '{{.State.StartedAt}}')"
+
+    ((attempt += 1))
+done
