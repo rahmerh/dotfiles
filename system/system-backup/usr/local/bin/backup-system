@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
-set -o pipefail
+set -u -o pipefail
 
 BACKUP_DIR="/var/lib/backup-system"
 CONF_FILE="$BACKUP_DIR/config"
 LOG_FILE="$BACKUP_DIR/log"
 LAST_SUCCESS_FILE="$BACKUP_DIR/last-success"
 STATUS_FILE="$BACKUP_DIR/status"
+LOCK_FILE="$BACKUP_DIR/lock"
+
+# Refuse to mirror a mass deletion. If a source is ever unmounted or empty when
+# the backup runs, rsync would otherwise faithfully delete the remote copy.
+MAX_DELETE=5000
+
+# Bound a single I/O stall so an unreachable destination fails the run instead
+# of hanging it forever.
+RSYNC_TIMEOUT=600
 
 # Example /var/lib/backup-system/config:
 # DESTINATION="backup-host:/srv/backups/system"
@@ -14,7 +23,40 @@ STATUS_FILE="$BACKUP_DIR/status"
 # Optional:
 # EXCLUDES="/.cache:/.local/share/Trash"
 
+# Regenerable build and dependency directories. These churn constantly while the
+# machine is in use, which both bloats the transfer and makes rsync trip over
+# files that vanish mid-run. Config EXCLUDES are added on top of these.
+DEFAULT_EXCLUDES=(
+    "node_modules/"
+    "target/"
+    "__pycache__/"
+    ".venv/"
+    ".mypy_cache/"
+    ".pytest_cache/"
+    ".ruff_cache/"
+    ".gradle/"
+    ".npm/"
+    ".cargo/registry/"
+    ".cargo/git/"
+    "go/pkg/mod/"
+)
+
 install --directory --owner=root --group=root --mode=0755 "$BACKUP_DIR"
+
+# Take the lock before touching the log, so a second invocation cannot truncate
+# the log of the run already in progress.
+exec 9>"$LOCK_FILE"
+if ! flock --nonblock 9; then
+    printf '%s\n' "Another system backup is already running." >&2
+    exit 0
+fi
+
+# Keep one generation. Truncating on start discarded the previous run's log at
+# exactly the moment it was needed to diagnose that run's failure.
+if [[ -f "$LOG_FILE" ]]; then
+    mv --force "$LOG_FILE" "$LOG_FILE.1"
+fi
+
 : >"$LOG_FILE"
 chmod 0644 "$LOG_FILE"
 
@@ -22,9 +64,15 @@ log() {
     printf '%s\n' "$*" | tee -a "$LOG_FILE"
 }
 
+# Written via a temp file and renamed into place: backup-system-notify.path
+# watches this file, and truncate-then-write let it observe an empty or partial
+# line. A rename is atomic, so a reader sees either the old or the new status.
 write_status() {
-    printf '%s\t%s\t%s\n' "$(date --iso-8601=seconds)" "$1" "$2" >"$STATUS_FILE"
-    chmod 0644 "$STATUS_FILE"
+    local temp
+    temp="$(mktemp "$BACKUP_DIR/.status.XXXXXX")"
+    printf '%s\t%s\t%s\n' "$(date --iso-8601=seconds)" "$1" "$2" >"$temp"
+    chmod 0644 "$temp"
+    mv --force --no-target-directory "$temp" "$STATUS_FILE"
 }
 
 fail() {
@@ -45,16 +93,26 @@ fi
 # shellcheck disable=SC1090
 source "$CONF_FILE"
 
+for required in DESTINATION BACKUP_DIRS SSH_KEY_FILE; do
+    [[ -n "${!required:-}" ]] || fail "Config value missing or empty: $required"
+done
+
 IFS=":" read -r -a sources <<<"$BACKUP_DIRS"
 
 rsync_args=(
     -a
     --delete
-    --progress
+    --max-delete="$MAX_DELETE"
+    --timeout="$RSYNC_TIMEOUT"
+    --info=stats2
     --no-group
     --no-owner
     -e "ssh -i $SSH_KEY_FILE -o IdentitiesOnly=yes"
 )
+
+for exclude in "${DEFAULT_EXCLUDES[@]}"; do
+    rsync_args+=(--exclude="$exclude")
+done
 
 if [[ -n "${EXCLUDES:-}" ]]; then
     IFS=":" read -r -a excludes <<<"$EXCLUDES"
@@ -68,11 +126,30 @@ log "Sources: ${sources[*]}"
 log "Log: $LOG_FILE"
 write_status running "System backup started."
 
-if rsync "${rsync_args[@]}" "${sources[@]}" "$DESTINATION" 2>&1 | tee -a "$LOG_FILE"; then
-    printf '%s\n' "$today" >"$LAST_SUCCESS_FILE"
-    chmod 0644 "$LAST_SUCCESS_FILE"
-    log "System backup completed."
-    write_status completed "System backup completed."
-else
-    fail "System backup failed."
-fi
+rsync "${rsync_args[@]}" "${sources[@]}" "$DESTINATION" 2>&1 | tee -a "$LOG_FILE"
+rsync_status="${PIPESTATUS[0]}"
+
+# 24 and 23 are warnings, not failures: backing up a live home directory always
+# races with files being written and deleted. Treating them as fatal means the
+# backup can never succeed while the machine is in use.
+case "$rsync_status" in
+    0)
+        ;;
+    24)
+        log "Warning: some files vanished during transfer (rsync exit code 24)."
+        ;;
+    23)
+        log "Warning: some files could not be transferred (rsync exit code 23)."
+        ;;
+    25)
+        fail "System backup stopped: more than $MAX_DELETE files would have been deleted (rsync exit code 25). Check the sources are all mounted."
+        ;;
+    *)
+        fail "System backup failed (rsync exit code $rsync_status)."
+        ;;
+esac
+
+printf '%s\n' "$today" >"$LAST_SUCCESS_FILE"
+chmod 0644 "$LAST_SUCCESS_FILE"
+log "System backup completed."
+write_status completed "System backup completed."
