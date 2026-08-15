@@ -2,10 +2,20 @@
 Description=Runs backup script
 After=network-online.target
 Wants=network-online.target
-StartLimitIntervalSec=0
+StartLimitIntervalSec=6h
+StartLimitBurst=4
 
 [Service]
 Type=oneshot
 ExecStart=/usr/local/bin/backup-system
 Restart=on-failure
 RestartSec=30min
+
+# Type=oneshot defaults to no start timeout, so an unreachable destination would
+# hang the unit indefinitely rather than failing it.
+TimeoutStartSec=6h
+
+# Stay out of the way of interactive use; this runs for tens of minutes.
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

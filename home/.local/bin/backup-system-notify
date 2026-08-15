@@ -12,12 +12,9 @@ if [[ ! -r "$status_file" ]]; then
     exit 0
 fi
 
-IFS=$'\t' read -r timestamp state message < "$status_file"
+IFS=$'\t' read -r _ state message < "$status_file"
 
 body="$message"
-if [[ -n "$timestamp" ]]; then
-    body="${body:+$body$'\n'}$timestamp"
-fi
 
 case "$state" in
     running)
