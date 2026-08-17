@@ -1,0 +1,312 @@
+/*
+ * Notification styling, matching the SDDM / hyprlock login field:
+ * a 12px-rounded translucent dark card with an inset 6px accent pill
+ * (x=12, 8px vertical inset, 3px rounding) on the left.
+ *
+ * Reference geometry:
+ *   system/sddm/usr/share/sddm/themes/theme/Main.qml  (passwordField)
+ *   home/.config/hypr/hyprlock.conf                   (shape + input-field)
+ */
+
+:root {
+    --background: rgba(10, 11, 14, 0.82);
+    --background-hover: rgba(22, 24, 30, 0.88);
+    --surface: #101216;
+    --text: #ffffff;
+    --subtext: #e6e8ec;
+    --muted: #a8aeb8;
+    --accent: #ff4f9a;
+    --hairline: rgba(255, 255, 255, 0.06);
+
+    --card-radius: 12px;
+    --pill-width: 6px;
+    /*
+     * Offsets are 1px under spec because they are measured from inside the
+     * card's 1px border, so the pill lands at exactly 12px / 8px from the
+     * card's outer edge -- the values in Main.qml. Likewise min-height is
+     * 68px so the card measures 70px including its border.
+     */
+    --pill-offset: 11px;
+    --pill-inset: 7px;
+    --pill-radius: 3px;
+    /* Text starts at 1 + 11 + 6 + 10 = 28px, matching TextInput x: 28 */
+    --content-offset: 10px;
+
+    --notification-icon-size: 36px;
+    --notification-app-icon-size: 16px;
+
+    --font-summary: "CaskaydiaCove Nerd Font Propo";
+    --font-body: "CaskaydiaCove Nerd Font Propo";
+}
+
+notificationwindow,
+blankwindow,
+.blank-window {
+    background: transparent;
+}
+
+/*** Popups ***/
+
+.floating-notifications {
+    background: transparent;
+    margin: 10px 10px 0 0;
+}
+
+.floating-notifications .notification-row {
+    background: transparent;
+}
+
+/*
+ * The base stylesheet gives .notification-background a 6px 12px padding and
+ * treats .notification as the visible card. Flatten the wrapper so the pill
+ * offset is measured from the card edge, not from the wrapper's padding.
+ */
+.notification-row .notification-background {
+    /* Bottom padding is the 10px gap between stacked cards. Margin on
+     * .notification-row is ignored by GTK here, so the spacing lives on the
+     * wrapper's padding instead. */
+    padding: 0 0 10px 0;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* The card itself: this is the login field */
+.notification-row .notification-background .notification {
+    min-height: 68px;
+    background: var(--background);
+    border: 1px solid var(--hairline);
+    border-radius: var(--card-radius);
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    transition: background 0.15s ease-in-out;
+}
+
+.notification-row .notification-background .notification:hover {
+    background: var(--background-hover);
+}
+
+/*
+ * The accent pill. Drawn as the left border of the action box, which is
+ * inset 8px vertically and offset 12px from the card edge, so it floats
+ * inside the rounded card exactly like the login screen's Rectangle.
+ */
+.notification-row .notification-background .notification .notification-default-action {
+    margin: var(--pill-inset) 0;
+    padding: 0 16px 0 27px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    color: var(--text);
+    transition: none;
+    /*
+     * A border-left would only round its outer two corners. Main.qml's pill is
+     * a standalone 6x54 rect with radius 3, i.e. a capsule with semicircular
+     * caps, so draw it as three background layers instead: a circular cap at
+     * each end and a rect spanning between them.
+     */
+    background-color: transparent;
+    background-image:
+        radial-gradient(circle at 3px 3px, var(--accent) 3px, transparent 3px),
+        radial-gradient(circle at 3px 3px, var(--accent) 3px, transparent 3px),
+        linear-gradient(var(--accent), var(--accent));
+    background-size:
+        var(--pill-width) var(--pill-width),
+        var(--pill-width) var(--pill-width),
+        var(--pill-width) calc(100% - var(--pill-width));
+    background-position:
+        var(--pill-offset) top,
+        var(--pill-offset) bottom,
+        var(--pill-offset) var(--pill-radius);
+    background-repeat: no-repeat;
+}
+
+.notification-row .notification-background .notification .notification-default-action:hover {
+    background: transparent;
+    -gtk-icon-filter: none;
+}
+
+/* Keep the pill square-off when alternative actions are shown below */
+.notification-row .notification-background .notification .notification-default-action:not(:only-child) {
+    border-bottom-left-radius: var(--pill-radius);
+    border-bottom-right-radius: var(--pill-radius);
+}
+
+.notification-content {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-content .image {
+    -gtk-icon-size: var(--notification-icon-size);
+    -gtk-icon-filter: none;
+    border-radius: 3px;
+    margin: 0 12px 0 0;
+}
+
+.notification-content .app-icon {
+    -gtk-icon-size: var(--notification-app-icon-size);
+    -gtk-icon-filter: none;
+    -gtk-icon-shadow: none;
+    margin: 0 8px 0 0;
+}
+
+.notification-content .text-box {
+    margin: 0;
+    padding: 0;
+}
+
+.notification-content .text-box label {
+    filter: none;
+}
+
+.notification-content .text-box .summary {
+    font-family: var(--font-summary);
+    font-size: 11pt;
+    font-weight: bold;
+    color: var(--text);
+    background: transparent;
+    text-shadow: none;
+    padding: 0 0 2px 0;
+}
+
+.notification-content .text-box .body {
+    font-family: var(--font-body);
+    font-size: 11pt;
+    font-weight: normal;
+    color: var(--subtext);
+    background: transparent;
+    text-shadow: none;
+    padding: 0;
+}
+
+.notification-content .text-box .time {
+    font-family: var(--font-body);
+    font-size: 9pt;
+    color: var(--muted);
+    margin-right: 26px;
+    text-shadow: none;
+}
+
+.notification-content .body-image {
+    border-radius: 3px;
+    margin-top: 6px;
+}
+
+/*** Close button ***/
+
+.close-button {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    border-radius: 100%;
+    min-width: 20px;
+    min-height: 20px;
+    margin: 6px 8px 0 0;
+    padding: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+.close-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+
+/*** Inline actions ***/
+
+.notification-action {
+    margin: 0 8px 8px 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--subtext);
+    font-family: var(--font-body);
+    font-size: 10pt;
+}
+
+.notification-action:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--text);
+}
+
+/*** Control center ***/
+
+.control-center {
+    background: var(--background);
+    border: 1px solid var(--hairline);
+    border-radius: var(--card-radius);
+    box-shadow: none;
+    padding: 10px;
+}
+
+.control-center .notification-row .notification-background {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.control-center .notification-row .notification-background:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.control-center-list {
+    background: transparent;
+}
+
+.control-center-list-placeholder {
+    color: var(--muted);
+    font-family: var(--font-body);
+    opacity: 0.6;
+}
+
+.widget-title {
+    color: var(--text);
+    font-family: var(--font-summary);
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 4px 4px 10px 4px;
+    padding: 0;
+}
+
+.widget-title > button {
+    font-family: var(--font-body);
+    font-size: 10pt;
+    font-weight: normal;
+    color: var(--subtext);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+
+.widget-title > button:hover {
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--text);
+}
+
+.widget-dnd {
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 11pt;
+    margin: 0 4px 10px 4px;
+}
+
+.widget-dnd > switch {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid var(--hairline);
+    border-radius: 100px;
+    box-shadow: none;
+}
+
+.widget-dnd > switch:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.widget-dnd > switch > slider {
+    background: var(--subtext);
+    border-radius: 100px;
+}
