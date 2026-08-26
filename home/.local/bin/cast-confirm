@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+
+"""Screen-share confirmation dialog for niri-cast-portal.
+
+A layer-shell overlay rather than a normal window, so it sits above everything
+and takes an exclusive keyboard grab -- a consent prompt should not be possible
+to type past.
+
+Styling follows the tokens shared by waybar, swaync and rofi (see
+home/.config/waybar/style/00-vars.css and home/.config/swaync/style.css): a
+near-black translucent card, a hairline border, 12px radius, and the accent
+used as text rather than as a fill. The card is translucent because niri blurs
+the layer behind it via the cast-confirm layer-rule.
+
+Exits 0 if the user shares, 1 otherwise, including when dismissed.
+"""
+
+import os
+import sys
+
+# gtk4-layer-shell has to be loaded before libwayland-client, otherwise the
+# layer surface silently degrades into an ordinary window -- which niri would
+# then tile like any other. The package ships a preload shim for this exact
+# problem, so re-exec once with it in place.
+PRELOAD = "/usr/lib/libgtk4-layer-shell.so"
+
+if PRELOAD not in os.environ.get("LD_PRELOAD", ""):
+    existing = os.environ.get("LD_PRELOAD", "")
+    os.environ["LD_PRELOAD"] = f"{PRELOAD}:{existing}" if existing else PRELOAD
+    os.execv(sys.executable, [sys.executable, *sys.argv])
+
+import gi  # noqa: E402
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk4LayerShell", "1.0")
+from gi.repository import Gdk, GLib, Gtk  # noqa: E402
+from gi.repository import Gtk4LayerShell as LayerShell  # noqa: E402
+
+NAMESPACE = "cast-confirm"
+
+CSS = b"""
+window {
+    background: transparent;
+}
+
+.card {
+    /* Slightly above swaync's 0.82 -- a consent prompt should stay legible
+       over whatever it interrupts, but still read as part of the desktop. */
+    background-color: rgba(10, 11, 14, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    min-width: 392px;
+}
+
+.copy {
+    padding: 18px 20px 16px 20px;
+}
+
+.headline {
+    font-family: "CaskaydiaCove Nerd Font Propo";
+    font-size: 11pt;
+    font-weight: bold;
+    color: #E6E8EC;
+}
+
+.detail {
+    font-family: "CaskaydiaCove Nerd Font Propo";
+    font-size: 10pt;
+    color: #A8AEB8;
+}
+
+separator {
+    background-color: rgba(255, 255, 255, 0.06);
+    min-height: 1px;
+}
+
+.actions {
+    padding: 10px;
+}
+
+button.choice {
+    font-family: "CaskaydiaCove Nerd Font Propo";
+    font-size: 10pt;
+    color: #A8AEB8;
+
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    text-shadow: none;
+    outline: none;
+
+    min-height: 0px;
+    padding: 9px 14px;
+}
+
+button.choice:hover,
+button.choice:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #E6E8EC;
+}
+
+button.choice:active {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Accent as text only -- the same restraint rofi uses on its prompt. */
+button.share {
+    color: #FF4F9A;
+    font-weight: bold;
+}
+
+button.share:hover,
+button.share:focus {
+    background-color: rgba(255, 79, 154, 0.14);
+    color: #FF4F9A;
+}
+"""
+
+def build(app_name):
+    window = Gtk.Window()
+    window.set_decorated(False)
+
+    LayerShell.init_for_window(window)
+    LayerShell.set_namespace(window, NAMESPACE)
+    LayerShell.set_layer(window, LayerShell.Layer.OVERLAY)
+    LayerShell.set_keyboard_mode(window, LayerShell.KeyboardMode.EXCLUSIVE)
+
+    card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+    card.add_css_class("card")
+
+    copy = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=7)
+    copy.add_css_class("copy")
+
+    headline = Gtk.Label(label="Share your screen?")
+    headline.add_css_class("headline")
+    headline.set_wrap(True)
+    headline.set_justify(Gtk.Justification.CENTER)
+
+    detail = Gtk.Label(
+        label=f"{app_name} wants to capture this session.\n"
+              "Sharing starts on your active window.")
+    detail.add_css_class("detail")
+    detail.set_wrap(True)
+    detail.set_justify(Gtk.Justification.CENTER)
+
+    copy.append(headline)
+    copy.append(detail)
+
+    buttons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+    buttons.add_css_class("actions")
+    buttons.set_halign(Gtk.Align.END)
+
+    deny = Gtk.Button(label="Deny")
+    deny.add_css_class("choice")
+
+    share = Gtk.Button(label="Share")
+    share.add_css_class("choice")
+    share.add_css_class("share")
+
+    buttons.append(deny)
+    buttons.append(share)
+
+    card.append(copy)
+    card.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+    card.append(buttons)
+
+    window.set_child(card)
+
+    return window, deny, share
+
+
+def main():
+    app_name = sys.argv[1] if len(sys.argv) > 1 else "An application"
+
+    Gtk.init()
+
+    provider = Gtk.CssProvider()
+    provider.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_display(
+        Gdk.Display.get_default(), provider,
+        Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    window, deny, share = build(app_name)
+
+    loop = GLib.MainLoop()
+    result = {"shared": False}
+
+    def finish(shared):
+        result["shared"] = shared
+        loop.quit()
+
+    share.connect("clicked", lambda _b: finish(True))
+    deny.connect("clicked", lambda _b: finish(False))
+    window.connect("close-request", lambda _w: finish(False))
+
+    keys = Gtk.EventControllerKey()
+
+    def on_key(_c, keyval, _code, _state):
+        if keyval == Gdk.KEY_Escape:
+            finish(False)
+            return True
+        if keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            finish(True)
+            return True
+        return False
+
+    keys.connect("key-pressed", on_key)
+    window.add_controller(keys)
+
+    window.present()
+    share.grab_focus()
+
+    loop.run()
+
+    sys.exit(0 if result["shared"] else 1)
+
+
+if __name__ == "__main__":
+    main()

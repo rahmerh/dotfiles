@@ -143,6 +143,13 @@ binds {
 
     Mod+Shift+D repeat=false { spawn-sh "wl-mirror $(niri msg --json focused-output | jq -r .name)"; }
 
+    // Screen sharing: niri-cast-portal starts every share on the active
+    // window; these re-point the live stream without re-prompting.
+    Mod+Alt+E { spawn-sh "~/.config/niri/scripts/cast monitor"; }
+    Mod+Alt+R { spawn-sh "~/.config/niri/scripts/cast window"; }
+    Mod+Alt+T { spawn-sh "~/.config/niri/scripts/cast hide"; }
+    Mod+Alt+X { spawn-sh "~/.config/niri/scripts/cast stop"; }
+
     Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
 
     Ctrl+Shift+L { spawn "hyprlock"; }
@@ -181,6 +188,21 @@ binds {
 
     Mod+C { center-column; }
     Mod+D { spawn-sh "~/.config/niri/scripts/equalize-column-widths"; }
+}
+
+layer-rule {
+    match namespace="^cast-confirm$"
+
+    shadow {
+        on
+        softness 28
+        spread 3
+        offset x=0 y=8
+        color "#00000099"
+    }
+
+    geometry-corner-radius 12
+    background-effect { blur true; }
 }
 
 layer-rule {
