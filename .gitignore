@@ -9,3 +9,7 @@ home/.config/yazi/plugins
 
 *.log
 /cspell.json
+
+# Python bytecode from local scripts
+__pycache__/
+*.pyc

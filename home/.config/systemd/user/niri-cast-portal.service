@@ -1,0 +1,11 @@
+[Unit]
+Description=niri ScreenCast portal backend
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.impl.portal.desktop.niri-cast
+ExecStart=%h/.local/bin/niri-cast-portal
+Restart=on-failure
+Slice=session.slice

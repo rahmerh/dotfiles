@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=org.freedesktop.impl.portal.desktop.niri-cast
+Exec=/bin/false
+SystemdService=niri-cast-portal.service

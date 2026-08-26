@@ -1,0 +1,413 @@
+#!/usr/bin/env python3
+
+"""xdg-desktop-portal ScreenCast backend for niri.
+
+Replaces the GNOME screencast picker with a small confirmation widget. On
+confirm, the cast is bound to niri's dynamic cast target rather than to a
+monitor or a window directly. That indirection is the whole point: a stream
+bound straight to a monitor is stuck on it for the stream's lifetime, whereas
+the dynamic cast target can be re-pointed afterwards with
+`niri msg action set-dynamic-cast-*` without renegotiating the cast, so the
+sharing application never re-prompts.
+
+Only org.freedesktop.impl.portal.ScreenCast is implemented; every other portal
+interface stays with the GNOME backend via portals.conf.
+"""
+
+import os
+import sys
+import subprocess
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+BUS_NAME = "org.freedesktop.impl.portal.desktop.niri-cast"
+OBJECT_PATH = "/org/freedesktop/portal/desktop"
+
+MUTTER_NAME = "org.gnome.Mutter.ScreenCast"
+MUTTER_PATH = "/org/gnome/Mutter/ScreenCast"
+MUTTER_IFACE = "org.gnome.Mutter.ScreenCast"
+MUTTER_SESSION_IFACE = "org.gnome.Mutter.ScreenCast.Session"
+MUTTER_STREAM_IFACE = "org.gnome.Mutter.ScreenCast.Stream"
+
+INTROSPECT_NAME = "org.gnome.Shell.Introspect"
+INTROSPECT_PATH = "/org/gnome/Shell/Introspect"
+
+# niri exposes its dynamic cast target as a pseudo-window with this app id.
+DYNAMIC_CAST_APP_ID = "rs.bxt.niri.desktop"
+
+CONFIRM_WIDGET = os.path.expanduser("~/.local/bin/cast-confirm")
+
+CALL_TIMEOUT_MS = 5000
+STREAM_TIMEOUT_MS = 10000
+
+# Portal response codes.
+RESPONSE_SUCCESS = 0
+RESPONSE_CANCELLED = 1
+RESPONSE_FAILED = 2
+
+# Portal source types (bitmask) and cursor modes (bitmask).
+SOURCE_MONITOR = 1
+SOURCE_WINDOW = 2
+CURSOR_HIDDEN = 1
+CURSOR_EMBEDDED = 2
+CURSOR_METADATA = 4
+
+# Mutter uses its own cursor mode enum rather than the portal's bitmask.
+MUTTER_CURSOR = {
+    CURSOR_HIDDEN: 0,
+    CURSOR_EMBEDDED: 1,
+    CURSOR_METADATA: 2,
+}
+
+PORTAL_XML = """
+<node>
+  <interface name="org.freedesktop.impl.portal.ScreenCast">
+    <method name="CreateSession">
+      <arg type="o" name="handle" direction="in"/>
+      <arg type="o" name="session_handle" direction="in"/>
+      <arg type="s" name="app_id" direction="in"/>
+      <arg type="a{sv}" name="options" direction="in"/>
+      <arg type="u" name="response" direction="out"/>
+      <arg type="a{sv}" name="results" direction="out"/>
+    </method>
+    <method name="SelectSources">
+      <arg type="o" name="handle" direction="in"/>
+      <arg type="o" name="session_handle" direction="in"/>
+      <arg type="s" name="app_id" direction="in"/>
+      <arg type="a{sv}" name="options" direction="in"/>
+      <arg type="u" name="response" direction="out"/>
+      <arg type="a{sv}" name="results" direction="out"/>
+    </method>
+    <method name="Start">
+      <arg type="o" name="handle" direction="in"/>
+      <arg type="o" name="session_handle" direction="in"/>
+      <arg type="s" name="app_id" direction="in"/>
+      <arg type="s" name="parent_window" direction="in"/>
+      <arg type="a{sv}" name="options" direction="in"/>
+      <arg type="u" name="response" direction="out"/>
+      <arg type="a{sv}" name="results" direction="out"/>
+    </method>
+    <property name="AvailableSourceTypes" type="u" access="read"/>
+    <property name="AvailableCursorModes" type="u" access="read"/>
+    <property name="version" type="u" access="read"/>
+  </interface>
+</node>
+"""
+
+SESSION_XML = """
+<node>
+  <interface name="org.freedesktop.impl.portal.Session">
+    <method name="Close"/>
+    <signal name="Closed"/>
+    <property name="version" type="u" access="read"/>
+  </interface>
+</node>
+"""
+
+
+def log(message):
+    print(f"niri-cast-portal: {message}", file=sys.stderr, flush=True)
+
+
+class Session:
+    """One screencast session, from CreateSession through to Close."""
+
+    def __init__(self, bus, handle):
+        self.bus = bus
+        self.handle = handle
+        self.cursor_mode = CURSOR_EMBEDDED
+        self.mutter_session = None
+        self.registration_id = None
+        self.stream_subscription = None
+        self.stream_timeout = None
+
+    def close(self):
+        if self.stream_timeout is not None:
+            GLib.source_remove(self.stream_timeout)
+            self.stream_timeout = None
+
+        if self.stream_subscription is not None:
+            self.bus.signal_unsubscribe(self.stream_subscription)
+            self.stream_subscription = None
+
+        if self.mutter_session is not None:
+            try:
+                self.bus.call_sync(
+                    MUTTER_NAME, self.mutter_session, MUTTER_SESSION_IFACE,
+                    "Stop", None, None, Gio.DBusCallFlags.NONE,
+                    CALL_TIMEOUT_MS, None)
+            except GLib.Error as error:
+                log(f"stopping mutter session failed: {error.message}")
+
+            self.mutter_session = None
+
+        if self.registration_id is not None:
+            self.bus.unregister_object(self.registration_id)
+            self.registration_id = None
+
+
+class Portal:
+    def __init__(self):
+        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        self.sessions = {}
+        self.portal_node = Gio.DBusNodeInfo.new_for_xml(PORTAL_XML)
+        self.session_node = Gio.DBusNodeInfo.new_for_xml(SESSION_XML)
+
+    # -- portal interface -------------------------------------------------
+
+    def on_method_call(self, _conn, _sender, _path, _iface, method, params,
+                       invocation):
+        try:
+            if method == "CreateSession":
+                self.create_session(params, invocation)
+            elif method == "SelectSources":
+                self.select_sources(params, invocation)
+            elif method == "Start":
+                self.start(params, invocation)
+            else:
+                invocation.return_error_literal(
+                    Gio.dbus_error_quark(),
+                    Gio.DBusError.UNKNOWN_METHOD,
+                    f"unknown method {method}")
+        except Exception as error:  # a crash here would wedge every share
+            log(f"{method} failed: {error}")
+            self.respond(invocation, RESPONSE_FAILED)
+
+    def on_get_property(self, _conn, _sender, _path, _iface, prop):
+        if prop == "AvailableSourceTypes":
+            return GLib.Variant("u", SOURCE_MONITOR | SOURCE_WINDOW)
+        if prop == "AvailableCursorModes":
+            return GLib.Variant("u", CURSOR_HIDDEN | CURSOR_EMBEDDED | CURSOR_METADATA)
+        if prop == "version":
+            return GLib.Variant("u", 4)
+        return None
+
+    @staticmethod
+    def respond(invocation, response, results=None):
+        invocation.return_value(
+            GLib.Variant("(ua{sv})", (response, results or {})))
+
+    # -- methods ----------------------------------------------------------
+
+    def create_session(self, params, invocation):
+        _handle, session_handle, _app_id, _options = params.unpack()
+
+        session = Session(self.bus, session_handle)
+        session.registration_id = self.bus.register_object(
+            session_handle,
+            self.session_node.interfaces[0],
+            self.on_session_method_call,
+            self.on_session_get_property,
+            None)
+
+        self.sessions[session_handle] = session
+        self.respond(invocation, RESPONSE_SUCCESS)
+
+    def select_sources(self, params, invocation):
+        _handle, session_handle, _app_id, options = params.unpack()
+
+        session = self.sessions.get(session_handle)
+        if session is None:
+            self.respond(invocation, RESPONSE_FAILED)
+            return
+
+        requested = options.get("cursor_mode", CURSOR_EMBEDDED)
+        # The option is a bitmask of acceptable modes; prefer a visible cursor.
+        for mode in (CURSOR_EMBEDDED, CURSOR_METADATA, CURSOR_HIDDEN):
+            if requested & mode:
+                session.cursor_mode = mode
+                break
+
+        self.respond(invocation, RESPONSE_SUCCESS)
+
+    def start(self, params, invocation):
+        _handle, session_handle, app_id, _parent, _options = params.unpack()
+
+        session = self.sessions.get(session_handle)
+        if session is None:
+            self.respond(invocation, RESPONSE_FAILED)
+            return
+
+        self.confirm(app_id, lambda ok: self.on_confirmed(
+            ok, session, invocation))
+
+    # -- confirmation widget ----------------------------------------------
+
+    def confirm(self, app_id, callback):
+        # xdg-desktop-portal only knows an app id for sandboxed callers, so
+        # unsandboxed apps stay anonymous here rather than being guessed at.
+        name = app_id.strip() or "An application"
+
+        try:
+            proc = Gio.Subprocess.new(
+                [CONFIRM_WIDGET, name], Gio.SubprocessFlags.NONE)
+        except GLib.Error as error:
+            # Failing closed matters: no widget must never mean silent consent.
+            log(f"could not launch the confirmation widget: {error.message}")
+            callback(False)
+            return
+
+        def finished(source, result):
+            try:
+                source.wait_finish(result)
+            except GLib.Error as error:
+                log(f"confirmation widget failed: {error.message}")
+                callback(False)
+                return
+
+            callback(source.get_successful())
+
+        proc.wait_async(None, finished)
+
+    def on_confirmed(self, confirmed, session, invocation):
+        if not confirmed:
+            self.respond(invocation, RESPONSE_CANCELLED)
+            return
+
+        try:
+            self.begin_cast(session, invocation)
+        except GLib.Error as error:
+            log(f"starting the cast failed: {error.message}")
+            self.respond(invocation, RESPONSE_FAILED)
+
+    # -- casting ----------------------------------------------------------
+
+    def dynamic_cast_target_id(self):
+        reply = self.bus.call_sync(
+            INTROSPECT_NAME, INTROSPECT_PATH, INTROSPECT_NAME,
+            "GetWindows", None, GLib.VariantType("(a{ta{sv}})"),
+            Gio.DBusCallFlags.NONE, CALL_TIMEOUT_MS, None)
+
+        for window_id, props in reply.unpack()[0].items():
+            if props.get("app-id") == DYNAMIC_CAST_APP_ID:
+                return window_id
+
+        return None
+
+    def begin_cast(self, session, invocation):
+        # Point the target at the focused window before starting, so the very
+        # first frame is already correct rather than blank.
+        subprocess.run(
+            ["niri", "msg", "action", "set-dynamic-cast-window"],
+            check=False, capture_output=True)
+
+        window_id = self.dynamic_cast_target_id()
+        if window_id is None:
+            log("niri is not exposing a dynamic cast target window")
+            self.respond(invocation, RESPONSE_FAILED)
+            return
+
+        session.mutter_session = self.bus.call_sync(
+            MUTTER_NAME, MUTTER_PATH, MUTTER_IFACE, "CreateSession",
+            GLib.Variant("(a{sv})", ({},)), GLib.VariantType("(o)"),
+            Gio.DBusCallFlags.NONE, CALL_TIMEOUT_MS, None).unpack()[0]
+
+        props = {
+            "window-id": GLib.Variant("t", window_id),
+            "cursor-mode": GLib.Variant(
+                "u", MUTTER_CURSOR[session.cursor_mode]),
+        }
+
+        stream_path = self.bus.call_sync(
+            MUTTER_NAME, session.mutter_session, MUTTER_SESSION_IFACE,
+            "RecordWindow", GLib.Variant("(a{sv})", (props,)),
+            GLib.VariantType("(o)"), Gio.DBusCallFlags.NONE,
+            CALL_TIMEOUT_MS, None).unpack()[0]
+
+        # The node id only arrives by signal, so subscribe before Start().
+        session.stream_subscription = self.bus.signal_subscribe(
+            MUTTER_NAME, MUTTER_STREAM_IFACE, "PipeWireStreamAdded",
+            stream_path, None, Gio.DBusSignalFlags.NONE,
+            lambda *args: self.on_stream_added(
+                session, invocation, stream_path, args[5]),
+            None)
+
+        session.stream_timeout = GLib.timeout_add(
+            STREAM_TIMEOUT_MS,
+            lambda: self.on_stream_timeout(session, invocation))
+
+        self.bus.call_sync(
+            MUTTER_NAME, session.mutter_session, MUTTER_SESSION_IFACE,
+            "Start", None, None, Gio.DBusCallFlags.NONE,
+            CALL_TIMEOUT_MS, None)
+
+    def on_stream_added(self, session, invocation, stream_path, params):
+        if session.stream_timeout is None:
+            return  # already answered
+
+        GLib.source_remove(session.stream_timeout)
+        session.stream_timeout = None
+
+        node_id = params.unpack()[0]
+
+        stream_props = {"source_type": GLib.Variant("u", SOURCE_WINDOW)}
+
+        size = self.stream_size(stream_path)
+        if size is not None:
+            stream_props["size"] = GLib.Variant("(ii)", size)
+
+        streams = GLib.Variant("a(ua{sv})", [(node_id, stream_props)])
+        self.respond(invocation, RESPONSE_SUCCESS, {"streams": streams})
+
+    def stream_size(self, stream_path):
+        try:
+            reply = self.bus.call_sync(
+                MUTTER_NAME, stream_path, "org.freedesktop.DBus.Properties",
+                "Get",
+                GLib.Variant("(ss)", (MUTTER_STREAM_IFACE, "Parameters")),
+                GLib.VariantType("(v)"), Gio.DBusCallFlags.NONE,
+                CALL_TIMEOUT_MS, None)
+        except GLib.Error:
+            return None
+
+        return reply.unpack()[0].get("size")
+
+    def on_stream_timeout(self, session, invocation):
+        session.stream_timeout = None
+        log("timed out waiting for the PipeWire stream")
+        self.respond(invocation, RESPONSE_FAILED)
+        return GLib.SOURCE_REMOVE
+
+    # -- session object ---------------------------------------------------
+
+    def on_session_method_call(self, _conn, _sender, path, _iface, method,
+                               _params, invocation):
+        if method != "Close":
+            invocation.return_error_literal(
+                Gio.dbus_error_quark(), Gio.DBusError.UNKNOWN_METHOD, method)
+            return
+
+        session = self.sessions.pop(path, None)
+        if session is not None:
+            session.close()
+
+        invocation.return_value(None)
+
+    def on_session_get_property(self, _conn, _sender, _path, _iface, prop):
+        if prop == "version":
+            return GLib.Variant("u", 2)
+        return None
+
+    # -- lifecycle --------------------------------------------------------
+
+    def run(self):
+        self.bus.register_object(
+            OBJECT_PATH,
+            self.portal_node.interfaces[0],
+            self.on_method_call,
+            self.on_get_property,
+            None)
+
+        Gio.bus_own_name_on_connection(
+            self.bus, BUS_NAME, Gio.BusNameOwnerFlags.NONE,
+            lambda *_: log(f"acquired {BUS_NAME}"),
+            lambda *_: log(f"lost {BUS_NAME}"))
+
+        GLib.MainLoop().run()
+
+
+if __name__ == "__main__":
+    Portal().run()
