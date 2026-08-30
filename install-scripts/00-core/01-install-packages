@@ -22,6 +22,8 @@ if ! command -v yay &>/dev/null; then
     yay -Y --devel --save --noconfirm
 fi
 
+yay -Syu
+
 cli_packages=(
     neovim
     kitty
@@ -52,6 +54,7 @@ system_packages=(
     jmtpfs
     cifs-utils
     croc
+    zsa-udev
 )
 
 media_packages=(
@@ -82,6 +85,7 @@ gui_packages=(
     ripdrag
     waybar
     spotify
+    zsa-keymapp-bin
 )
 
 wm_packages=(
