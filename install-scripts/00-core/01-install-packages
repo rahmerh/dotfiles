@@ -18,11 +18,8 @@ if ! command -v yay &>/dev/null; then
     makepkg -si
 
     yay -Y --gendb --noconfirm
-    yay -Syu --devel --noconfirm
     yay -Y --devel --save --noconfirm
 fi
-
-yay -Syu
 
 cli_packages=(
     neovim
@@ -168,42 +165,12 @@ else
     exit 1
 fi
 
-install_packages() {
-    local package
-    local repo_package
-    local -A repo_package_names=()
-    local repo_packages=()
-    local aur_packages=()
-
-    print_step "Mapping AUR packages"
-    while IFS= read -r repo_package; do
-        repo_package_names["$repo_package"]=1
-    done < <(pacman -Slq)
-
-    for package in "$@"; do
-        if [[ -v "repo_package_names[$package]" ]]; then
-            repo_packages+=("$package")
-        else
-            aur_packages+=("$package")
-        fi
-    done
-
-    if ((${#repo_packages[@]})); then
-        print_step "Installing/updating repository packages"
-        sudo pacman --needed -S --noconfirm "${repo_packages[@]}"
-    fi
-
-    for package in "${aur_packages[@]}"; do
-        print_step "Reviewing AUR package: $package"
-        yay --aur --needed -S \
-            --diffmenu \
-            --answerdiff All \
-            --confirm \
-            "$package"
-    done
-}
-
-install_packages \
+print_step "Installing/updating packages"
+yay -Syu --needed \
+    --devel \
+    --diffmenu \
+    --answerdiff All \
+    --answerclean None \
     "${cli_packages[@]}" \
     "${system_packages[@]}" \
     "${media_packages[@]}" \
