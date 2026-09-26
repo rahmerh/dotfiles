@@ -18,11 +18,6 @@ output "Dell Inc. DELL P2722HE 11CWDH3" {
     mode "1920x1080@60.00"
 }
 
-output "Samsung Electric Company LS27A800U H4ZT101647" {
-    scale 1.5
-    mode "3840x2160@59.997"
-}
-
 layout {
     gaps 12
 
