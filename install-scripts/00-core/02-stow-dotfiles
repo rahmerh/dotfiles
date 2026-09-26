@@ -23,7 +23,10 @@ force_stow() {
             mkdir -p "$expected_dirname"
         fi
 
-        if [[ -L "$expected" ]]; then
+        # Already resolves to the dotfile, possibly through a folded directory symlink.
+        if [[ "$expected" -ef "$entry" ]]; then
+            continue;
+        elif [[ -L "$expected" ]]; then
             # TODO: Check if symlink to dotfiles or not. Prompt to delete if not.
             continue;
         elif [[ -f "$expected" ]]; then
@@ -32,7 +35,7 @@ force_stow() {
     done
 
     print_step "Stowing $package"
-    stow --target="$target" "$package"
+    stow --no-folding --target="$target" "$package"
 }
 
 force_stow "$HOME" home
