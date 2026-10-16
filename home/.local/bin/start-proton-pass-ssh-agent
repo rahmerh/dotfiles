@@ -92,6 +92,7 @@ until agent_responds; do
         continue
     fi
 
+    notify_waiting
     sleep 3
 done
 
