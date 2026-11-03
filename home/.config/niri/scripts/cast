@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# Controls niri's dynamic cast target.
-#
-# niri-cast-portal binds every screencast to the dynamic cast target and points
-# it at the active window on confirm. These subcommands re-point that live
-# stream; the sharing app never renegotiates, so it never re-prompts.
-
 usage() {
     echo "Usage: cast <window|monitor|hide|stop>"
     exit 1
@@ -24,8 +18,6 @@ hide_cast() {
 }
 
 stop_cast() {
-    # One session can carry several streams, so collapse to unique session ids
-    # and stop each once.
     local session_ids
     mapfile -t session_ids < <(
         niri msg --json casts | jq -r '.[].session_id' | sort -u
@@ -41,9 +33,9 @@ if [[ $# -ne 1 ]]; then
 fi
 
 case "$1" in
-    window)  cast_window;;
-    monitor) cast_monitor;;
-    hide)    hide_cast;;
-    stop)    stop_cast;;
-    *)       usage;;
+    window) cast_window ;;
+    monitor) cast_monitor ;;
+    hide) hide_cast ;;
+    stop) stop_cast ;;
+    *) usage ;;
 esac
