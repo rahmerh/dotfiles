@@ -18,13 +18,9 @@ output "Dell Inc. DELL P2722HE 11CWDH3" {
     mode "1920x1080@60.00"
 }
 
+// Gaps, struts, the shadow's colours and offset, window corners and unfocused opacity come from
+// theme-picker (the include at the end), since a theme can change them.
 layout {
-    gaps 12
-
-    struts {
-        top -4
-    }
-
     focus-ring {
         on
         width 2
@@ -37,10 +33,7 @@ layout {
         on
         softness 32
         spread 4
-        offset x=0 y=14
         draw-behind-window false
-        color "#00000099"
-        inactive-color "#00000066"
     }
 }
 
@@ -126,9 +119,8 @@ spawn-sh-at-startup "~/.local/bin/theme-picker restore"
 spawn-sh-at-startup "~/.local/bin/theme-picker ui"
 
 binds {
-    Mod+Space {
-        spawn-sh "rofi -show drun -display-drun ''"
-    }
+    // rofi, or the sky's own launcher under a theme with a sky.
+    Mod+Space { spawn-sh "~/.local/bin/theme-picker launch"; }
 
     Mod+T { spawn "kitty"; }
     Mod+Shift+T { spawn-sh "~/.local/bin/theme-picker toggle"; }
@@ -186,6 +178,12 @@ binds {
     Mod+D { spawn-sh "~/.config/niri/scripts/equalize-column-widths"; }
 }
 
+// theme-picker's sky launcher: blur what's behind it.
+layer-rule {
+    match namespace="^theme-picker-launcher$"
+    background-effect { blur true; }
+}
+
 layer-rule {
     match namespace="^cast-confirm$"
 
@@ -233,7 +231,6 @@ window-rule {
 }
 
 window-rule {
-    geometry-corner-radius 10
     clip-to-geometry true
     draw-border-with-background false
 }

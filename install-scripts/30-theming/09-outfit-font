@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+# Outfit, the UI font of theme-picker's Drift theme. Not packaged for Arch or the AUR, so it ships
+# here (SIL Open Font License, see OFL.txt).
+src="$SCRIPT_DIR/../assets/fonts/outfit/Outfit[wght].ttf"
+dest="$HOME/.local/share/fonts/outfit/Outfit[wght].ttf"
+
+if ! cmp -s "$src" "$dest"; then
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+    fc-cache -f "$(dirname "$dest")" > /dev/null
+fi
+
+print_step Done
