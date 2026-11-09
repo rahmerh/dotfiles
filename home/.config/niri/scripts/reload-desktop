@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-pkill swaybg
-~/.config/niri/scripts/set-wallpaper &
+~/.local/bin/theme-picker restore &
 
 pkill waybar
 setsid -f waybar

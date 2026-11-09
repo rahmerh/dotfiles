@@ -92,7 +92,8 @@ wm_packages=(
     python
     python-gobject
     python-markdown-it-py
-    swaybg
+    awww
+    quickshell
     swaync
     webkit2gtk-4.1
     grim
