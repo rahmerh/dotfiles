@@ -80,7 +80,6 @@ gui_packages=(
     pinta
     protonmail-bridge
     ripdrag
-    waybar
     spotify
     zsa-keymapp-bin
 )
@@ -92,9 +91,7 @@ wm_packages=(
     python
     python-gobject
     python-markdown-it-py
-    awww
     quickshell
-    swaync
     webkit2gtk-4.1
     grim
     slurp

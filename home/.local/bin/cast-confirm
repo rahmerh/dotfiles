@@ -6,9 +6,8 @@ A layer-shell overlay rather than a normal window, so it sits above everything
 and takes an exclusive keyboard grab -- a consent prompt should not be possible
 to type past.
 
-Styling follows the tokens shared by waybar, swaync and rofi (see
-home/.config/waybar/style/00-vars.css and home/.config/swaync/style.css): a
-near-black translucent card, a hairline border, 12px radius, and the accent
+Styling follows fjord's notification cards and rofi (theme-picker's
+sky/fjord/Card.qml): a near-black translucent card, a hairline border, 12px radius, and the accent
 used as text rather than as a fill. The card is translucent because niri blurs
 the layer behind it via the cast-confirm layer-rule.
 
@@ -45,7 +44,7 @@ window {
 }
 
 .card {
-    /* Slightly above swaync's 0.82 -- a consent prompt should stay legible
+    /* Slightly above the notification cards' 0.82 -- a consent prompt should stay legible
        over whatever it interrupts, but still read as part of the desktop. */
     background-color: rgba(10, 11, 14, 0.88);
     border: 1px solid rgba(255, 255, 255, 0.06);

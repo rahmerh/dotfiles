@@ -108,18 +108,18 @@ environment {
     PROTON_PASS_LINUX_KEYRING "dbus"
 }
 
-spawn-at-startup "swaync"
-spawn-at-startup "waybar"
+// theme-picker's sky is the whole desktop around the windows: wallpaper, bar, notifications, tray and
+// launcher. restore starts it, first, so the tray is there for the apps below.
+spawn-sh-at-startup "~/.local/bin/theme-picker restore"
 spawn-at-startup "steam" "-silent"
 spawn-sh-at-startup "~/.config/niri/scripts/spawn-after-tray discord --start-minimized"
 spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
-spawn-sh-at-startup "~/.local/bin/theme-picker restore"
 spawn-sh-at-startup "~/.local/bin/theme-picker ui"
 
 binds {
-    // rofi, or the sky's own launcher under a theme with a sky.
+    // The sky's launcher, in the applied theme's style.
     Mod+Space { spawn-sh "~/.local/bin/theme-picker launch"; }
 
     Mod+T { spawn "kitty"; }
@@ -138,8 +138,6 @@ binds {
     Mod+Alt+T { spawn-sh "~/.config/niri/scripts/cast hide"; }
     Mod+Alt+X { spawn-sh "~/.config/niri/scripts/cast stop"; }
 
-    Mod+R { spawn-sh "~/.config/niri/scripts/reload-desktop"; }
-
     Ctrl+Shift+L { spawn "hyprlock"; }
 
     Mod+B repeat=false { spawn "rofi-rbw"; }
@@ -147,7 +145,7 @@ binds {
         spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
     }
 
-    // swaync's panel, or the sky's notification history under a theme with a sky.
+    // The sky's notification history.
     Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
 
     Mod+Q { close-window; }

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-~/.local/bin/theme-picker restore &
-
-pkill waybar
-setsid -f waybar
-
-pkill swaync
-setsid -f swaync
