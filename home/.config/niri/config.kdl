@@ -123,6 +123,7 @@ spawn-at-startup "blueman-applet"
 
 spawn-sh-at-startup "~/.config/niri/scripts/set-peripheral-settings"
 spawn-sh-at-startup "~/.local/bin/theme-picker restore"
+spawn-sh-at-startup "~/.local/bin/theme-picker ui"
 
 binds {
     Mod+Space {
@@ -130,6 +131,7 @@ binds {
     }
 
     Mod+T { spawn "kitty"; }
+    Mod+Shift+T { spawn-sh "~/.local/bin/theme-picker toggle"; }
 
     Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot copy"; }
     Ctrl+Shift+A { spawn-sh "~/.config/niri/scripts/screenshot save"; }
