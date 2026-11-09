@@ -8,7 +8,8 @@ repo_dir="$HOME/projects/theme-picker"
 
 if [[ ! -d "$repo_dir/.git" ]]; then
     print_step "Cloning theme-picker"
-    git clone https://git.sr.ht/~rahmerh/theme-picker "$repo_dir"
+    # Private repo: cloned over SSH (the proton-pass SSH agent is enabled in 10-system).
+    git clone git@git.sr.ht:~rahmerh/theme-picker "$repo_dir"
 fi
 
 mkdir -p "$HOME/.local/bin"
