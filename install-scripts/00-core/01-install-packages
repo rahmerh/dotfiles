@@ -136,6 +136,7 @@ dev_packages=(
     rust-analyzer
     codelldb-bin
     android-tools
+    hut
 )
 
 desktop_packages=(
