@@ -147,7 +147,8 @@ binds {
         spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
     }
 
-    Mod+N { spawn "swaync-client" "--toggle-panel"; }
+    // swaync's panel, or the sky's notification history under a theme with a sky.
+    Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
