@@ -4,12 +4,12 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
 
-repo_dir="$HOME/projects/theme-picker"
+repo_dir="$HOME/projects/the-sky"
 
 if [[ ! -d "$repo_dir/.git" ]]; then
-    print_step "Cloning theme-picker"
+    print_step "Cloning the-sky"
     # Private repo: cloned over SSH (the proton-pass SSH agent is enabled in 10-system).
-    git clone git@git.sr.ht:~rahmerh/theme-picker "$repo_dir"
+    git clone git@git.sr.ht:~rahmerh/the-sky "$repo_dir"
 fi
 
 mkdir -p "$HOME/.local/bin"
