@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+# Schibsted Grotesk, the UI font of theme-picker's fjord theme. Not packaged for Arch or the AUR, so it
+# ships here (SIL Open Font License, see OFL.txt).
+src_dir="$SCRIPT_DIR/../assets/fonts/schibsted-grotesk"
+dest_dir="$HOME/.local/share/fonts/schibsted-grotesk"
+
+changed=0
+for font in "SchibstedGrotesk[wght].ttf" "SchibstedGrotesk-Italic[wght].ttf"; do
+    if ! cmp -s "$src_dir/$font" "$dest_dir/$font"; then
+        mkdir -p "$dest_dir"
+        cp "$src_dir/$font" "$dest_dir/$font"
+        changed=1
+    fi
+done
+
+if [ "$changed" = 1 ]; then
+    fc-cache -f "$dest_dir" > /dev/null
+fi
+
+print_step Done
