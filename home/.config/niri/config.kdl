@@ -44,63 +44,7 @@ blur {
     saturation 1.0
 }
 
-animations {
-    slowdown 1.05
-
-    workspace-switch {
-        spring damping-ratio=0.88 stiffness=1100 epsilon=0.0001
-    }
-
-    window-resize {
-        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
-    }
-
-    window-movement {
-        spring damping-ratio=0.92 stiffness=900 epsilon=0.0001
-    }
-
-    horizontal-view-movement {
-        spring damping-ratio=0.92 stiffness=900 epsilon=0.0001
-    }
-
-    window-open {
-        spring damping-ratio=0.72 stiffness=900 epsilon=0.0005
-
-        custom-shader r"
-            vec4 open_color(vec3 coords_geo, vec3 size_geo) {
-                float slide = (1.0 - niri_progress) * min(size_geo.y * 0.18, 180.0);
-                vec3 coords = vec3(coords_geo.x, coords_geo.y - slide / size_geo.y, 1.0);
-
-                if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
-                    return vec4(0.0);
-                }
-
-                vec3 coords_tex = niri_geo_to_tex * coords;
-                vec4 color = texture2D(niri_tex, coords_tex.st);
-                return color * smoothstep(0.0, 0.82, niri_clamped_progress);
-            }
-        "
-    }
-
-    window-close {
-        spring damping-ratio=1.0 stiffness=900 epsilon=0.0005
-
-        custom-shader r"
-            vec4 close_color(vec3 coords_geo, vec3 size_geo) {
-                float slide = niri_progress * min(size_geo.y * 0.18, 180.0);
-                vec3 coords = vec3(coords_geo.x, coords_geo.y - slide / size_geo.y, 1.0);
-
-                if (coords.x < 0.0 || coords.x > 1.0 || coords.y < 0.0 || coords.y > 1.0) {
-                    return vec4(0.0);
-                }
-
-                vec3 coords_tex = niri_geo_to_tex * coords;
-                vec4 color = texture2D(niri_tex, coords_tex.st);
-                return color * (1.0 - smoothstep(0.0, 0.82, niri_clamped_progress));
-            }
-        "
-    }
-}
+// Animations come from theme-picker (the include at the end), since each theme moves in its own way.
 
 prefer-no-csd
 
