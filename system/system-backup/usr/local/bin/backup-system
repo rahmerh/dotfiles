@@ -7,7 +7,6 @@ LOG_FILE="$BACKUP_DIR/log"
 LAST_SUCCESS_FILE="$BACKUP_DIR/last-success"
 STATUS_FILE="$BACKUP_DIR/status"
 LOCK_FILE="$BACKUP_DIR/lock"
-MAX_DELETE=5000
 RSYNC_TIMEOUT=600
 
 # Example /var/lib/backup-system/config:
@@ -92,7 +91,6 @@ IFS=":" read -r -a sources <<<"$BACKUP_DIRS"
 rsync_args=(
     -a
     --delete
-    --max-delete="$MAX_DELETE"
     --timeout="$RSYNC_TIMEOUT"
     --info=stats2
     --no-group
