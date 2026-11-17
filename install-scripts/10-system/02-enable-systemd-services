@@ -21,13 +21,15 @@ if ! systemctl --user is-enabled --quiet proton-pass-sync.timer; then
     systemctl --user enable --now proton-pass-sync.timer
 fi
 
-if ! systemctl --user is-enabled --quiet openrgb-server.service; then
-    systemctl --user enable --now openrgb-server.service
-fi
+if mt_is_desktop; then
+    if ! systemctl --user is-enabled --quiet openrgb-server.service; then
+        systemctl --user enable --now openrgb-server.service
+    fi
 
-# Owns the Razer mouse; set-peripheral-settings drives it through razer-cli
-if ! systemctl --user is-enabled --quiet openrazer-daemon.service; then
-    systemctl --user enable --now openrazer-daemon.service
+    # Owns the Razer mouse; set-peripheral-settings drives it through razer-cli
+    if ! systemctl --user is-enabled --quiet openrazer-daemon.service; then
+        systemctl --user enable --now openrazer-daemon.service
+    fi
 fi
 
 print_step Done
