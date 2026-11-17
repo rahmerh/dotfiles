@@ -205,14 +205,6 @@ cargo install sax
 cargo install --git https://github.com/webstonehq/tuxedo
 cargo install reel-tui
 
-if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx easydotnet; then
-    dotnet tool install --global EasyDotnet
-fi
-
-if ! dotnet tool list --global | awk '{ print $1 }' | grep -qx csharpier; then
-    dotnet tool install --global CSharpier
-fi
-
 print_step "Installing apps in wine"
 
 if mt_is_desktop; then
