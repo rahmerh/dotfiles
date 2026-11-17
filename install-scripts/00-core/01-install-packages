@@ -49,6 +49,7 @@ system_packages=(
     ufw
     rsync
     trash-cli
+    dtach
     jmtpfs
     cifs-utils
     croc
