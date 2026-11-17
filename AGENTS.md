@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository manages an Arch-based workstation through dotfiles and install scripts. `home/` is a GNU Stow package: its hidden paths mirror the target home directory, for example `home/.config/nvim/` and `home/.bashrc.d/`. `system/` contains files copied into system locations, grouped by feature such as `system/sddm/`, `system/system-backup/`, `system/logid/`, and `system/sysctl/`.
+This repository manages an Arch-based workstation through dotfiles and install scripts. `home/` is a GNU Stow package: its hidden paths mirror the target home directory, for example `home/.config/nvim/` and `home/.bashrc.d/`. `system/` contains files copied into system locations, grouped by feature such as `system/sddm/`, `system/system-backup/`, and `system/sysctl/`.
 
 Provisioning lives in `install-scripts/`. Numbered directories and the scripts inside them define execution order, sorted with `sort -V`: `00-core` (packages, stow, system files, git, login shell), `10-system` (groups, services, firewall, backups, SSH), `20-apps` (firefox, docker), and `30-theming` (system theme, assets, firefox, icons, SDDM wallpaper). Shared Bash helpers are in `install-scripts/lib/` (`print`, `prefs`, `firefox`, `wine`); wallpapers and icons are in `install-scripts/assets/`. The root entry point is `apply`, which performs post-install configuration; it prompts for machine type and purpose and persists them to `.prefs`.
 

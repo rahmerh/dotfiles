@@ -3,7 +3,6 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 . "$SCRIPT_DIR/../lib/print"
-. "$SCRIPT_DIR/../lib/prefs"
 
 copy_system_package() {
     local package="$1"
@@ -48,10 +47,6 @@ cd system || exit 1
 copy_system_package sysctl
 copy_system_package sddm
 copy_system_package system-backup
-
-if mt_is_laptop; then
-    copy_system_package logid
-fi
 
 # Unit files just changed on disk; reload here so this script is correct on its
 # own, not only when 10-system/02-enable-systemd-services happens to run later.

@@ -147,16 +147,11 @@ desktop_packages=(
 )
 
 laptop_packages=(
-    logiops
     blueman
 )
 
 if mt_is_laptop; then
     mt_packages=("${laptop_packages[@]}")
-
-    if ! systemctl is-enabled --quiet logid.service; then
-        sudo systemctl enable --now logid.service
-    fi
 elif mt_is_desktop; then
     mt_packages=("${desktop_packages[@]}")
 else
