@@ -48,6 +48,7 @@ system_packages=(
     wireguard-tools
     ufw
     rsync
+    trash-cli
     jmtpfs
     cifs-utils
     croc
