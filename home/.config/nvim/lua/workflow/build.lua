@@ -19,29 +19,6 @@ end
 local builders = {
     {
         project = function(start_dir)
-            local path, cwd = files.find_upwards(start_dir, { "*.csproj", "*.fsproj", "*.vbproj" })
-            if path then
-                return {
-                    name = "build " .. vim.fn.fnamemodify(path, ":t"),
-                    command = "dotnet build " .. vim.fn.shellescape(path),
-                    cwd = cwd,
-                }
-            end
-        end,
-
-        workspace = function(start_dir)
-            local path, cwd = files.find_upwards(start_dir, { "*.sln", "*.slnx" })
-            if path then
-                return {
-                    name = "build " .. vim.fn.fnamemodify(path, ":t"),
-                    command = "dotnet build " .. vim.fn.shellescape(path),
-                    cwd = cwd,
-                }
-            end
-        end,
-    },
-    {
-        project = function(start_dir)
             local path, cwd = files.find_upwards(start_dir, { "go.mod" })
             if path then
                 return {

@@ -1,13 +1,10 @@
 local M = {}
 
-local dotnet = require("debug.dotnet")
 local breakpoints = require("debug.breakpoints")
 
 function M.setup()
     local dap = require("dap")
     local dapui = require("dapui")
-
-    dotnet.setup(dap)
 
     dapui.setup({
         layouts = {

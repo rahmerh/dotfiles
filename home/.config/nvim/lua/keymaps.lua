@@ -174,8 +174,6 @@ vim.keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<cr>", options)
 vim.keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<cr>", options)
 vim.keymap.set("n", "<leader>rn", "<cmd>lua vim.lsp.buf.rename()<cr>", options)
 
-vim.keymap.set("n", "<leader>rr", "<cmd>Dotnet lsp restart<cr>", options)
-
 vim.keymap.set("n", "<leader>cc", function()
     require("neogen").generate()
 end, vim.tbl_extend("force", options, {

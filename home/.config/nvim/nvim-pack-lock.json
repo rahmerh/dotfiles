@@ -5,10 +5,6 @@
       "src": "https://github.com/Saghen/blink.cmp",
       "version": "1.0.0 - 2.0.0"
     },
-    "easy-dotnet.nvim": {
-      "rev": "4553feb3e82002ef4588b8e429d28cc5a6e19e5d",
-      "src": "https://github.com/GustavEikaas/easy-dotnet.nvim"
-    },
     "neogen": {
       "rev": "23e7e9f883d01289ebd90e98025acc860ea26366",
       "src": "https://github.com/danymat/neogen"
@@ -16,10 +12,6 @@
     "neotest": {
       "rev": "ad991822b7076b1d940b33a9d6d0d30416d5df81",
       "src": "https://github.com/nvim-neotest/neotest"
-    },
-    "neotest-vstest": {
-      "rev": "8588c3c988c7ed49879dddf937b42681cfa7ce30",
-      "src": "https://github.com/nsidorenco/neotest-vstest"
     },
     "nvim-autopairs": {
       "rev": "7b9923abad60b903ece7c52940e1321d39eccc79",

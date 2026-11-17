@@ -7,12 +7,10 @@ vim.pack.add({
     { src = "https://github.com/Saghen/blink.cmp",                version = vim.version.range("1") },
     { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
     { src = "https://github.com/mrcjkb/rustaceanvim",             version = vim.version.range("^9") },
-    "https://github.com/GustavEikaas/easy-dotnet.nvim",
     "https://github.com/mfussenegger/nvim-dap",
     "https://github.com/rcarriga/nvim-dap-ui",
     "https://github.com/nvim-neotest/nvim-nio",
     "https://github.com/nvim-neotest/neotest",
-    "https://github.com/nsidorenco/neotest-vstest",
     "https://github.com/danymat/neogen",
     "https://github.com/petertriho/nvim-scrollbar",
 })
@@ -111,43 +109,13 @@ vim.g.rustaceanvim = {
     },
 }
 
--- Dotnet
-local function setup_easy_dotnet()
-    require("easy-dotnet").setup({
-        auto_bootstrap_namespace = {
-            type = "file_scoped",
-            enabled = true,
-        },
-        test_runner = {
-            neotest_integration = true,
-        },
-        debugger = {
-            auto_register_dap = false,
-        },
-        lsp = {
-            enabled = true,
-            auto_refresh_codelens = false,
-            config = {
-                capabilities = require("blink.cmp").get_lsp_capabilities(),
-            },
-        },
-    })
-end
-
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "cs",
-    once = true,
-    callback = setup_easy_dotnet,
-    desc = "Set up easy-dotnet for C# buffers",
-})
-
 -- Neotest
 --
 -- rustaceanvim's neotest adapter root() shells out to `cargo metadata` and reads
 -- vim.env synchronously. neotest probes every registered adapter's root() inside
 -- an async (fast event) context, where those calls raise E5560. Replace root()
--- with a fast-safe filesystem walk so probing non-Rust projects (e.g. dotnet) no
--- longer crashes neotest.
+-- with a fast-safe filesystem walk so probing non-Rust projects no longer
+-- crashes neotest.
 local rust_neotest = require("rustaceanvim.neotest")
 
 rust_neotest.root = function(path)
@@ -176,28 +144,13 @@ end
 
 require("neotest").setup({
     adapters = {
-        require("neotest-vstest"),
         rust_neotest,
     },
-})
-
--- neotest-vstest emits positions of type "parameterized", which neotest's
--- status consumer never registers a sign for, causing E155 on sign_place.
-vim.fn.sign_define("neotest_parameterized", {
-    text = require("neotest.config").icons.namespace,
-    texthl = require("neotest.config").highlights.namespace,
 })
 
 -- Neogen
 require("neogen").setup({
     snippet_engine = "nvim",
-    languages = {
-        cs = {
-            template = {
-                annotation_convention = "xmldoc",
-            },
-        },
-    },
 })
 
 -- Diagnostic overview
