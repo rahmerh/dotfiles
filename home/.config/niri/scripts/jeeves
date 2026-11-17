@@ -1,15 +1,27 @@
 #!/usr/bin/env bash
-# Mod+A: opens Jeeves (~/projects/jeeves) in a floating kitty window, focuses it if it's already open,
-# and sends focus back to the tiled windows if Jeeves already has it.
+# Mod+A: shows and hides Jeeves (~/projects/jeeves).
+#
+# Jeeves runs inside dtach, so it keeps running without a window. Hiding closes only the kitty window;
+# showing opens a new one attached to the same Jeeves. Nothing shows in the bar while it's hidden.
+#
+#   window, focused     → hide (close the window; Jeeves keeps running)
+#   window, not focused → focus it
+#   no window           → show: attach to the running Jeeves, or start one
+
+socket="${XDG_RUNTIME_DIR:-/tmp}/jeeves/dtach.sock"
+mkdir -p "$(dirname "$socket")"
 
 window=$(niri msg --json windows | jq -r 'first(.[] | select(.app_id == "jeeves") | "\(.id) \(.is_focused)") // empty')
 read -r id focused <<<"$window"
 
 if [[ -z "$id" ]]; then
-    kitty --class jeeves --title Jeeves -e "$HOME/.cargo/bin/jeeves" &
+    # -A attaches, or starts Jeeves if it isn't running. -E: no detach key, -z: no suspend key,
+    # -r winch: make Jeeves redraw for the new window.
+    # Closing the window only hides Jeeves, so kitty needn't ask first.
+    kitty --class jeeves --title Jeeves -o confirm_os_window_close=0 -e dtach -A "$socket" -E -z -r winch "$HOME/.cargo/bin/jeeves" &
     disown
 elif [[ "$focused" == "true" ]]; then
-    niri msg action focus-tiling
+    niri msg action close-window --id "$id"
 else
     niri msg action focus-window --id "$id"
 fi
