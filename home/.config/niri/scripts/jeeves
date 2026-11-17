@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Opens Jeeves (~/projects/jeeves) in a floating kitty window, or focuses it if one is already open.
+
+window=$(niri msg --json windows | jq -r 'first(.[] | select(.app_id == "jeeves") | .id) // empty')
+
+if [[ -n "$window" ]]; then
+    niri msg action focus-window --id "$window"
+else
+    kitty --class jeeves --title Jeeves -e "$HOME/.cargo/bin/jeeves" &
+    disown
+fi

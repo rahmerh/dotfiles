@@ -67,6 +67,7 @@ binds {
     Mod+Space { spawn-sh "~/.local/bin/theme-picker launch"; }
 
     Mod+T { spawn "kitty"; }
+    Mod+A repeat=false { spawn-sh "~/.config/niri/scripts/jeeves"; }
     Mod+Shift+T { spawn-sh "~/.local/bin/theme-picker toggle"; }
 
     Ctrl+Shift+S { spawn-sh "~/.config/niri/scripts/screenshot copy"; }
@@ -172,6 +173,15 @@ window-rule {
 window-rule {
     match app-id="com-azefsw-audioconnect-desktop-app-MainKt"
     open-floating true
+}
+
+// Jeeves (~/projects/jeeves): opened with Mod+A, floating and centred.
+window-rule {
+    match app-id="^jeeves$"
+    open-floating true
+    open-focused true
+    default-column-width { proportion 0.5; }
+    default-window-height { proportion 0.65; }
 }
 
 window-rule {
