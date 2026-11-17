@@ -25,4 +25,12 @@ git config --global user.email "$git_email"
 git config --global pull.rebase true
 git config --global init.defaultBranch main
 
+# Fresh machines clone over https (no SSH keys yet); push over SSH from here on.
+repo_dir="$SCRIPT_DIR/../.."
+ssh_remote="git@git.sr.ht:~rahmerh/dotfiles"
+
+if [[ "$(git -C "$repo_dir" remote get-url origin)" != "$ssh_remote" ]]; then
+    git -C "$repo_dir" remote set-url origin "$ssh_remote"
+fi
+
 print_step Done
