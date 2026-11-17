@@ -5,14 +5,13 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 . "$SCRIPT_DIR/../lib/print"
 
 # Outfit, the UI font of theme-picker's Drift theme. Not packaged for Arch or the AUR, so it ships
-# here (SIL Open Font License, see OFL.txt).
+# here (SIL Open Font License, see OFL.txt). System-wide, so the SDDM login screen can use it too.
 src="$SCRIPT_DIR/../assets/fonts/outfit/Outfit[wght].ttf"
-dest="$HOME/.local/share/fonts/outfit/Outfit[wght].ttf"
+dest="/usr/local/share/fonts/outfit/Outfit[wght].ttf"
 
 if ! cmp -s "$src" "$dest"; then
-    mkdir -p "$(dirname "$dest")"
-    cp "$src" "$dest"
-    fc-cache -f "$(dirname "$dest")" > /dev/null
+    sudo install -D --owner=root --group=root --mode=0644 "$src" "$dest"
+    sudo fc-cache -f "$(dirname "$dest")" > /dev/null
 fi
 
 print_step Done

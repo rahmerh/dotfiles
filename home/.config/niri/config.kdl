@@ -82,7 +82,8 @@ binds {
     Mod+Alt+T { spawn-sh "~/.config/niri/scripts/cast hide"; }
     Mod+Alt+X { spawn-sh "~/.config/niri/scripts/cast stop"; }
 
-    Ctrl+Shift+L { spawn "hyprlock"; }
+    // theme-picker's sky locks in the theme's look; hyprlock if the sky is down.
+    Ctrl+Shift+L { spawn-sh "~/.local/bin/theme-picker lock"; }
 
     Mod+B repeat=false { spawn "rofi-rbw"; }
     Mod+P repeat=false {

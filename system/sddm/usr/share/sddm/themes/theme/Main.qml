@@ -13,7 +13,19 @@ Rectangle {
     property int sessionIndex: sessionModel.lastIndex >= 0 ? sessionModel.lastIndex : 0
     property bool loginFailed: false
     property bool authenticating: false
-    readonly property string fieldFontFamily: "JetBrainsMono Nerd Font Mono"
+
+    // The applied theme's look, written by theme-picker next to the background (see its
+    // docs/desktop.md). Without one, the look this screen had before.
+    readonly property QtObject look: {
+        const component = Qt.createComponent("file:///var/lib/dotfiles/sddm/Look.qml")
+        return component.status === Component.Ready ? component.createObject(root) : null
+    }
+    readonly property color fieldColor: look ? look.field : "#a6000000"
+    readonly property color textColor: look ? look.text : "#ffffff"
+    readonly property color accentColor: look ? look.accent : "#d16e9e"
+    readonly property color urgentColor: look ? look.urgent : "#ff3117"
+    readonly property string fieldFontFamily: look ? look.font : "JetBrainsMono Nerd Font Mono"
+    readonly property int fieldRadius: look ? look.radius : 12
 
     function currentUsername() {
         return userModel.data(userModel.index(userIndex, 0), usernameRole)
@@ -74,16 +86,16 @@ Rectangle {
             y: passwordField.y - height - 10
             width: passwordField.width
             height: passwordField.height
-            color: "#a6000000"
-            radius: 12
+            color: root.fieldColor
+            radius: root.fieldRadius
 
             Rectangle {
                 x: 12
                 anchors.verticalCenter: parent.verticalCenter
                 width: 6
                 height: parent.height - 16
-                radius: 3
-                color: "#d16e9e"
+                radius: Math.min(3, root.fieldRadius)
+                color: root.accentColor
             }
 
             TextInput {
@@ -91,7 +103,7 @@ Rectangle {
                 x: 28
                 width: parent.width - x
                 height: parent.height
-                color: "#ffffff"
+                color: root.textColor
                 text: userModel.lastUser || root.currentUsername()
                 font.family: root.fieldFontFamily
                 font.pixelSize: 24
@@ -117,18 +129,18 @@ Rectangle {
             y: parent.height - height - (parent.height * 0.05)
             width: 420
             height: 70
-            color: "#a6000000"
-            radius: 12
+            color: root.fieldColor
+            radius: root.fieldRadius
 
             Rectangle {
                 x: 12
                 anchors.verticalCenter: parent.verticalCenter
                 width: 6
                 height: parent.height - 16
-                radius: 3
-                color: root.loginFailed ? "#ff3117"
-                    : root.authenticating ? "#ffffff"
-                    : "#d16e9e"
+                radius: Math.min(3, root.fieldRadius)
+                color: root.loginFailed ? root.urgentColor
+                    : root.authenticating ? root.textColor
+                    : root.accentColor
 
                 SequentialAnimation on opacity {
                     running: root.authenticating && !root.loginFailed
@@ -143,7 +155,7 @@ Rectangle {
                 x: 28
                 width: parent.width - x
                 height: parent.height
-                color: "#ffffff"
+                color: root.textColor
                 echoMode: TextInput.Password
                 font.family: root.fieldFontFamily
                 font.pixelSize: 24
