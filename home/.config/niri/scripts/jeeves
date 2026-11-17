@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# Opens Jeeves (~/projects/jeeves) in a floating kitty window, or focuses it if one is already open.
+# Mod+A: opens Jeeves (~/projects/jeeves) in a floating kitty window, focuses it if it's already open,
+# and sends focus back to the tiled windows if Jeeves already has it.
 
-window=$(niri msg --json windows | jq -r 'first(.[] | select(.app_id == "jeeves") | .id) // empty')
+window=$(niri msg --json windows | jq -r 'first(.[] | select(.app_id == "jeeves") | "\(.id) \(.is_focused)") // empty')
+read -r id focused <<<"$window"
 
-if [[ -n "$window" ]]; then
-    niri msg action focus-window --id "$window"
-else
+if [[ -z "$id" ]]; then
     kitty --class jeeves --title Jeeves -e "$HOME/.cargo/bin/jeeves" &
     disown
+elif [[ "$focused" == "true" ]]; then
+    niri msg action focus-tiling
+else
+    niri msg action focus-window --id "$id"
 fi

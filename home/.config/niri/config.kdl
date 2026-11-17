@@ -96,6 +96,7 @@ binds {
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
     Mod+F { fullscreen-window; }
 
     Mod+H { focus-column-left; }
