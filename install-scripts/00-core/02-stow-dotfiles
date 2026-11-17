@@ -40,4 +40,8 @@ force_stow() {
 
 force_stow "$HOME" home
 
+# Reads the stowed ~/.config/yazi/package.toml, so it runs after stowing.
+print_step "Installing yazi plugins"
+/usr/bin/ya pkg install
+
 print_step "Done"
