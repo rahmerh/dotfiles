@@ -66,6 +66,8 @@ media_packages=(
     wl-clipboard
     wf-recorder
     wl-mirror
+    pipewire-pulse
+    wireplumber
     wiremix
     playerctl
     libnotify
@@ -148,6 +150,9 @@ desktop_packages=(
 
 laptop_packages=(
     blueman
+    bluez
+    bluez-utils
+    upower
 )
 
 if mt_is_laptop; then

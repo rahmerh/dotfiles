@@ -11,6 +11,10 @@ if ! systemctl is-enabled --quiet sddm.service; then
     sudo systemctl enable sddm.service
 fi
 
+if mt_is_laptop && ! systemctl is-enabled --quiet bluetooth.service; then
+    sudo systemctl enable --now bluetooth.service
+fi
+
 systemctl --user daemon-reload
 
 if ! systemctl --user is-enabled --quiet proton-pass-ssh-agent.service; then
