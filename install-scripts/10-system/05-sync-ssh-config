@@ -12,6 +12,23 @@ keys_dir="$ssh_dir/proton-keys"
 block_begin="# >>> proton-pass (managed by dotfiles) >>>"
 block_end="# <<< proton-pass (managed by dotfiles) <<<"
 
+# Same keyring as the proton-pass user services; without it pass-cli falls back to the
+# kernel keyring, which they can't see and which is cleared on reboot.
+export PROTON_PASS_LINUX_KEYRING=dbus
+
+if ! "$pass_cli" info &>/dev/null; then
+    if ! gum confirm "Not logged in to Proton Pass. Log in now?"; then
+        print_warning "Skipping SSH config sync; run apply again after logging in"
+        exit 0
+    fi
+
+    if ! "$pass_cli" login --interactive; then
+        print_warning "Proton Pass login failed; skipping SSH config sync"
+        print_warning "The keyring may be unavailable outside a graphical session; run apply again from niri"
+        exit 0
+    fi
+fi
+
 slugify() {
     printf '%s' "$1" \
         | tr '[:upper:]' '[:lower:]' \
