@@ -113,6 +113,7 @@ wm_packages=(
 font_packages=(
     ttf-jetbrains-mono-nerd
     ttf-cascadia-code-nerd
+    otf-geist-mono-nerd
 )
 
 dev_packages=(
