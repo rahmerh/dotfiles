@@ -1,8 +1,8 @@
 [Unit]
-Description=Run proton pass password store sync hourly
+Description=Sync Proton Pass hourly
 
 [Timer]
-OnStartupSec=5min
+OnStartupSec=1min
 OnUnitActiveSec=1h
 Unit=proton-pass-sync.service
 

@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+# Syncs Proton Pass into local files, in one pass over the vaults:
+# - login titles and ids (no secrets) for the Mod+P password search;
+# - SSH-key items with a Host field into ~/.ssh/config and ~/.ssh/proton-keys.
+# Nothing is replaced unless every vault and item was read.
+
+set -euo pipefail
+
+cache_dir="$HOME/.cache/proton-pass"
+cache_file="$cache_dir/entries.json"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/proton-pass-sync"
+failures_file="$state_dir/failures"
+notify_after_failures=5
+
+ssh_dir="$HOME/.ssh"
+ssh_config="$ssh_dir/config"
+agent_sock="$ssh_dir/proton-pass-agent.sock"
+keys_dir="$ssh_dir/proton-keys"
+block_begin="# >>> proton-pass (managed by dotfiles) >>>"
+block_end="# <<< proton-pass (managed by dotfiles) <<<"
+
+work_dir=$(mktemp -d)
+trap 'rm -rf "$work_dir"' EXIT
+
+slugify() {
+    printf '%s' "$1" \
+        | tr '[:upper:]' '[:lower:]' \
+        | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
+}
+
+# Counts consecutive failures; the service retries every minute, so this
+# notifies once when a few minutes of retries have not helped.
+record_failure() {
+    local failures=0
+
+    mkdir -p "$state_dir"
+    [[ -r $failures_file ]] && failures=$(<"$failures_file")
+    failures=$((failures + 1))
+    printf '%s\n' "$failures" >"$failures_file"
+
+    if ((failures == notify_after_failures)); then
+        notify-send --app-name="Proton Pass" \
+            "Proton Pass sync failing" \
+            "Is pass-cli logged in? See: journalctl --user -u proton-pass-sync" \
+            || true
+    fi
+}
+
+fail() {
+    printf 'proton-pass-sync: %s\n' "$*" >&2
+    record_failure
+    exit 1
+}
+
+sync_logins() {
+    local vault
+
+    : >"$work_dir/logins.jsonl"
+    for vault in "${vaults[@]}"; do
+        pass-cli item list "$vault" \
+            --output json \
+            --filter-type login \
+            --filter-state active \
+            | jq -c '.items[]' >>"$work_dir/logins.jsonl" \
+            || fail "could not list logins in vault '$vault'"
+    done
+
+    mkdir -p "$cache_dir"
+    chmod 700 "$cache_dir"
+    jq -s . "$work_dir/logins.jsonl" >"$work_dir/entries.json"
+    chmod 600 "$work_dir/entries.json"
+    mv "$work_dir/entries.json" "$cache_file"
+}
+
+sync_ssh() {
+    local vault items_json item_json share_id item_id title host user pubkey slug
+    local new_keys="$work_dir/proton-keys"
+    local block=$block_begin$'\n'
+
+    mkdir -m 700 "$new_keys"
+
+    for vault in "${vaults[@]}"; do
+        items_json=$(pass-cli item list "$vault" --filter-type ssh-key --output json) \
+            || fail "could not list SSH keys in vault '$vault'"
+
+        while IFS=$'\t' read -r share_id item_id; do
+            item_json=$(pass-cli item view --share-id "$share_id" --item-id "$item_id" --output json) \
+                || fail "could not read SSH key item $item_id"
+
+            IFS=$'\t' read -r title host user pubkey < <(
+                jq -r '
+                    .item.content as $c
+                    | [ $c.title,
+                        ($c.extra_fields[]? | select(.name=="Host")     | .content.Text) // "",
+                        ($c.extra_fields[]? | select(.name=="Username") | .content.Text) // "",
+                        ($c.content.SshKey.public_key) // ""
+                      ] | @tsv' <<<"$item_json"
+            )
+
+            # SSH-key items without a Host are keys used some other way.
+            [[ -n $host && -n $pubkey ]] || continue
+
+            slug=$(slugify "$title")
+            printf '%s\n' "$pubkey" >"$new_keys/$slug.pub"
+            chmod 600 "$new_keys/$slug.pub"
+
+            block+="Host $host"$'\n'
+            [[ -n $user ]] && block+="    User $user"$'\n'
+            block+="    IdentitiesOnly yes"$'\n'
+            block+="    IdentityFile $keys_dir/$slug.pub"$'\n'
+            block+="    IdentityAgent $agent_sock"$'\n'
+            block+=$'\n'
+        done < <(jq -r '(.items // .)[] | select(.state == "Active") | [.share_id, .id] | @tsv' <<<"$items_json")
+    done
+
+    block+=$block_end
+
+    mkdir -p "$ssh_dir"
+    chmod 700 "$ssh_dir"
+
+    # Keep everything outside the managed block, then append the new block.
+    if [[ -f $ssh_config ]]; then
+        awk -v b="$block_begin" -v e="$block_end" '
+            $0 == b { skip = 1 }
+            skip && $0 == e { skip = 0; next }
+            !skip { print }
+        ' "$ssh_config" >"$work_dir/config"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba}' "$work_dir/config"
+        [[ -s $work_dir/config ]] && printf '\n' >>"$work_dir/config"
+    fi
+    printf '%s\n' "$block" >>"$work_dir/config"
+    chmod 600 "$work_dir/config"
+
+    if ! diff -qr "$new_keys" "$keys_dir" &>/dev/null; then
+        rm -rf "$keys_dir.old"
+        [[ -d $keys_dir ]] && mv "$keys_dir" "$keys_dir.old"
+        mv "$new_keys" "$keys_dir"
+        rm -rf "$keys_dir.old"
+    fi
+
+    if ! cmp -s "$work_dir/config" "$ssh_config"; then
+        mv "$work_dir/config" "$ssh_config"
+    fi
+}
+
+vaults_json=$(pass-cli vault list --output json) || fail "could not list vaults (not logged in?)"
+mapfile -t vaults < <(jq -r '.vaults[].name' <<<"$vaults_json")
+((${#vaults[@]} > 0)) || fail "no vaults returned"
+
+sync_logins
+sync_ssh
+
+rm -f "$failures_file"

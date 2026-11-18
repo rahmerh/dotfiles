@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-pass_cli="$HOME/.local/bin/pass-cli"
 agent_sock="$HOME/.ssh/proton-pass-agent.sock"
 initial_notify_after=60
 notify_interval=900
@@ -69,7 +68,7 @@ start_agent() {
     fi
 
     log "Starting Proton Pass SSH agent"
-    env PROTON_PASS_LINUX_KEYRING=dbus "$pass_cli" ssh-agent start \
+    pass-cli ssh-agent start \
         --socket-path "$agent_sock" \
         --refresh-interval "$refresh_interval" &
     agent_pid=$!

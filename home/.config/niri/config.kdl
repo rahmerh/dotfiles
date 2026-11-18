@@ -26,10 +26,6 @@ layout {
 
 prefer-no-csd
 
-environment {
-    PROTON_PASS_LINUX_KEYRING "dbus"
-}
-
 // theme-picker's sky is the whole desktop around the windows: wallpaper, bar, notifications, tray and
 // launcher. restore starts it, first, so the tray is there for the apps below.
 spawn-sh-at-startup "~/.local/bin/theme-picker restore"
@@ -65,7 +61,7 @@ binds {
     Ctrl+Shift+L { spawn-sh "~/.local/bin/theme-picker lock"; }
 
     Mod+P repeat=false {
-        spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
+        spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf -kb-custom-1 Alt+u -kb-custom-2 Alt+t -kb-custom-3 Alt+r";
     }
 
     // The sky's notification history.

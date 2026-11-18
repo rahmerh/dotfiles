@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+. "$SCRIPT_DIR/../lib/print"
+
+# environment.d sets this for the session, but apply may run before the first
+# login that loads it; without it pass-cli falls back to the kernel keyring,
+# which the proton-pass user services can't see and which is cleared on reboot.
+export PROTON_PASS_LINUX_KEYRING=dbus
+
+if ! pass-cli info &>/dev/null; then
+    if ! gum confirm "Not logged in to Proton Pass. Log in now?"; then
+        print_warning "Skipping Proton Pass sync; run apply again after logging in"
+        exit 0
+    fi
+
+    if ! pass-cli login --interactive; then
+        print_warning "Proton Pass login failed; skipping Proton Pass sync"
+        print_warning "The keyring may be unavailable outside a graphical session; run apply again from niri"
+        exit 0
+    fi
+fi
+
+# The same sync the hourly proton-pass-sync timer runs: password search cache and SSH config.
+if ! "$HOME/.local/bin/proton-pass-sync"; then
+    print_error "Proton Pass sync failed"
+    exit 1
+fi
+
+print_step "Synced Proton Pass logins and SSH config"

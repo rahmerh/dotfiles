@@ -1,8 +1,10 @@
 [Unit]
-Description=Sync proton pass password store
+Description=Sync Proton Pass logins and SSH config
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
-Environment=PROTON_PASS_LINUX_KEYRING=dbus
-Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin
-ExecStart=%h/.local/bin/sync-password-store
+ExecStart=%h/.local/bin/proton-pass-sync
+# Covers the first run after boot, before Proton Pass has a session.
+Restart=on-failure
+RestartSec=1min

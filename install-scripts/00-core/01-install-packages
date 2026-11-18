@@ -39,6 +39,7 @@ cli_packages=(
     httpie
     lazysql
     systemctl-tui
+    proton-pass-cli-bin
 )
 
 system_packages=(
@@ -196,10 +197,6 @@ rustup component add rustfmt clippy --toolchain stable
 rustup component add llvm-tools-preview --toolchain nightly
 
 print_step "Installing manual packages"
-
-if ! command -v pass-cli &>/dev/null; then
-    curl -fsSL https://proton.me/download/pass-cli/install.sh | bash
-fi
 
 if ! command -v mcfly &>/dev/null; then
     curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sudo sh -s -- --git cantino/mcfly
