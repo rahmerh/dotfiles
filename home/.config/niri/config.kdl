@@ -18,33 +18,11 @@ output "Dell Inc. DELL P2722HE 11CWDH3" {
     mode "1920x1080@60.00"
 }
 
-// Gaps, struts, the shadow's colours and offset, window corners and unfocused opacity come from
-// theme-picker (the include at the end), since a theme can change them.
+// The look (gaps, struts, focus ring, shadows, corners, unfocused opacity, blur, animations) is the
+// theme's own, from theme-picker (the include at the end); only behaviour lives here.
 layout {
-    focus-ring {
-        on
-        width 2
-        // colours come from theme-picker, see the include at the end
-    }
-
     default-column-width { proportion 0.5; }
-
-   shadow {
-        on
-        softness 32
-        spread 4
-        draw-behind-window false
-    }
 }
-
-blur {
-    passes 2
-    offset 0.5 
-    noise 0.01
-    saturation 1.0
-}
-
-// Animations come from theme-picker (the include at the end), since each theme moves in its own way.
 
 prefer-no-csd
 
@@ -122,12 +100,6 @@ binds {
 
     Mod+C { center-column; }
     Mod+D { spawn-sh "~/.config/niri/scripts/equalize-column-widths"; }
-}
-
-// theme-picker's sky launcher: blur what's behind it.
-layer-rule {
-    match namespace="^theme-picker-launcher$"
-    background-effect { blur true; }
 }
 
 layer-rule {
