@@ -64,11 +64,6 @@ binds {
     // theme-picker's sky locks in the theme's look; hyprlock if the sky is down.
     Ctrl+Shift+L { spawn-sh "~/.local/bin/theme-picker lock"; }
 
-    Mod+B repeat=false { spawn "rofi-rbw"; }
-    Mod+P repeat=false {
-        spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
-    }
-
     // The sky's notification history.
     Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
 
@@ -134,12 +129,6 @@ layer-rule {
 
 window-rule {
     match app-id="feh"
-    open-floating true
-}
-
-window-rule {
-    match title="rbw"
-    match app-id="Pinentry-gtk"
     open-floating true
 }
 
