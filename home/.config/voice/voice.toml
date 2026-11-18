@@ -1,11 +1,9 @@
 # Bas's voice: the one voice local programs speak with (greeter, agents' "notify me when done", ...).
-# Only ~/.local/bin/say reads this file and talks to Chatterbox. Every program that speaks calls `say`
-# (or `say --out file.wav` to get the audio); none talk to Chatterbox or read this file themselves.
+# Only voiced (~/projects/voice, the daemon behind `say`) reads this file and talks to Chatterbox. Every program
+# that speaks calls `say` (or `say --out file.wav` to get the audio); none talk to Chatterbox or read this file.
 
 voice = "OldBritishMan.wav"  # Chatterbox predefined voice (volume chatterbox_voices); sample clip of fish.audio/m/6da0962c14b2462e8cd3bd0793d8d6ce, no stated license; copy in ~/.local/share/voice/
 # voice = "Gerald.wav"  # Common Voice speaker 6eed81f7 (CC0), England, seventies; fine on the server defaults (no [settings])
-tts_url = "http://127.0.0.1:2003"  # shared Chatterbox server, ~/projects/chatterbox
-tts_container = "chatterbox"
 loudness = -16.0  # target LUFS after ffmpeg loudnorm; closer to 0 is louder
 
 # Chatterbox generation settings sent with every request; unset ones use the server's defaults.
