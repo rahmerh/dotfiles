@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync proton pass password store
+
+[Service]
+Type=oneshot
+Environment=PROTON_PASS_LINUX_KEYRING=dbus
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin
+ExecStart=%h/.local/bin/sync-password-store

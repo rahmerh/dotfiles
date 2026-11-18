@@ -64,6 +64,10 @@ binds {
     // theme-picker's sky locks in the theme's look; hyprlock if the sky is down.
     Ctrl+Shift+L { spawn-sh "~/.local/bin/theme-picker lock"; }
 
+    Mod+P repeat=false {
+        spawn-sh "rofi -show password-search -modi 'password-search:~/.config/rofi/scripts/password-search.sh' -sorting-method fzf";
+    }
+
     // The sky's notification history.
     Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
 
