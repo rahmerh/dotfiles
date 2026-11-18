@@ -6,7 +6,7 @@ A layer-shell overlay rather than a normal window, so it sits above everything
 and takes an exclusive keyboard grab -- a consent prompt should not be possible
 to type past.
 
-Styling follows fjord's notification cards and rofi (theme-picker's
+Styling follows fjord's notification cards (theme-picker's
 sky/fjord/Card.qml): a near-black translucent card, a hairline border, 12px radius, and the accent
 used as text rather than as a fill. The card is translucent because niri blurs
 the layer behind it via the cast-confirm layer-rule.
@@ -105,7 +105,7 @@ button.choice:active {
     background-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Accent as text only -- the same restraint rofi uses on its prompt. */
+/* Accent as text only, never a fill. */
 button.share {
     color: #FF4F9A;
     font-weight: bold;

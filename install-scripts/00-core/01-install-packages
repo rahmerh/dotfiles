@@ -79,7 +79,6 @@ media_packages=(
 
 gui_packages=(
     firefox
-    rofi
     feh
     nvidia-container-toolkit
     pinta
