@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Keeps the trash (trash-cli) from growing forever. Run daily by trash-prune.timer:
+# - wipes everything trashed more than TRASH_MAX_AGE_DAYS ago (default 7);
+# - then, while the home trash is still over TRASH_MAX_GB (default 50), wipes the oldest item.
+# Wiped items are gone for good.
+
+set -euo pipefail
+shopt -s nullglob
+
+max_age_days="${TRASH_MAX_AGE_DAYS:-7}"
+max_gb="${TRASH_MAX_GB:-50}"
+trash_dir="${XDG_DATA_HOME:-$HOME/.local/share}/Trash"
+
+# Keep going on failure: items it cannot delete (root-owned files) must not block the size cap.
+trash-empty -f "$max_age_days" || echo "trash-empty failed, continuing" >&2
+
+[[ -d "$trash_dir/files" ]] || exit 0
+
+limit=$((max_gb * 1024 * 1024 * 1024))
+total=$(du -sb "$trash_dir/files" 2>/dev/null | cut -f1 || true)
+
+# Oldest first: DeletionDate is ISO 8601, so it sorts as text.
+oldest_first() {
+    local info date
+    for info in "$trash_dir"/info/*.trashinfo; do
+        date=$(grep -m1 '^DeletionDate=' "$info" | cut -d= -f2 || true)
+        printf '%s\t%s\n' "$date" "$info"
+    done | sort
+}
+
+while ((total > limit)) && IFS=$'\t' read -r _ info; do
+    name=$(basename "$info" .trashinfo)
+    file="$trash_dir/files/$name"
+    size=0
+    if [[ -e "$file" || -L "$file" ]]; then
+        size=$(du -sb "$file" 2>/dev/null | cut -f1 || true)
+        if ! rm -rf -- "$file"; then
+            echo "could not fully wipe $name, skipping" >&2
+            continue
+        fi
+    fi
+    rm -f -- "$info"
+    total=$((total - size))
+    echo "wiped $name ($((size / 1024 / 1024)) MiB), trash now $((total / 1024 / 1024 / 1024)) GiB"
+done < <(oldest_first)

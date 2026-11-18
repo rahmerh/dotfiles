@@ -1,0 +1,6 @@
+[Unit]
+Description=Wipe trash older than 7 days and keep it under 50 GB
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/trash-prune

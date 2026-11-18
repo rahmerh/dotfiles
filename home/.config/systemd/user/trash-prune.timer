@@ -1,0 +1,10 @@
+[Unit]
+Description=Prune the trash daily
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+Unit=trash-prune.service
+
+[Install]
+WantedBy=timers.target
