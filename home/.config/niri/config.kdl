@@ -67,7 +67,7 @@ binds {
     Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
 
     // Peek at the desktop: the windows slide off to the empty workspace; again brings them back.
-    Ctrl+O repeat=false { spawn-sh "~/.config/niri/scripts/peek-desktop"; }
+    Mod+O repeat=false { spawn-sh "~/.config/niri/scripts/peek-desktop"; }
 
     Mod+Q { close-window; }
     Mod+V { toggle-window-floating; }
