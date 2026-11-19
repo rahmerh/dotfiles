@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Peek at the desktop: the windows slide away to show the empty workspace below; press again to get
+# them back. niri always keeps an empty workspace last on each output, so that's where it goes.
+
+workspaces=$(niri msg --json workspaces)
+focused=$(jq -c '.[] | select(.is_focused)' <<<"$workspaces")
+[[ -z "$focused" ]] && exit 0
+
+focused_id=$(jq -r .id <<<"$focused")
+output=$(jq -r .output <<<"$focused")
+
+window_count=$(niri msg --json windows |
+    jq --argjson id "$focused_id" '[.[] | select(.workspace_id == $id)] | length')
+
+if (( window_count == 0 )); then
+    niri msg action focus-workspace-previous
+else
+    empty_idx=$(jq -r --arg output "$output" \
+        '[.[] | select(.output == $output)] | max_by(.idx) | .idx' <<<"$workspaces")
+    niri msg action focus-workspace "$empty_idx"
+fi
