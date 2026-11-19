@@ -65,6 +65,8 @@ binds {
 
     // The sky's notification history.
     Mod+N { spawn-sh "~/.local/bin/theme-picker notifications"; }
+    // The live notifications take the keyboard (the history if none show); again gives it back.
+    Mod+Shift+N repeat=false { spawn-sh "~/.local/bin/theme-picker live"; }
 
     // Peek at the desktop: the windows slide off to the empty workspace; again brings them back.
     Mod+O repeat=false { spawn-sh "~/.config/niri/scripts/peek-desktop"; }
