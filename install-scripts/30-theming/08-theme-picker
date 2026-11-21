@@ -9,7 +9,7 @@ repo_dir="$HOME/projects/the-sky"
 if [[ ! -d "$repo_dir/.git" ]]; then
     print_step "Cloning the-sky"
     # Private repo: cloned over SSH (the proton-pass SSH agent is enabled in 10-system).
-    if ! git clone git@git.sr.ht:~rahmerh/the-sky "$repo_dir"; then
+    if ! git clone git@github.com:rahmerh/the-sky.git "$repo_dir"; then
         print_error "Could not clone the-sky; is the Proton Pass SSH agent unlocked?"
         exit 1
     fi
